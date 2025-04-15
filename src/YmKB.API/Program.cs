@@ -63,6 +63,7 @@ builder.Services.AddOpenApi(opt =>
     opt.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
 
 });
+builder.Services.AddAntiforgery();
 
 
 var app = builder.Build();
@@ -106,6 +107,7 @@ if (app.Environment.IsDevelopment())
 
 // app.UseHttpsRedirection();
 app.UseCors("all");
+app.UseAntiforgery();
 
 app.UseAuthorization();
 

@@ -41,7 +41,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         
         services
-            // .AddScoped<IUploadService, FileUploadService>()
+            .AddScoped<IUploadService, FileUploadService>()
             .AddScoped<IDateTime, UtcDateTime>()
             .AddScoped<ICurrentUserContext, CurrentUserContext>()
             .AddScoped<ICurrentUserAccessor, CurrentUserAccessor>()

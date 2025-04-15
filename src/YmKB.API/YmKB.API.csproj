@@ -22,4 +22,8 @@
       <ProjectReference Include="..\Migrators\YmKB.Migrators.SQLite\YmKB.Migrators.SQLite.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="files\document\" />
+    </ItemGroup>
+
 </Project>

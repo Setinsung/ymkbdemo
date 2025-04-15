@@ -1,6 +1,0 @@
-@YmKB.API_HostAddress = http://localhost:5045
-
-GET {{YmKB.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
