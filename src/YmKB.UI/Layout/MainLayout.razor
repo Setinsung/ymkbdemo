@@ -1,10 +1,93 @@
-﻿@inherits LayoutComponentBase
+﻿@using YmKB.UI.Components.Main
+@using YmKB.UI.Models
+@using YmKB.UI.Models.SideMenu
+@inherits LayoutComponentBase
 
 @code {
-    private bool _drawerOpen = true;
+    private bool _drawerOpen = false;
     private bool _isDarkMode = false;
     private MudTheme? _theme = null;
+    private bool _canMiniSideMenuDrawer = true;
+    private bool _searchDialogOpen;
 
+    [Inject] private IDialogService _dialogService { get; set; }
+
+    private List<MenuSectionModel> _navProfile = new()
+    {
+        new MenuSectionModel
+        {
+            Title = "GENERAL",
+            SectionItems =
+            [
+                new()
+                {
+                    Title = "仪表",
+                    Icon = Icons.Material.Filled.Speed,
+                    Href = "/"
+                },
+                new()
+                {
+                    Title = "应用",
+                    Icon = Icons.Material.Filled.Apps,
+                    Href = "/applications",
+                },
+                new()
+                {
+                    Title = "知识",
+                    IsParent = true,
+                    Icon = Icons.Material.Filled.AutoStories,
+                    MenuItems =
+                    [
+                        new()
+                        {
+                            Title = "知识库",
+                            Href = "/knowledgebases",
+                        },
+                        new()
+                        {
+                            Title = "文档",
+                            Href = "/knowledgebases/files",
+                        },
+                    ]
+                },
+                new()
+                {
+                    Title = "插件",
+                    Icon = Icons.Custom.Brands.Calculator,
+                    Href = "/plugins",
+                },
+            ]
+        },
+
+        new MenuSectionModel
+        {
+            Title = "CONFIGURATION",
+            SectionItems =
+            [
+                new()
+                {
+                    Title = "用户",
+                    Icon = Icons.Material.Filled.PeopleAlt,
+                    Href = "/users",
+                },
+                new()
+                {
+                    Title = "模型",
+                    Icon = Icons.Material.Filled.AllInclusive,
+                    Href = "/aimodels",
+                },
+            ]
+        }
+    };
+
+    private readonly UserModel _user = new()
+    {
+        Avatar = "./avatar.png",
+        DisplayName = "MudDemo",
+        Email = "muddemo@demo.com.au",
+        Role = "Admin"
+    };
+    
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -71,6 +154,26 @@
         true => Icons.Material.Rounded.AutoMode,
         false => Icons.Material.Outlined.DarkMode,
     };
+
+    private async Task OpenSearchDialog()
+    {
+        if (!_searchDialogOpen)
+        {
+            var options = new DialogOptions
+            {
+                NoHeader = true,
+                MaxWidth = MaxWidth.Medium,
+                FullWidth = true
+            };
+            var parameters = new DialogParameters<SearchDialog> { { x => x.NavProfile, _navProfile} };
+
+            var searchDialog = await _dialogService.ShowAsync<SearchDialog>("", parameters, options);
+            _searchDialogOpen = true;
+
+            await searchDialog.Result;
+            _searchDialogOpen = false;
+        }
+    }
 }
 
 
@@ -79,20 +182,47 @@
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
+
 <MudLayout>
-    <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+
+    <MudAppBar Class="px-8" Elevation="0"
+        Style="@(_isDarkMode ? "background: rgba(21,27,34,0.7)" : "background: rgba(255,255,255,0.7)")">
+        @if (!_canMiniSideMenuDrawer)
+        {
+            <MudHidden Breakpoint="Breakpoint.MdAndUp">
+                <MudTooltip Arrow="true" Text="Toggle menu">
+                    <MudIconButton Class="mr-3" Color="Color.Default" Edge="Edge.Start" Icon="@Icons.Material.Filled.Menu"
+                        OnClick="DrawerToggle" />
+                </MudTooltip>
+            </MudHidden>
+        }
+        <MudTooltip Arrow="true" Text="查询">
+            <MudIconButton Color="Color.Default" Edge="Edge.Start" Icon="@Icons.Material.Filled.Search"
+                OnClick="OpenSearchDialog" />
+        </MudTooltip>
         <MudSpacer />
-        <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+        <MudTooltip Arrow="true" Text="导航至Github">
+            <MudIconButton Class="mx-3" Color="Color.Default" Icon="@Icons.Custom.Brands.GitHub"
+                Link="https://gitee.com" Target="_blank" />
+        </MudTooltip>
+        <MudTooltip Arrow="true" Text="切换明暗主题">
+            <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
+        </MudTooltip>
+        <UserAvatar Class="ml-3" User="_user" />
     </MudAppBar>
-    <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu />
-    </MudDrawer>
-    <MudMainContent Class="mt-16 pa-4">
-        @Body
+
+
+    <SideMenu @bind-CanMiniSideMenuDrawer="_canMiniSideMenuDrawer"
+              @bind-SideMenuDrawerOpen="_drawerOpen"
+              NavProfile="_navProfile"
+              User="_user" />
+
+    <MudMainContent>
+        <MudContainer Class="mb-16 mt-4">
+            @Body
+        </MudContainer>
     </MudMainContent>
+
 </MudLayout>
 
 
