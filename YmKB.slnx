@@ -1,6 +1,12 @@
 <Solution>
-  <Folder Name="/src/" Id="02ea681e-c7d8-13c7-8484-4ac65e1b71e8">
-    <Project Path="src/YmKB.UI/YmKB.UI.csproj" Id="e50773e9-e35a-4d46-9bd5-1ae908ddb7d9" />
+  <Folder Name="/src/" />
+  <Folder Name="/src/API/" />
+  <Folder Name="/src/Core/">
+    <Project Path="src\YmKB.Domain.Abstractions\YmKB.Domain.Abstractions.csproj" Type="Classic C#" />
   </Folder>
-  <Folder Name="/tests/" Id="713564d6-79a7-401f-8728-205dd1d874c4" />
+  <Folder Name="/src/Infrastructure/" />
+  <Folder Name="/src/UI/">
+    <Project Path="src/YmKB.UI/YmKB.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
 </Solution>
