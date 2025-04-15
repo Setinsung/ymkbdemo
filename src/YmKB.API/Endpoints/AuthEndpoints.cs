@@ -8,7 +8,7 @@ public class AuthEndpoints(ILogger<ProductEndpoins> logger) : IEndpointRegistrar
 {
     public void RegisterRoutes(IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup("/auth").WithTags("auth");
+        var group = routes.MapGroup("/Auth").WithTags("Auth");
 
         group
             .MapPost(

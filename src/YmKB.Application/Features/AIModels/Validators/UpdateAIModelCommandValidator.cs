@@ -23,6 +23,6 @@ public class UpdateAIModelCommandValidator : AbstractValidator<UpdateAIModelComm
             .WithMessage("ModelDescription is required.");
         RuleFor(command => command.AIModelType)
             .NotNull()
-            .WithMessage("Product category is required.");
+            .WithMessage("AIModelType is required.");
     }
 }
