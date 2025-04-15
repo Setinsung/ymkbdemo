@@ -6,7 +6,7 @@ using YmKB.Domain.Entities.Trial;
 
 namespace YmKB.API.Controllers;
 
-[ApiController]
+/*[ApiController]
 [Route("[controller]")]
 public class ProductController : ControllerBase
 {
@@ -22,4 +22,4 @@ public class ProductController : ControllerBase
         var data = await _mediator.Send(new GetAllProductsQuery());
         return data;
     }
-}
+}*/

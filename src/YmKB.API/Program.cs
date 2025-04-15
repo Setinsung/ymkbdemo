@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
+using YmKB.API.Endpoints;
 using YmKB.API.ExceptionHandlers;
 using YmKB.Application;
 using YmKB.Application.Contracts.Identity;
@@ -51,6 +52,13 @@ builder
     {
         options.AddPolicy("all", cfg => cfg.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
     });
+builder.Services.Scan(scan => scan
+    .FromAssemblyOf<Program>()
+    .AddClasses(classes => classes.AssignableTo<IEndpointRegistrar>())
+    .As<IEndpointRegistrar>()
+    .WithScopedLifetime());
+
+
 var app = builder.Build();
 await app.InitializeDatabaseAsync();
 app.UseExceptionHandler();
@@ -95,6 +103,7 @@ app.UseCors("all");
 
 app.UseAuthorization();
 
+app.MapEndpointDefinitions();
 app.MapControllers();
 
 app.Run();
