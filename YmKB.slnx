@@ -1,6 +1,8 @@
 <Solution>
   <Folder Name="/src/" />
-  <Folder Name="/src/API/" />
+  <Folder Name="/src/API/">
+    <Project Path="src\YmKB.API\YmKB.API.csproj" Type="Classic C#" />
+  </Folder>
   <Folder Name="/src/Core/">
     <Project Path="src\YmKB.Application\YmKB.Application.csproj" Type="Classic C#" />
     <Project Path="src\YmKB.Domain.Abstractions\YmKB.Domain.Abstractions.csproj" Type="Classic C#" />
@@ -8,6 +10,11 @@
   </Folder>
   <Folder Name="/src/Infrastructure/">
     <Project Path="src\YmKB.Infrastructure\YmKB.Infrastructure.csproj" Type="Classic C#" />
+  </Folder>
+  <Folder Name="/src/Migrators/">
+    <Project Path="src\Migrators\YmKB.Migrators.MSSQL\YmKB.Migrators.MSSQL.csproj" Type="Classic C#" />
+    <Project Path="src\Migrators\YmKB.Migrators.PostgreSQL\YmKB.Migrators.PostgreSQL.csproj" Type="Classic C#" />
+    <Project Path="src\Migrators\YmKB.Migrators.SQLite\YmKB.Migrators.SQLite.csproj" Type="Classic C#" />
   </Folder>
   <Folder Name="/src/UI/">
     <Project Path="src/YmKB.UI/YmKB.UI.csproj" />
