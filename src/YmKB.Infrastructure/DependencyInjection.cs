@@ -1,13 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using YmKB.Application.Contracts;
 using YmKB.Application.Contracts.Identity;
 using YmKB.Application.Contracts.Persistence;
 using YmKB.Application.Contracts.Upload;
+using YmKB.Domain.Abstractions.Identities;
 using YmKB.Infrastructure.Configurations;
 using YmKB.Infrastructure.Persistence;
 using YmKB.Infrastructure.Persistence.Interceptors;
@@ -47,6 +52,44 @@ public static class DependencyInjection
 
         services.AddDatabase(configuration);
         services.AddFusionCacheService();
+        services.AddIdentityService(configuration);
+        return services;
+    }
+
+    private static IServiceCollection AddIdentityService(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
+    {
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+
+        services
+            .AddIdentity<ApplicationUser, IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+
+        services
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(o =>
+            {
+                o.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
+                    ValidIssuer = configuration["JwtSettings:Issuer"],
+                    ValidAudience = configuration["JwtSettings:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"])
+                    )
+                };
+            });
         return services;
     }
 
@@ -115,7 +158,10 @@ public static class DependencyInjection
             );
         }
 
-        services.AddScoped<IDbContextFactory<ApplicationDbContext>, BlazorContextFactory<ApplicationDbContext>>();
+        services.AddScoped<
+            IDbContextFactory<ApplicationDbContext>,
+            BlazorContextFactory<ApplicationDbContext>
+        >();
         services.AddScoped<IApplicationDbContext>(
             provider =>
                 provider
@@ -200,10 +246,13 @@ public static class DependencyInjection
                 throw new InvalidOperationException($"DB Provider {dbProvider} is not supported.");
         }
     }
+
     public static async Task InitializeDatabaseAsync(this IHost host)
     {
         using var scope = host.Services.CreateScope();
-        var initializer = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitializer>();
+        var initializer = scope
+            .ServiceProvider
+            .GetRequiredService<ApplicationDbContextInitializer>();
         await initializer.InitialiseAsync().ConfigureAwait(false);
 
         var env = host.Services.GetRequiredService<IHostEnvironment>();
