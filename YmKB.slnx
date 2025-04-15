@@ -3,6 +3,7 @@
   <Folder Name="/src/API/" />
   <Folder Name="/src/Core/">
     <Project Path="src\YmKB.Domain.Abstractions\YmKB.Domain.Abstractions.csproj" Type="Classic C#" />
+    <Project Path="src\YmKB.Domain.Entities\YmKB.Domain.Entities.csproj" Type="Classic C#" />
   </Folder>
   <Folder Name="/src/Infrastructure/" />
   <Folder Name="/src/UI/">
