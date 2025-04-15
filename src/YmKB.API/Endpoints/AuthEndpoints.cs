@@ -8,7 +8,9 @@ public class AuthEndpoints(ILogger<ProductEndpoins> logger) : IEndpointRegistrar
 {
     public void RegisterRoutes(IEndpointRouteBuilder routes)
     {
-        routes
+        var group = routes.MapGroup("/auth").WithTags("auth");
+
+        group
             .MapPost(
                 "/login",
                 async (
@@ -21,7 +23,7 @@ public class AuthEndpoints(ILogger<ProductEndpoins> logger) : IEndpointRegistrar
             .WithSummary("登录")
             .WithDescription("用户输入用户名和密码，登录返回token");
 
-        routes
+        group
             .MapPost(
                 "/register",
                 async (
