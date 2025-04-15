@@ -12,16 +12,19 @@ public class ApplicationDbContextInitializer
     private readonly ILogger<ApplicationDbContextInitializer> _logger;
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
 
     public ApplicationDbContextInitializer(
         ILogger<ApplicationDbContextInitializer> logger,
         ApplicationDbContext context,
-        UserManager<ApplicationUser> userManager
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager
     )
     {
         _logger = logger;
         _context = context;
         _userManager = userManager;
+        _roleManager = roleManager;
     }
 
     public async Task InitialiseAsync()
@@ -56,13 +59,13 @@ public class ApplicationDbContextInitializer
 
     private async Task SeedUsersAsync()
     {
-        if (!(await _context.Tenants.AnyAsync()))
+        if (!await _context.Tenants.AnyAsync())
         {
             var tenants = new List<Tenant>()
             {
                 new()
                 {
-                    Name = "AdminOrg",
+                    Name = "Org - 1",
                     Description = "Organization 1",
                     Id = Guid.CreateVersion7().ToString()
                 },
@@ -79,6 +82,17 @@ public class ApplicationDbContextInitializer
 
         if (await _userManager.Users.AnyAsync())
             return;
+        
+        // 创建角色
+        if (!await _roleManager.RoleExistsAsync("Admin"))
+        {
+            await _roleManager.CreateAsync(new IdentityRole("Admin"));
+        }
+        if (!await _roleManager.RoleExistsAsync("User"))
+        {
+            await _roleManager.CreateAsync(new IdentityRole("User"));
+        }
+        
         var tenantId = _context.Tenants.First().Id;
         var defaultPassword = "P@ssw0rd!";
         _logger.LogInformation("Seeding users...");
@@ -111,6 +125,10 @@ public class ApplicationDbContextInitializer
 
         await _userManager.CreateAsync(adminUser, defaultPassword);
         await _userManager.CreateAsync(demoUser, defaultPassword);
+        
+        // 分配角色
+        await _userManager.AddToRoleAsync(adminUser, "Admin");
+        await _userManager.AddToRoleAsync(demoUser, "User");
     }
 
     private async Task SeedDataAsync()

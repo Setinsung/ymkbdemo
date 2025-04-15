@@ -25,22 +25,18 @@ public static class SerilogExtensions
             .UseSerilog(
                 (context, configuration) =>
                     configuration
+                        .MinimumLevel.Debug()
                         // 从应用程序配置中读取日志配置
                         .ReadFrom
                         .Configuration(context.Configuration)
                         // 设置不同命名空间的最小日志级别
-                        .MinimumLevel
-                        .Override("Microsoft", LogEventLevel.Error)
-                        .MinimumLevel
-                        .Override("Microsoft.AspNetCore", LogEventLevel.Error)
-                        .MinimumLevel
-                        .Override("MudBlazor", LogEventLevel.Information)
-                        .MinimumLevel
-                        .Override("Serilog", LogEventLevel.Information)
+                        .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                        // .MinimumLevel
+                        // .Override("Serilog", LogEventLevel.Information)
                         .MinimumLevel
                         .Override("Microsoft.EntityFrameworkCore.AddOrUpdate", LogEventLevel.Error)
                         .MinimumLevel
-                        .Override("ZiggyCreatures.Caching.Fusion.FusionCache", LogEventLevel.Error)
+                        .Override("ZiggyCreatures.Caching.Fusion.FusionCache", LogEventLevel.Information)
                         // 从日志上下文中丰富日志信息
                         .Enrich
                         .FromLogContext()

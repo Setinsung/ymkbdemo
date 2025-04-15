@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
+using YmKB.API.Common;
 using YmKB.API.Endpoints;
 using YmKB.API.ExceptionHandlers;
 using YmKB.Application;
@@ -45,7 +46,6 @@ builder
 builder.Services.AddExceptionHandler<ProblemExceptionHandler>();
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
 builder
     .Services
     .AddCors(options =>
@@ -57,6 +57,12 @@ builder.Services.Scan(scan => scan
     .AddClasses(classes => classes.AssignableTo<IEndpointRegistrar>())
     .As<IEndpointRegistrar>()
     .WithScopedLifetime());
+
+builder.Services.AddOpenApi(opt =>
+{
+    opt.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+
+});
 
 
 var app = builder.Build();

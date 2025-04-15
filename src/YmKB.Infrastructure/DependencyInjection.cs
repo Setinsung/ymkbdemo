@@ -38,10 +38,8 @@ public static class DependencyInjection
         IConfiguration configuration
     )
     {
-        /*services
-            .Configure<MinioOptions>(configuration.GetSection(MinioOptions.Key))
-            .AddSingleton(s => s.GetRequiredService<IOptions<MinioOptions>>().Value);*/
-
+        services.AddScoped<IAuthService, AuthService>();
+        
         services
             // .AddScoped<IUploadService, FileUploadService>()
             .AddScoped<IDateTime, UtcDateTime>()
