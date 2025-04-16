@@ -9,6 +9,7 @@ public class KbDocFileConfig : IEntityTypeConfiguration<KbDocFile>
     public void Configure(EntityTypeBuilder<KbDocFile> builder)
     {
         builder.Property(x => x.Status).HasConversion<string>();
+        builder.Property(x => x.SegmentPattern).HasConversion<string>();
         builder.Ignore(e => e.DomainEvents);    
     }
 }

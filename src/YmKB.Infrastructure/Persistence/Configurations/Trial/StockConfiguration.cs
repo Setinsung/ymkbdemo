@@ -16,14 +16,12 @@ public class StockConfiguration : IEntityTypeConfiguration<Stock>
     public void Configure(EntityTypeBuilder<Stock> builder)
     {
         // Configures the ProductId property of the Stock entity.
-        builder.Property(x => x.ProductId).HasMaxLength(50).IsRequired();
+        builder.Property(x => x.ProductId).IsRequired();
 
         // Configures the relationship between the Stock and Product entities.
         builder
             .HasOne(x => x.Product)
-            .WithMany()
-            .HasForeignKey(x => x.ProductId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .WithMany();
 
         // Configures the Location property of the Stock entity.
         builder.Property(x => x.Location).HasMaxLength(12).IsRequired();

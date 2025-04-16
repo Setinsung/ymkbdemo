@@ -1,4 +1,6 @@
-﻿using YmKB.Domain.Abstractions.Events;
+﻿using Mediator;
+using Microsoft.Extensions.Logging;
+using YmKB.Domain.Abstractions.Events;
 using YmKB.Domain.Entities.Trial;
 
 namespace YmKB.Application.Features.Products.EventHandlers;
@@ -24,7 +26,6 @@ public class ProductCreatedEvent : DomainEvent
     public Product Item { get; }
 }
 
-/*
 public class ProductCreatedEventHandler : INotificationHandler<ProductCreatedEvent>
 {
     private readonly ILogger<ProductCreatedEventHandler> _logger;
@@ -36,9 +37,14 @@ public class ProductCreatedEventHandler : INotificationHandler<ProductCreatedEve
         _logger = logger;
     }
 
-    public async Task Handle(ProductCreatedEvent notification, CancellationToken cancellationToken)
+
+    public ValueTask Handle(ProductCreatedEvent notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Handled domain event '{EventType}' with notification: {@Notification} in {ElapsedMilliseconds} ms", notification.GetType().Name, notification, _timer.ElapsedMilliseconds);
+        // _logger.LogInformation("Handled domain event '{EventType}' with notification: {@Notification} in {ElapsedMilliseconds} ms", notification.GetType().Name, notification, _timer.ElapsedMilliseconds);
+        _logger.LogInformation("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        _logger.LogInformation("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        _logger.LogInformation("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        _logger.LogInformation("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        return ValueTask.CompletedTask;
     }
 }
-*/

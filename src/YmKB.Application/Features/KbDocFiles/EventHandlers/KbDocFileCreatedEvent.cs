@@ -1,0 +1,6 @@
+﻿using YmKB.Domain.Abstractions.Events;
+using YmKB.Domain.Entities;
+
+namespace YmKB.Application.Features.KbDocFiles.EventHandlers;
+
+public class KbDocFileCreatedEvent(KbDocFile item) : CommonDomainEvent<KbDocFile>(item);

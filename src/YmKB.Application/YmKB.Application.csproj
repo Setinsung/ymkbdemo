@@ -24,4 +24,9 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Features\KbDocFiles\DTOs\" />
+      <Folder Include="Features\KbDocFiles\Queries\" />
+    </ItemGroup>
+
 </Project>

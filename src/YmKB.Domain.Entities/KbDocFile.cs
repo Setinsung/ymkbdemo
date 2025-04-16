@@ -18,11 +18,6 @@ public class KbDocFile : BaseAuditableEntity, IAuditTrial, ISoftDelete
     public string FileName { get; set; } = "";
 
     /// <summary>
-    /// 文件guid名称
-    /// </summary>
-    public string FileGuid { get; set; } = "";
-    
-    /// <summary>
     /// 文件路径
     /// </summary>
     public string Url { get; set; } = "";
@@ -47,6 +42,11 @@ public class KbDocFile : BaseAuditableEntity, IAuditTrial, ISoftDelete
     /// </summary>
     public QuantizationState? Status { get; set; } = QuantizationState.Loading;
 
+    /// <summary>
+    /// 切分模式
+    /// </summary>
+    public SegmentPattern SegmentPattern { get; set; } = SegmentPattern.Subsection;
+
     public DateTime? Deleted { get; set; }
     public string? DeletedBy { get; set; }
 }
@@ -67,4 +67,17 @@ public enum QuantizationState
     ///     失败
     /// </summary>
     Fail
+}
+
+public enum SegmentPattern
+{
+    /// <summary>
+    ///     分段
+    /// </summary>
+    Subsection,
+
+    /// <summary>
+    ///     问答
+    /// </summary>
+    QA
 }

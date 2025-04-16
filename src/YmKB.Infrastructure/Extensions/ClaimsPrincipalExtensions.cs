@@ -16,7 +16,7 @@ public static class ClaimsPrincipalExtensions
 
     public static string? GetUserId(this ClaimsPrincipal claimsPrincipal)
     {
-        return claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+        return claimsPrincipal.FindFirstValue("uid");
     }
 
     public static string? GetUserName(this ClaimsPrincipal claimsPrincipal)
