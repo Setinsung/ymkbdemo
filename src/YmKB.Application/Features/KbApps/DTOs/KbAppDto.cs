@@ -1,4 +1,5 @@
-﻿using YmKB.Domain.Entities;
+﻿using YmKB.Application.Features.AIModels.DTOs;
+using YmKB.Domain.Entities;
 
 namespace YmKB.Application.Features.KbApps.DTOs;
 
@@ -14,7 +15,11 @@ public class KbAppDto
 
     public KbAppType KbAppType { get; set; }
 
+    public AIModelDto? ChatModel { get; set; }
+    
     public string? ChatModelId { get; set; }
+    
+    public AIModelDto? EmbeddingModel { get; set; }
 
     public string? EmbeddingModelId { get; set; }
 
