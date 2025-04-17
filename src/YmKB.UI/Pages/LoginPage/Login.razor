@@ -1,0 +1,115 @@
+﻿@layout LoginLayout
+@page "/Login"
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@code {
+    private MudForm form;
+    private bool success;
+    private string email = "admin@example.com";
+    private string password = "P@ssw0rd!";
+    private bool rememberMe = true;
+
+    private async Task HandleLogin()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            // TODO: 实现登录逻辑
+            Snackbar.Add("登录成功", Severity.Success);
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}
+<div class="login-container">
+    <div class="login-box">
+        <MudImage Class="login-image-section"  Src="/Logo_full.jpg"></MudImage>
+
+        <div class="login-form-section">
+            <MudText Typo="Typo.h4" Class="mb-4">登录</MudText>
+            <MudText Typo="Typo.subtitle1" Color="Color.Default" Class="mb-8">欢迎使用 YmKB 智能问答系统，<br />请输入账号密码！</MudText>
+
+            <MudForm @ref="form" @bind-IsValid="@success">
+                <MudTextField T="string"
+                              Label="邮箱"
+                              @bind-Value="email"
+                              Required="true"
+                              HelperText=""
+                              RequiredError="请输入邮箱地址"
+                              Variant="Variant.Outlined"
+                              Class="mb-4"/>
+
+                <MudTextField T="string"
+                              Label="密码"
+                              @bind-Value="password"
+                              Required="true"
+                              RequiredError="请输入密码"
+                              InputType="InputType.Password"
+                              Variant="Variant.Outlined"/>
+
+                <MudCheckBox T="bool" @bind-Checked="rememberMe" Label="记住我" Color="Color.Primary" Class="mb-4"/>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           FullWidth="true"
+                           OnClick="HandleLogin"
+                           Size="Size.Large"
+                           Class="login-button">登陆</MudButton>
+            </MudForm>
+        </div>
+    </div>
+</div>
+
+<style>
+    .login-container {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #ffffff 0%, #e6e4fc 100%);
+    }
+
+    .login-box {
+        display: flex;
+        background-color: white;
+        border-radius: 24px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+        overflow: hidden;
+        width: 1000px;
+        height: 600px;
+    }
+
+    .login-form-section {
+        flex: 1;
+        padding: 48px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .login-image-section {
+        flex: 1;
+        background-color: #f5f5f5;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    .login-button {
+        border-radius: 8px;
+        height: 48px;
+        font-size: 16px;
+    }
+    @@media (max-width: 900px) {
+        .login-box {
+            flex-direction: column;
+            width: 90%;
+            height: auto;
+        }
+    
+        .login-image-section {
+            display: none;
+        }
+    }
+</style>
