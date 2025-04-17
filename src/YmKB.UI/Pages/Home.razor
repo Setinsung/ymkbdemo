@@ -1,48 +1,216 @@
 ﻿@page "/"
+@using MudBlazor
 
-<PageTitle>Home</PageTitle>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
-<h1>Hello, world!</h1>
+<PageTitle>YmKB - 智能知识库问答系统</PageTitle>
 
-Welcome to your new app.
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudPaper Class="pa-16 ma-2">
+        <MudGrid>
+            <MudItem xs="12" sm="8">
+                <MudText Typo="Typo.h2" Color="Color.Surface" Class="mb-4">YmKB - 智能知识库问答系统</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Surface">集成大语言模型，为您提供智能对话、知识库管理构建的一站式解决方案</MudText>
+            </MudItem>
+            <MudItem xs="12" sm="4" Class="d-flex justify-center align-center">
+                <MudIcon Icon="@Icons.Material.Filled.Psychology" Color="Color.Surface" Style="width: 100px; height: 100px;" />
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <MudGrid Class="mt-4">
+        <MudItem xs="12">
+            <MudCard Elevation="0" Class="pb-4">
+                <MudCardHeader>
+                    <CardHeaderAvatar>
+                        <MudIcon Icon="@Icons.Material.Filled.Dashboard" Color="Color.Primary" Style="font-size: 2rem;"/>
+                    </CardHeaderAvatar>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Color="Color.Primary">系统资源</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2" Class="rounded-lg">
+                <MudCardContent>
+                    <div class="d-flex">
+                        <div>
+                            <MudIcon Icon="@Icons.Material.Filled.Apps" Color="Color.Primary" Style="font-size: 2.5rem;"/>
+                            <MudText>应用数量</MudText>
+                        </div>
+                        <MudText Typo="Typo.h3" Color="Color.Primary">7</MudText>
+                    </div>
+                    <MudDivider Class="my-4"/>
+                    <MudChipSet T="string" Class="gap-2">
+                        <MudChip Icon="@Icons.Material.Filled.Chat" Color="Color.Info" Size="Size.Small">对话应用: 2</MudChip>
+                        <MudChip Icon="@Icons.Material.Filled.QuestionAnswer" Color="Color.Warning" Size="Size.Small">知识库对话应用: 2</MudChip>
+                    </MudChipSet>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2" Class="rounded-lg">
+                <MudCardContent>
+                    <div class="d-flex gap-4">
+                        <MudIcon Icon="@Icons.Material.Filled.Storage" Color="Color.Primary" Style="font-size: 2.5rem;"/>
+                        <div>
+                            <MudText Typo="Typo.h3" Color="Color.Primary">13</MudText>
+                            <MudText>知识库数量</MudText>
+                        </div>
+                    </div>
+                    <MudDivider Class="my-4"/>
+                    <MudChipSet T="string" Class="gap-2">
+                        <MudChip Icon="@Icons.Material.Filled.Book" Color="Color.Success" Size="Size.Small">普通知识库: 8</MudChip>
+                        <MudChip Icon="@Icons.Material.Filled.AccountTree" Color="Color.Warning" Size="Size.Small">知识图谱: 5</MudChip>
+                    </MudChipSet>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2" Class="rounded-lg">
+                <MudCardContent>
+                    <div class="d-flex gap-4">
+                        <MudIcon Icon="@Icons.Material.Filled.Description" Color="Color.Primary" Style="font-size: 2.5rem;"/>
+                        <div>
+                            <MudText Typo="Typo.h3" Color="Color.Primary">14</MudText>
+                            <MudText>文档数量</MudText>
+                        </div>
+                    </div>
+                    <MudDivider Class="my-4"/>
+                    <MudChipSet T="string" Class="gap-2">
+                        <MudChip Icon="@Icons.Material.Filled.FileCopy" Color="Color.Info" Size="Size.Small">普通文档: 9</MudChip>
+                        <MudChip Icon="@Icons.Material.Filled.Link" Color="Color.Success" Size="Size.Small">网页链接: 3</MudChip>
+                    </MudChipSet>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2" Class="rounded-lg">
+                <MudCardContent>
+                    <div class="d-flex gap-4">
+                        <MudIcon Icon="@Icons.Material.Filled.Memory" Color="Color.Primary" Style="font-size: 2.5rem;"/>
+                        <div>
+                            <MudText Typo="Typo.h3" Color="Color.Primary">20</MudText>
+                            <MudText>模型数量</MudText>
+                        </div>
+                    </div>
+                    <MudDivider Class="my-4"/>
+                    <MudChipSet T="string" Class="gap-2">
+                        <MudChip Icon="@Icons.Material.Filled.Chat" Color="Color.Info" Size="Size.Small">会话模型: 17</MudChip>
+                        <MudChip Icon="@Icons.Material.Filled.Transform" Color="Color.Success" Size="Size.Small">向量模型: 1</MudChip>
+                    </MudChipSet>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <MudGrid Class="mt-4">
+        <MudItem xs="12">
+            <MudCard Elevation="0" Class="pb-4">
+                <MudCardHeader>
+                    <CardHeaderAvatar>
+                        <MudIcon Icon="@Icons.Material.Filled.Stars" Color="Color.Primary" Style="font-size: 2rem;"/>
+                    </CardHeaderAvatar>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Color="Color.Primary">功能特性</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2" Class="rounded-lg h-100">
+                <MudCardHeader>
+                    <CardHeaderAvatar>
+                        <MudIcon Icon="@Icons.Material.Filled.Code" Color="Color.Primary" Style="font-size: 2rem;"/>
+                    </CardHeaderAvatar>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">开源使用</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudList Dense="true" T="string">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Lightbulb">轻量级</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Settings">基本没啥额外功能</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Groups">使用群体通用性</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Support">专业技术支持服务</MudListItem>
+                    </MudList>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2" Class="rounded-lg h-100">
+                <MudCardHeader>
+                    <CardHeaderAvatar>
+                        <MudIcon Icon="@Icons.Material.Filled.IntegrationInstructions" Color="Color.Primary" Style="font-size: 2rem;"/>
+                    </CardHeaderAvatar>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">一体化解决方案</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudList Dense="true" T="string">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Api">只支持OpenAI协议模型</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.PlayForWork">一键部署，开箱即用</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.HelpOutline">无指导</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.SupportAgent">无技术支持</MudListItem>
+                    </MudList>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2" Class="rounded-lg h-100">
+                <MudCardHeader>
+                    <CardHeaderAvatar>
+                        <MudIcon Icon="@Icons.Material.Filled.Storage" Color="Color.Primary" Style="font-size: 2rem;"/>
+                    </CardHeaderAvatar>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">知识库</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudList Dense="true" T="string">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Description">支持多种文档格式</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Article">Markdown, PDF, Excel等</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.ManageSearch">知识库管理</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Search">智能搜索与问答</MudListItem>
+                    </MudList>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2" Class="rounded-lg h-100">
+                <MudCardHeader>
+                    <CardHeaderAvatar>
+                        <MudIcon Icon="@Icons.Material.Filled.Psychology" Color="Color.Primary" Style="font-size: 2rem;"/>
+                    </CardHeaderAvatar>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">AI 能力</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudList Dense="true" T="string">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Settings">支持自定义模型</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.TrendingUp">模型强则强</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Update">不持续优化与进化</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Extension">不灵活的扩展能力</MudListItem>
+                    </MudList>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    
+}
