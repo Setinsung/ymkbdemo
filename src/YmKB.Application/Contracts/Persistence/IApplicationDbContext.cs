@@ -16,14 +16,14 @@ public interface IApplicationDbContext
     DbSet<KnowledgeDb> KnowledgeDbs { get; set; }
     DbSet<OnlyChatHistory> OnlyChatHistories { get; set; }
     DbSet<QuantizedList> QuantizedLists { get; set; }
-    
-    DbSet<Product> Products { get; set; }
 
-    DbSet<Stock> Stocks { get; set; }
+    DbSet<JsFunctionCall> JsFunctionCalls { get; set; }
 
+    # region system
     DbSet<AuditTrail> AuditTrails { get; set; }
-
     DbSet<Tenant> Tenants { get; set; }
-
+    DbSet<Product> Products { get; set; }
+    DbSet<Stock> Stocks { get; set; }
+    # endregion
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

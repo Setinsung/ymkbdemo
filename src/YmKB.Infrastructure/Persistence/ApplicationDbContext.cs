@@ -20,6 +20,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<KnowledgeDb> KnowledgeDbs { get; set; }
     public DbSet<OnlyChatHistory> OnlyChatHistories { get; set; }
     public DbSet<QuantizedList> QuantizedLists { get; set; }
+    public DbSet<JsFunctionCall> JsFunctionCalls { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<Stock> Stocks { get; set; }
     public DbSet<AuditTrail> AuditTrails { get; set; }
