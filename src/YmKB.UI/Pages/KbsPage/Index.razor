@@ -1,6 +1,103 @@
 ﻿@page "/knowledgebases"
-<h3>knowledgebases</h3>
+@using YmKB.UI.Models
+@using YmKB.UI.Services
+@inject IKnowledgeBaseService KnowledgeBaseService
+@inject NavigationManager NavigationManager
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudPaper Class="pa-4">
+                <MudStack Row="true" Justify="Justify.SpaceBetween" Class="mb-4">
+                    <MudText Typo="Typo.h5">知识库列表</MudText>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateKnowledgeBase">创建知识库</MudButton>
+                </MudStack>
+
+                <MudTextField @bind-Value="searchString" Placeholder="输入回车" Immediate="true" 
+                            AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start" 
+                            OnKeyDown="@SearchOnEnter" Class="mb-4"/>
+
+                <MudGrid>
+                    @foreach (var kb in filteredKnowledgeBases)
+                    {
+                        <MudItem xs="12" sm="6" md="4" lg="3">
+                            <MudCard>
+                                <MudCardHeader>
+                                    <CardHeaderContent>
+                                        <MudText Typo="Typo.h6">@kb.Name</MudText>
+                                        <MudText Typo="Typo.body2">@kb.Description</MudText>
+                                    </CardHeaderContent>
+                                    <CardHeaderActions>
+                                        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default" />
+                                    </CardHeaderActions>
+                                </MudCardHeader>
+                                <MudCardContent>
+                                    <MudText>
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Primary">段落切片: @kb.SegmentTokens</MudChip>
+                                    </MudText>
+                                    <MudText Class="mt-2">
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Secondary">文档数量: @kb.DocumentCount</MudChip>
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Info">切片数量: @kb.SegmentCount</MudChip>
+                                    </MudText>
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <MudButton OnClick="@(() => ViewKnowledgeBase(kb.Id))">查看</MudButton>
+                                    <MudButton OnClick="@(() => EditKnowledgeBase(kb.Id))">修改</MudButton>
+                                    <MudButton Color="Color.Error" OnClick="@(() => DeleteKnowledgeBase(kb))">删除</MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
 @code {
-    
+    private List<KnowledgeBase> knowledgeBases = new();
+    private string searchString = "";
+
+    private IEnumerable<KnowledgeBase> filteredKnowledgeBases => knowledgeBases
+        .Where(x => string.IsNullOrWhiteSpace(searchString) ||
+                   x.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                   x.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        knowledgeBases = await KnowledgeBaseService.GetKnowledgeBasesAsync();
+    }
+
+    private void SearchOnEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            StateHasChanged();
+        }
+    }
+
+    private void CreateKnowledgeBase()
+    {
+        NavigationManager.NavigateTo("/knowledgebases/create");
+    }
+
+    private void ViewKnowledgeBase(string id)
+    {
+        NavigationManager.NavigateTo($"/knowledgebases/{id}");
+    }
+
+    private void EditKnowledgeBase(string id)
+    {
+        NavigationManager.NavigateTo($"/knowledgebases/{id}/edit");
+    }
+
+    private async Task DeleteKnowledgeBase(KnowledgeBase kb)
+    {
+        var result = await KnowledgeBaseService.DeleteKnowledgeBaseAsync(kb.Id);
+        if (result)
+        {
+            knowledgeBases.Remove(kb);
+            StateHasChanged();
+        }
+    }
 }

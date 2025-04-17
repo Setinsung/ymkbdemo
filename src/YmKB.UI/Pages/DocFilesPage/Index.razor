@@ -1,6 +1,111 @@
 ﻿@page "/docfiles"
-<h3>docfiles</h3>
+@using YmKB.UI.Models
+@using YmKB.UI.Services
+@inject IDocumentService DocumentService
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudText Typo="Typo.h5" Class="mb-4">文档管理</MudText>
+
+    <MudTextField @bind-Value="searchText" Placeholder="输入回车" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start"
+                OnKeyDown="@SearchOnEnter" Class="mb-4"/>
+
+    <MudTable Items="@documents" Dense="true" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@loading"
+             Bordered="true" Striped="true">
+        <HeaderContent>
+            <MudTh>文件名称</MudTh>
+            <MudTh>文件类型</MudTh>
+            <MudTh>文件大小</MudTh>
+            <MudTh>上传时间</MudTh>
+            <MudTh>操作</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="文件名称">
+                <MudStack Row="true" AlignItems="AlignItems.Center">
+                    @{
+                        var icon = context.FileType.ToLower() switch
+                        {
+                            "pdf" => Icons.Custom.FileFormats.FilePdf,
+                            "jpg" or "jpeg" or "png" => Icons.Custom.FileFormats.FileImage,
+                            "txt" => Icons.Custom.FileFormats.FileDocument,
+                            _ => Icons.Custom.FileFormats.FileCode
+                        };
+                    }
+                    <MudIcon Icon="@icon" />
+                    <MudText>@context.FileName</MudText>
+                </MudStack>
+            </MudTd>
+            <MudTd DataLabel="文件类型">
+                <MudChip T="string" Size="Size.Small" Color="Color.Primary">@context.FileType</MudChip>
+            </MudTd>
+            <MudTd DataLabel="文件大小">@context.FormattedFileSize</MudTd>
+            <MudTd DataLabel="上传时间">@context.UploadTime.ToString("yyyy-MM-dd HH:mm:ss")</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small" OnClick="@(() => CopyDocument(context))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small" OnClick="@(() => DownloadDocument(context))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" 
+                             OnClick="@(() => DeleteDocument(context))" />
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSize="10" />
+        </PagerContent>
+    </MudTable>
+</MudContainer>
 
 @code {
-    
+    private List<Document> documents = new();
+    private string searchText = "";
+    private bool loading = false;
+    private int totalItems;
+    private int currentPage = 1;
+    private int pageSize = 10;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDocuments();
+    }
+
+    private async Task LoadDocuments()
+    {
+        loading = true;
+        try
+        {
+            var result = await DocumentService.GetDocumentsAsync(searchText, currentPage, pageSize);
+            documents = result.Items;
+            totalItems = result.TotalCount;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task SearchOnEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            currentPage = 1;
+            await LoadDocuments();
+        }
+    }
+
+    private void CopyDocument(Document document)
+    {
+        // 复制功能待实现
+    }
+
+    private void DownloadDocument(Document document)
+    {
+        // 下载功能待实现
+    }
+
+    private async Task DeleteDocument(Document document)
+    {
+        var result = await DocumentService.DeleteDocumentAsync(document.Id);
+        if (result)
+        {
+            await LoadDocuments();
+        }
+    }
 }

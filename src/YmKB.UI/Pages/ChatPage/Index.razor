@@ -1,6 +1,90 @@
 ﻿@page "/chat"
-<h3>chat</h3>
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudPaper Class="pa-4" Elevation="3">
+        <MudText Typo="Typo.h5" Class="mb-4">AI 助手</MudText>
+        
+        <MudPaper Class="pa-4" Style="height: 60vh; overflow-y: auto;" @ref="_chatContainer">
+            @foreach (var message in _messages)
+            {
+                <MudChat ChatPosition="@(message.IsUser ? ChatBubblePosition.End : ChatBubblePosition.Start)">
+                    <MudAvatar Color="@(message.IsUser ? Color.Primary : Color.Secondary)">
+                        @(message.IsUser ? "U" : "AI")
+                    </MudAvatar>
+                    <MudChatHeader Name="@(message.IsUser ? "用户" : "AI助手")" Time="@message.Time" />
+                    <MudChatBubble>
+                        @message.Text
+                    </MudChatBubble>
+                </MudChat>
+            }
+        </MudPaper>
+
+        <MudPaper Class="pa-4 mt-4">
+            <div class="d-flex align-center">
+                <MudTextField @bind-Value="_currentMessage" 
+                             Placeholder="输入消息..." 
+                             Class="flex-grow-1"
+                             Immediate="true" />
+                <MudIconButton Icon="@Icons.Material.Filled.Send" 
+                             Color="Color.Primary" 
+                             OnClick="SendMessage" 
+                             Disabled="@string.IsNullOrWhiteSpace(_currentMessage)"
+                             Class="ml-2" />
+            </div>
+        </MudPaper>
+    </MudPaper>
+</MudContainer>
 
 @code {
-    
+    private List<ChatMessage> _messages = new();
+    private string _currentMessage = "";
+    private MudPaper _chatContainer;
+
+    protected override void OnInitialized()
+    {
+        // 添加欢迎消息
+        _messages.Add(new ChatMessage 
+        { 
+            Text = "你好！我是AI助手，有什么我可以帮你的吗？", 
+            IsUser = false,
+            Time = DateTime.Now.ToString("HH:mm")
+        });
+    }
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(_currentMessage))
+            return;
+
+        // 添加用户消息
+        _messages.Add(new ChatMessage 
+        { 
+            Text = _currentMessage, 
+            IsUser = true,
+            Time = DateTime.Now.ToString("HH:mm")
+        });
+
+        var userMessage = _currentMessage;
+        _currentMessage = "";
+
+        // TODO: 这里添加与AI的交互逻辑
+        // 模拟AI响应
+        await Task.Delay(1000);
+        _messages.Add(new ChatMessage 
+        { 
+            Text = $"我收到了你的消息：{userMessage}", 
+            IsUser = false,
+            Time = DateTime.Now.ToString("HH:mm")
+        });
+
+        StateHasChanged();
+    }
+
+    private class ChatMessage
+    {
+        public string Text { get; set; }
+        public bool IsUser { get; set; }
+        public string Time { get; set; }
+    }
 }
