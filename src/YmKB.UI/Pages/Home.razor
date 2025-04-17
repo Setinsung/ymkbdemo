@@ -7,8 +7,8 @@
     <MudPaper Class="pa-16 ma-2">
         <MudGrid>
             <MudItem xs="12" sm="8">
-                <MudText Typo="Typo.h2" Color="Color.Surface" Class="mb-4">YmKB - 智能知识库问答系统</MudText>
-                <MudText Typo="Typo.h6" Color="Color.Surface">集成大语言模型，为您提供智能对话、知识库管理构建的一站式解决方案</MudText>
+                <MudText Typo="Typo.h2" Color="Color.Surface" Class="mb-4">YmKB - 智能问答系统</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Surface">集成大语言模型，提供智能对话、知识库管理构建</MudText>
             </MudItem>
             <MudItem xs="12" sm="4" Class="d-flex justify-center align-center">
                 <MudIcon Icon="@Icons.Material.Filled.Psychology" Color="Color.Surface" Style="width: 100px; height: 100px;" />
@@ -16,72 +16,68 @@
         </MudGrid>
     </MudPaper>
 
-    <MudGrid Class="mt-4">
-        <MudItem xs="12">
-            <MudCard Elevation="0" Class="pb-4">
-                <MudCardHeader>
-                    <CardHeaderAvatar>
-                        <MudIcon Icon="@Icons.Material.Filled.Dashboard" Color="Color.Primary" Style="font-size: 2rem;"/>
-                    </CardHeaderAvatar>
-                    <CardHeaderContent>
-                        <MudText Typo="Typo.h5" Color="Color.Primary">系统资源</MudText>
-                    </CardHeaderContent>
-                </MudCardHeader>
-            </MudCard>
-        </MudItem>
-    </MudGrid>
+    <MudCard Elevation="0" Class="pb-4 mt-10">
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudIcon Icon="@Icons.Material.Filled.Dashboard" Color="Color.Primary" Style="font-size: 2rem;"/>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h5" Color="Color.Primary">系统资源</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+    </MudCard>
 
-    <MudGrid>
+    <MudGrid >
         <MudItem xs="12" sm="6" md="3">
-            <MudCard Elevation="2" Class="rounded-lg">
+            <MudCard Elevation="2" Class="rounded-lg" Style="height: 250px;">
                 <MudCardContent>
-                    <div class="d-flex">
+                    <div class="d-flex justify-space-between">
                         <div>
                             <MudIcon Icon="@Icons.Material.Filled.Apps" Color="Color.Primary" Style="font-size: 2.5rem;"/>
                             <MudText>应用数量</MudText>
                         </div>
-                        <MudText Typo="Typo.h3" Color="Color.Primary">7</MudText>
+                        <MudText  Typo="Typo.h3" Color="Color.Primary">7</MudText>
                     </div>
                     <MudDivider Class="my-4"/>
-                    <MudChipSet T="string" Class="gap-2">
+                    <MudChipSet T="string" Class="d-flex flex-wrap gap-2">
                         <MudChip Icon="@Icons.Material.Filled.Chat" Color="Color.Info" Size="Size.Small">对话应用: 2</MudChip>
-                        <MudChip Icon="@Icons.Material.Filled.QuestionAnswer" Color="Color.Warning" Size="Size.Small">知识库对话应用: 2</MudChip>
+                        <MudChip Icon="@Icons.Material.Filled.QuestionAnswer" Color="Color.Success" Size="Size.Small">知识库对话应用: 2</MudChip>
                     </MudChipSet>
                 </MudCardContent>
             </MudCard>
         </MudItem>
 
         <MudItem xs="12" sm="6" md="3">
-            <MudCard Elevation="2" Class="rounded-lg">
+            <MudCard Elevation="2" Class="rounded-lg" Style="height: 250px;">
                 <MudCardContent>
-                    <div class="d-flex gap-4">
-                        <MudIcon Icon="@Icons.Material.Filled.Storage" Color="Color.Primary" Style="font-size: 2.5rem;"/>
+                    <div class="d-flex justify-space-between">
                         <div>
-                            <MudText Typo="Typo.h3" Color="Color.Primary">13</MudText>
+                            <MudIcon Icon="@Icons.Material.Filled.Storage" Color="Color.Primary" Style="font-size: 2.5rem;"/>
                             <MudText>知识库数量</MudText>
                         </div>
+                        <MudText  Typo="Typo.h3" Color="Color.Primary">13</MudText>
                     </div>
                     <MudDivider Class="my-4"/>
-                    <MudChipSet T="string" Class="gap-2">
-                        <MudChip Icon="@Icons.Material.Filled.Book" Color="Color.Success" Size="Size.Small">普通知识库: 8</MudChip>
-                        <MudChip Icon="@Icons.Material.Filled.AccountTree" Color="Color.Warning" Size="Size.Small">知识图谱: 5</MudChip>
+                    <MudChipSet T="string" Class="d-flex flex-wrap gap-2">
+                        <MudChip Icon="@Icons.Material.Filled.Book" Color="Color.Info" Size="Size.Small">普通知识库: 8</MudChip>
+                        <MudChip Icon="@Icons.Material.Filled.AccountTree" Color="Color.Success" Size="Size.Small">知识图谱: 5</MudChip>
                     </MudChipSet>
                 </MudCardContent>
             </MudCard>
         </MudItem>
 
         <MudItem xs="12" sm="6" md="3">
-            <MudCard Elevation="2" Class="rounded-lg">
+            <MudCard Elevation="2" Class="rounded-lg" Style="height: 250px;">
                 <MudCardContent>
-                    <div class="d-flex gap-4">
-                        <MudIcon Icon="@Icons.Material.Filled.Description" Color="Color.Primary" Style="font-size: 2.5rem;"/>
+                    <div class="d-flex justify-space-between">
                         <div>
-                            <MudText Typo="Typo.h3" Color="Color.Primary">14</MudText>
+                            <MudIcon Icon="@Icons.Material.Filled.Description" Color="Color.Primary" Style="font-size: 2.5rem;"/>
                             <MudText>文档数量</MudText>
                         </div>
+                        <MudText  Typo="Typo.h3" Color="Color.Primary">14</MudText>
                     </div>
                     <MudDivider Class="my-4"/>
-                    <MudChipSet T="string" Class="gap-2">
+                    <MudChipSet T="string" Class="d-flex flex-wrap gap-2">
                         <MudChip Icon="@Icons.Material.Filled.FileCopy" Color="Color.Info" Size="Size.Small">普通文档: 9</MudChip>
                         <MudChip Icon="@Icons.Material.Filled.Link" Color="Color.Success" Size="Size.Small">网页链接: 3</MudChip>
                     </MudChipSet>
@@ -90,17 +86,17 @@
         </MudItem>
 
         <MudItem xs="12" sm="6" md="3">
-            <MudCard Elevation="2" Class="rounded-lg">
+            <MudCard Elevation="2" Class="rounded-lg" Style="height: 250px;">
                 <MudCardContent>
-                    <div class="d-flex gap-4">
-                        <MudIcon Icon="@Icons.Material.Filled.Memory" Color="Color.Primary" Style="font-size: 2.5rem;"/>
+                    <div class="d-flex justify-space-between">
                         <div>
-                            <MudText Typo="Typo.h3" Color="Color.Primary">20</MudText>
+                            <MudIcon Icon="@Icons.Material.Filled.Memory" Color="Color.Primary" Style="font-size: 2.5rem;"/>
                             <MudText>模型数量</MudText>
                         </div>
+                        <MudText  Typo="Typo.h3" Color="Color.Primary">3</MudText>
                     </div>
                     <MudDivider Class="my-4"/>
-                    <MudChipSet T="string" Class="gap-2">
+                    <MudChipSet T="string" Class="d-flex flex-wrap gap-2">
                         <MudChip Icon="@Icons.Material.Filled.Chat" Color="Color.Info" Size="Size.Small">会话模型: 17</MudChip>
                         <MudChip Icon="@Icons.Material.Filled.Transform" Color="Color.Success" Size="Size.Small">向量模型: 1</MudChip>
                     </MudChipSet>
@@ -109,24 +105,22 @@
         </MudItem>
     </MudGrid>
 
-    <MudGrid Class="mt-4">
-        <MudItem xs="12">
-            <MudCard Elevation="0" Class="pb-4">
-                <MudCardHeader>
-                    <CardHeaderAvatar>
-                        <MudIcon Icon="@Icons.Material.Filled.Stars" Color="Color.Primary" Style="font-size: 2rem;"/>
-                    </CardHeaderAvatar>
-                    <CardHeaderContent>
-                        <MudText Typo="Typo.h5" Color="Color.Primary">功能特性</MudText>
-                    </CardHeaderContent>
-                </MudCardHeader>
-            </MudCard>
-        </MudItem>
-    </MudGrid>
+
+    <MudCard Elevation="0" Class="pb-4 mt-10">
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudIcon Icon="@Icons.Material.Filled.Stars" Color="Color.Primary" Style="font-size: 2rem;"/>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h5" Color="Color.Primary">功能特性</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+    </MudCard>
+
 
     <MudGrid>
         <MudItem xs="12" sm="6" md="3">
-            <MudCard Elevation="2" Class="rounded-lg h-100">
+            <MudCard Elevation="2" Class="rounded-lg">
                 <MudCardHeader>
                     <CardHeaderAvatar>
                         <MudIcon Icon="@Icons.Material.Filled.Code" Color="Color.Primary" Style="font-size: 2rem;"/>
