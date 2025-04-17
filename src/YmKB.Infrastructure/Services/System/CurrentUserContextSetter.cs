@@ -11,10 +11,6 @@ public class CurrentUserContextSetter : ICurrentUserContextSetter
 {
     private readonly ICurrentUserContext _currentUserContext;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CurrentUserContextSetter"/> class.
-    /// </summary>
-    /// <param name="currentUserContext">The current user context.</param>
     public CurrentUserContextSetter(ICurrentUserContext currentUserContext)
     {
         _currentUserContext = currentUserContext;
@@ -23,7 +19,7 @@ public class CurrentUserContextSetter : ICurrentUserContextSetter
     /// <summary>
     /// 使用提供的会话信息设置当前用户上下文。
     /// </summary>
-    /// <param name="user">The session information of the current user.</param>
+    /// <param name="user">当前用户的会话信息。</param>
     public void SetCurrentUser(ClaimsPrincipal user)
     {
         _currentUserContext.Set(user);

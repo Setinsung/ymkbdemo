@@ -2,6 +2,9 @@
 
 namespace YmKB.Application.Contracts.Identity;
 
+/// <summary>
+/// 表示当前用户上下文，保存会话信息。
+/// </summary>
 public interface ICurrentUserContext
 {
     /// <summary>

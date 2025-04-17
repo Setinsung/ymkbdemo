@@ -2,7 +2,9 @@
 
 namespace YmKB.Application.Contracts.Identity;
 
-
+/// <summary>
+/// 用于设置当前登录用户的信息
+/// </summary>
 public interface ICurrentUserContextSetter
 {
     /// <summary>
