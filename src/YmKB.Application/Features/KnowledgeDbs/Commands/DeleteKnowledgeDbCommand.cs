@@ -29,7 +29,7 @@ public class DeleteKnowledgeDbCommandHandler(
         foreach (var item in toDeletes)
         {
             item.AddDomainEvent(new KnowledgeDbDeletedEvent(item));
-            dbContext.KnowledgeDbs.Remove(item); // todo: executedeelte
+            dbContext.KnowledgeDbs.Remove(item); // todo: executedelete
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

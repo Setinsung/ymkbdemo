@@ -32,7 +32,7 @@ public class DeleteKbAppCommandHandler(
         foreach (var item in toDeletes)
         {
             item.AddDomainEvent(new KbAppDeletedEvent(item));
-            dbContext.KbApps.Remove(item); // todo: executedeelte
+            dbContext.KbApps.Remove(item); // todo: executedelete
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

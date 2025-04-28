@@ -12,7 +12,8 @@ public record CreateKbDocFileCommand(
     string KbId,
     string FileName,
     string Url,
-    SegmentPattern SegmentPattern
+    SegmentPattern? SegmentPattern = SegmentPattern.Subsection,
+    string? Type = "file"
 ) : IFusionCacheRefreshRequest<string>, IRequiresValidation
 {
     public IEnumerable<string>? Tags => [ "KbDocFiles" ];
@@ -28,7 +29,6 @@ public class CreateKbDocFileCommandHandler(IApplicationDbContext context, IMappe
     {
         var toCreate = mapper.Map<KbDocFile>(request);
         toCreate.DataCount = 0;
-        toCreate.Type = "data";
         toCreate.AddDomainEvent(new KbDocFileCreatedEvent(toCreate));
         context.KbDocFiles.Add(toCreate);
         await context.SaveChangesAsync(cancellationToken);

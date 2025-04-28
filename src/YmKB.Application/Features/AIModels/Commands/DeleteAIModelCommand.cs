@@ -29,7 +29,7 @@ public class DeleteAIModelCommandHandler(
         foreach (var item in toDeletes)
         {
             item.AddDomainEvent(new AIModelDeletedEvent(item));
-            dbContext.AIModels.Remove(item); // todo: executedeelte
+            dbContext.AIModels.Remove(item); // todo: executedelete
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
