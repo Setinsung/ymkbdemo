@@ -3,7 +3,7 @@
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudPaper Class="pa-4" Elevation="3">
-        <MudText Typo="Typo.h5" Class="mb-4">AI 助手</MudText>
+        <MudText Typo="Typo.h5" Class="mb-4">Chat</MudText>
         
         <MudPaper Class="pa-4" Style="height: 60vh; overflow-y: auto;" @ref="_chatContainer">
             @foreach (var message in _messages)
@@ -12,7 +12,7 @@
                     <MudAvatar Color="@(message.IsUser ? Color.Primary : Color.Secondary)">
                         @(message.IsUser ? "U" : "AI")
                     </MudAvatar>
-                    <MudChatHeader Name="@(message.IsUser ? "用户" : "AI助手")" Time="@message.Time" />
+                    <MudChatHeader Name="@(message.IsUser ? "用户" : "Assistant")" Time="@message.Time" />
                     <MudChatBubble>
                         @message.Text
                     </MudChatBubble>
@@ -44,12 +44,12 @@
     protected override void OnInitialized()
     {
         // 添加欢迎消息
-        _messages.Add(new ChatMessage 
-        { 
-            Text = "你好！我是AI助手，有什么我可以帮你的吗？", 
-            IsUser = false,
-            Time = DateTime.Now.ToString("HH:mm")
-        });
+        // _messages.Add(new ChatMessage 
+        // { 
+        //     Text = "你好！我是Assistant，有什么我可以帮你的吗？", 
+        //     IsUser = false,
+        //     Time = DateTime.Now.AddHours(12).ToString("HH:mm")
+        // });
     }
 
     private async Task SendMessage()
@@ -62,7 +62,7 @@
         { 
             Text = _currentMessage, 
             IsUser = true,
-            Time = DateTime.Now.ToString("HH:mm")
+            Time = DateTime.Now.AddHours(12).ToString("HH:mm")
         });
 
         var userMessage = _currentMessage;
@@ -73,9 +73,10 @@
         await Task.Delay(1000);
         _messages.Add(new ChatMessage 
         { 
-            Text = $"我收到了你的消息：{userMessage}", 
+            // Text = $"我收到了你的消息：{userMessage}", 
+            Text = "你好！我是Assistant，有什么我可以帮你的吗？", 
             IsUser = false,
-            Time = DateTime.Now.ToString("HH:mm")
+            Time = DateTime.Now.AddHours(12).ToString("HH:mm")
         });
 
         StateHasChanged();

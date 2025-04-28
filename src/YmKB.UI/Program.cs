@@ -18,5 +18,6 @@ builder
 builder.Services.AddScoped<IKnowledgeBaseService, MockKnowledgeBaseService>();
 builder.Services.AddScoped<IDocumentService, MockDocumentService>();
 builder.Services.AddScoped<IApplicationService, MockApplicationService>();
+builder.Services.AddScoped<IAIModelService, MockAIModelService>();
 
 await builder.Build().RunAsync();

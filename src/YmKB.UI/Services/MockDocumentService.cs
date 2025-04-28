@@ -9,31 +9,31 @@ public class MockDocumentService : IDocumentService
         {
             new Document
             {
-                FileName = "沪科技生物 选择性必修1【高清教材】.PDF",
+                FileName = "Blazor笔记.pdf",
                 FileType = "PDF",
                 FileSize = 4_020_000, // 4.02 MB
-                UploadTime = DateTime.Parse("2025-04-17 13:59:37")
+                UploadTime = DateTime.Parse("2025-01-07 13:59:37")
             },
             new Document
             {
                 FileName = ".gitignore",
                 FileType = "gitignore",
                 FileSize = 6_700, // 6.7 KB
-                UploadTime = DateTime.Parse("2025-04-16 01:16:02")
+                UploadTime = DateTime.Parse("2024-11-06 01:16:02")
             },
             new Document
             {
                 FileName = "nginx11.txt",
                 FileType = "txt",
                 FileSize = 2_680, // 2.68 KB
-                UploadTime = DateTime.Parse("2025-04-15 16:49:24")
+                UploadTime = DateTime.Parse("2024-09-15 16:49:24")
             },
             new Document
             {
                 FileName = "g7.jpg",
                 FileType = "jpg",
                 FileSize = 84_040, // 84.04 KB
-                UploadTime = DateTime.Parse("2025-04-15 16:46:08")
+                UploadTime = DateTime.Parse("2024-02-10 16:46:08")
             }
         };
 
