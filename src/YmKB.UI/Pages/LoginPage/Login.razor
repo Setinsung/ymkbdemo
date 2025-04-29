@@ -5,7 +5,7 @@
 @code {
     private MudForm form;
     private bool success;
-    private string email = "admin@example.com";
+    private string username = "Administrator";
     private string password = "P@ssw0rd!";
     private bool rememberMe = true;
 
@@ -30,11 +30,11 @@
 
             <MudForm @ref="form" @bind-IsValid="@success">
                 <MudTextField T="string"
-                              Label="邮箱"
-                              @bind-Value="email"
+                              Label="用户名"
+                              @bind-Value="username"
                               Required="true"
                               HelperText=""
-                              RequiredError="请输入邮箱地址"
+                              RequiredError="请输入用户名"
                               Variant="Variant.Outlined"
                               Class="mb-4"/>
 
@@ -53,7 +53,7 @@
                            FullWidth="true"
                            OnClick="HandleLogin"
                            Size="Size.Large"
-                           Class="login-button">登陆</MudButton>
+                           Class="login-button">登录</MudButton>
             </MudForm>
         </div>
     </div>

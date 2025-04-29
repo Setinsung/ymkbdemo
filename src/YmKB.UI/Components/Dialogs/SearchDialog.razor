@@ -6,7 +6,7 @@
     private string _search;
     [Inject] private NavigationManager Navigation { get; set; }
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
-    [EditorRequired][Parameter] public List<MenuSectionModel> NavProfile { get; set; }
+    [EditorRequired] [Parameter] public List<MenuSectionModel> NavProfile { get; set; }
 
     protected override void OnInitialized()
     {
@@ -29,19 +29,21 @@
     private Dictionary<string, string> NavProfileToDictionary(List<MenuSectionModel> navProfile)
     {
         return navProfile
-           .SelectMany(section => section.SectionItems)
-           .SelectMany(item =>
+            .SelectMany(section => section.SectionItems)
+            .SelectMany(item =>
             {
-                if (item.IsParent && item.MenuItems != null)
+                if (item is { IsParent: true, MenuItems: not null })
                 {
-                    return item.MenuItems.Select(subItem => new { Title = subItem.Title, Href = subItem.Href });
+                    return item.MenuItems.Select(subItem => new { subItem.Title, subItem.Href });
                 }
-                return new[] { new { Title = item.Title, Href = item.Href } };
+
+                return [new { item.Title, item.Href }];
             })
-           .ToDictionary(pair => pair.Title, pair => pair.Href);
+            .ToDictionary(pair => pair.Title, pair => pair.Href);
     }
 
 }
+
 <MudDialog DisableSidePadding="true">
     <DialogContent>
         <MudContainer>
@@ -49,14 +51,14 @@
                           Class="mb-3 mt-6"
                           Clearable="true"
                           Label="Search..."
-                          TextChanged="@(SearchPages)" 
+                          TextChanged="@(SearchPages)"
                           Immediate="true"/>
             <MudList T="string" Style="height: 300px; overflow-y: auto">
                 @foreach (var (key, value) in _pagesFiltered)
                 {
                     <MudListItem OnClick="@(() => Navigation.NavigateTo(value))">
                         <MudHighlighter HighlightedText="@_search"
-                                        Text="@key" />
+                                        Text="@key"/>
                     </MudListItem>
                 }
             </MudList>
