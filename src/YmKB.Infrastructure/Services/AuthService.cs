@@ -30,18 +30,18 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> Login(AuthRequest request)
     {
-        var user = await _userManager.FindByEmailAsync(request.Email);
+        var user = await _userManager.FindByNameAsync(request.UserName);
 
         if (user == null)
         {
-            throw new InvalidOperationException($"User with {request.Email} not found.");
+            throw new InvalidOperationException($"User with {request.UserName} not found.");
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
 
         if (result.Succeeded == false)
         {
-            throw new InvalidOperationException($"Credentials for '{request.Email} aren't valid'.");
+            throw new InvalidOperationException($"Credentials for '{request.UserName} aren't valid'.");
         }
 
         JwtSecurityToken jwtSecurityToken = await GenerateToken(user);
