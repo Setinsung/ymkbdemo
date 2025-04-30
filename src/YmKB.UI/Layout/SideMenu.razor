@@ -1,26 +1,26 @@
-﻿@using MudBlazor.Extensions
-@using Nextended.Core.Helper
+﻿@using Nextended.Core.Helper
 @using YmKB.UI.Models
 @using YmKB.UI.Models.SideMenu
-@code {
-    [EditorRequired][Parameter] public List<MenuSectionModel> NavProfile { get; set; }
-    [EditorRequired][Parameter] public bool SideMenuDrawerOpen { get; set; }
-    [EditorRequired][Parameter] public EventCallback<bool> SideMenuDrawerOpenChanged { get; set; }
-    [EditorRequired][Parameter] public bool CanMiniSideMenuDrawer { get; set; }
-    [EditorRequired][Parameter] public EventCallback<bool> CanMiniSideMenuDrawerChanged { get; set; }
-    [EditorRequired][Parameter] public UserModel User { get; set; }
-}
 
+@code {
+    [EditorRequired] [Parameter] public required List<MenuSectionModel> NavProfile { get; set; }
+    [EditorRequired] [Parameter] public bool SideMenuDrawerOpen { get; set; }
+    [EditorRequired] [Parameter] public EventCallback<bool> SideMenuDrawerOpenChanged { get; set; }
+    [EditorRequired] [Parameter] public bool CanMiniSideMenuDrawer { get; set; }
+    [EditorRequired] [Parameter] public EventCallback<bool> CanMiniSideMenuDrawerChanged { get; set; }
+    [EditorRequired] [Parameter] public required UserModel User { get; set; }
+}
+@* bug 不设置固定菜单时，主动缩小再回到大屏幕，会导致hover失效 *@
 <MudDrawer Breakpoint="Breakpoint.Md"
            Class="side-menu"
            Elevation="0"
            MiniWidth="100px"
            Open="SideMenuDrawerOpen"
-           OpenChanged="@(e => SideMenuDrawerOpenChanged.InvokeAsync(e))"
+           OpenChanged="@SideMenuDrawerOpenChanged"
            OpenMiniOnHover="true"
-           Variant="@(CanMiniSideMenuDrawer? DrawerVariant.Mini: DrawerVariant.Responsive)"
+           Variant="@(CanMiniSideMenuDrawer ? DrawerVariant.Mini : DrawerVariant.Responsive)"
            Width="280px">
-    <MudDrawerHeader Class="align-center d-flex justify-center pa-0">
+    <MudDrawerHeader Class="align-center d-flex justify-center pa-0 pt-4">
         <MudAvatar Size="Size.Large" Class="@(SideMenuDrawerOpen ? "ml-8" : "")">
             <MudImage Src="/Logo_full.jpg"></MudImage>
         </MudAvatar>
@@ -29,19 +29,17 @@
         {
             <MudText Typo="Typo.h5" Color="Color.Primary" Class="ml-4"><b>YMKB</b></MudText>
 
-            <MudSpacer />
-            <MudTooltip Arrow="true"
-                        Text="Mini Menu">
-                <MudToggleIconButton Class="mr-2"
-                                     Color="@Color.Error"
-                                     Icon="@Icons.Material.Filled.MenuOpen"
-                                     Size="Size.Small"
-                                     Toggled="CanMiniSideMenuDrawer"
-                                     ToggledChanged="@(e => CanMiniSideMenuDrawerChanged.InvokeAsync(e))"
-                                     ToggledColor="@Color.Primary"
-                                     ToggledIcon="@Icons.Material.Filled.MenuOpen"
-                                     ToggledSize="Size.Small" />
-            </MudTooltip>
+            <MudSpacer/>
+
+            <MudToggleIconButton Class="mr-2"
+                                 Color="@Color.Error"
+                                 Icon="@Icons.Material.Filled.MenuOpen"
+                                 Size="Size.Small"
+                                 Toggled="CanMiniSideMenuDrawer"
+                                 ToggledChanged="@CanMiniSideMenuDrawerChanged"
+                                 ToggledColor="@Color.Primary"
+                                 ToggledIcon="@Icons.Material.Filled.MenuOpen"
+                                 ToggledSize="Size.Small"/>
         }
     </MudDrawerHeader>
 
@@ -95,9 +93,9 @@
                 {
                     <MudNavGroup Icon="@sectionItem.Icon"
                                  Title="@sectionItem.Title">
-                        @foreach (var menuItem in sectionItem.MenuItems)
+                        @if (sectionItem.MenuItems is not null)
                         {
-                            @if (SideMenuDrawerOpen)
+                            @foreach (var menuItem in sectionItem.MenuItems.Where(_ => SideMenuDrawerOpen))
                             {
                                 <MudNavLink Disabled="@(menuItem.PageStatus != PageStatus.Completed)"
                                             Href="@(menuItem.Href)"
@@ -106,7 +104,7 @@
                                         @menuItem.Title
                                         @if (menuItem.PageStatus != PageStatus.Completed)
                                         {
-                                            <MudSpacer />
+                                            <MudSpacer/>
                                             <MudChip T="string" Class="mr-4"
                                                      Color="@Color.Primary"
                                                      Size="Size.Small"
@@ -130,7 +128,7 @@
                             @sectionItem.Title
                             @if (sectionItem.PageStatus != PageStatus.Completed)
                             {
-                                <MudSpacer />
+                                <MudSpacer/>
                                 <MudChip T="string" Class="mr-4"
                                          Color="@Color.Primary"
                                          Size="Size.Small"
@@ -153,10 +151,10 @@
         padding: 12px 16px 12px 38px;
     }
 
-        .mud-nav-link.active:not(.mud-nav-link-disabled) {
-            border-right: 3px solid var(--mud-palette-primary);
-            background-color: rgba(var(--mud-palette-primary-rgb), 0.1)
-        }
+    .mud-nav-link.active:not(.mud-nav-link-disabled) {
+        border-right: 3px solid var(--mud-palette-primary);
+        background-color: rgba(var(--mud-palette-primary-rgb), 0.1)
+    }
 
     .side-menu {
         border-right: 1px solid var(--mud-palette-table-lines)

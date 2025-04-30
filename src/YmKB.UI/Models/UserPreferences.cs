@@ -8,8 +8,15 @@ public class UserPreferences
     public bool RememberMe { get; set; }
 
     /// <summary>
-    /// 是否使用深色主题
+    /// 明暗模式
     /// </summary>
-    public bool IsDark { get; set; }
+    public DarkLightModeType DarkLightMode { get; set; }
 }
 
+
+public enum DarkLightModeType
+{
+    System = 0,
+    Light = 1,
+    Dark = 2
+}

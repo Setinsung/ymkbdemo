@@ -1,90 +1,20 @@
-﻿@using YmKB.UI.Components.Dialogs;
+﻿@using System.Text.Json
+@using YmKB.UI.Components.Dialogs;
+@using YmKB.UI.ConstantConfigs
 @using YmKB.UI.Models
 @using YmKB.UI.Models.SideMenu
+@using YmKB.UI.Services
 @inherits LayoutComponentBase
 
 @code {
     private bool _drawerOpen = false;
-    private bool _isDarkMode = false;
-    private MudTheme? _theme = null;
     private bool _canMiniSideMenuDrawer = true;
     private bool _searchDialogOpen;
+    private MudTheme? _theme = Theme.AppTheme;
+    private List<MenuSectionModel> _navProfile = NavMenuConfig.Default;
 
-    [Inject] private IDialogService _dialogService { get; set; }
-
-    private List<MenuSectionModel> _navProfile = new()
-    {
-        new MenuSectionModel
-        {
-            Title = "GENERAL",
-            SectionItems =
-            [
-                new()
-                {
-                    Title = "仪表",
-                    Icon = Icons.Material.Filled.Speed,
-                    Href = "/"
-                },
-                new()
-                {
-                    Title = "聊天",
-                    Icon = Icons.Material.Filled.Message,
-                    Href = "/chat"
-                },
-                new()
-                {
-                    Title = "应用",
-                    Icon = Icons.Material.Filled.Apps,
-                    Href = "/applications",
-                },
-                new()
-                {
-                    Title = "知识",
-                    IsParent = true,
-                    Icon = Icons.Material.Filled.AutoStories,
-                    MenuItems =
-                    [
-                        new()
-                        {
-                            Title = "知识库",
-                            Href = "/knowledgebases",
-                        },
-                        new()
-                        {
-                            Title = "文档",
-                            Href = "/docfiles",
-                        },
-                    ]
-                },
-                new()
-                {
-                    Title = "插件",
-                    Icon = Icons.Custom.Brands.Calculator,
-                    Href = "/plugins",
-                },
-            ]
-        },
-
-        new MenuSectionModel
-        {
-            Title = "CONFIGURATION",
-            SectionItems =
-            [
-                new()
-                {
-                    Title = "模型",
-                    Icon = Icons.Material.Filled.AllInclusive,
-                    Href = "/aimodels",
-                },
-                new()
-                {
-                    Title = "用户",
-                    Icon = Icons.Material.Filled.PeopleAlt,
-                    Href = "/users",
-                }
-            ]
-        }
-    };
+    [Inject] private LayoutService _layoutService { get; set; } = default!;
+    [Inject] private IDialogService _dialogService { get; set; } = default!;
 
     private readonly UserModel _user = new()
     {
@@ -93,17 +23,10 @@
         Email = "muddemo@demo.com.au",
         Role = "Admin"
     };
-    
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
-
-        _theme = new()
-        {
-            PaletteLight = _lightPalette,
-            PaletteDark = _darkPalette,
-            LayoutProperties = new LayoutProperties()
-        };
     }
 
     private void DrawerToggle()
@@ -111,51 +34,7 @@
         _drawerOpen = !_drawerOpen;
     }
 
-    private void DarkModeToggle()
-    {
-        _isDarkMode = !_isDarkMode;
-    }
-
-    private readonly PaletteLight _lightPalette = new()
-    {
-        Black = "#110e2d",
-        AppbarText = "#424242",
-        AppbarBackground = "rgba(255,255,255,0.8)",
-        DrawerBackground = "#ffffff",
-        GrayLight = "#e8e8e8",
-        GrayLighter = "#f9f9f9",
-    };
-
-    private readonly PaletteDark _darkPalette = new()
-    {
-        Primary = "#7e6fff",
-        Surface = "#1e1e2d",
-        Background = "#1a1a27",
-        BackgroundGray = "#151521",
-        AppbarText = "#92929f",
-        AppbarBackground = "rgba(26,26,39,0.8)",
-        DrawerBackground = "#1a1a27",
-        ActionDefault = "#74718e",
-        ActionDisabled = "#9999994d",
-        ActionDisabledBackground = "#605f6d4d",
-        TextPrimary = "#b2b0bf",
-        TextSecondary = "#92929f",
-        TextDisabled = "#ffffff33",
-        DrawerIcon = "#92929f",
-        DrawerText = "#92929f",
-        GrayLight = "#2a2833",
-        GrayLighter = "#1e1e2d",
-        Info = "#4a86ff",
-        Success = "#3dcb6c",
-        Warning = "#ffb545",
-        Error = "#ff3f5f",
-        LinesDefault = "#33323e",
-        TableLines = "#33323e",
-        Divider = "#292838",
-        OverlayLight = "#1e1e2d80",
-    };
-
-    public string DarkLightModeButtonIcon => _isDarkMode switch
+    public string DarkLightModeButtonIcon => !_layoutService.IsDarkMode switch
     {
         true => Icons.Material.Rounded.AutoMode,
         false => Icons.Material.Outlined.DarkMode,
@@ -171,7 +50,7 @@
                 MaxWidth = MaxWidth.Medium,
                 FullWidth = true
             };
-            var parameters = new DialogParameters<SearchDialog> { { x => x.NavProfile, _navProfile} };
+            var parameters = new DialogParameters<SearchDialog> { { x => x.NavProfile, _navProfile } };
 
             var searchDialog = await _dialogService.ShowAsync<SearchDialog>("", parameters, options);
             _searchDialogOpen = true;
@@ -180,49 +59,51 @@
             _searchDialogOpen = false;
         }
     }
+
+    private void Test(bool b)
+    {
+        Console.WriteLine($"_canMiniSideMenuDrawer {_canMiniSideMenuDrawer} _drawerOpen{_drawerOpen} {JsonSerializer.Serialize(b)}");
+    }
+
 }
 
 
 
-<MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
+<MudThemeProvider Theme="@_theme" IsDarkMode="@_layoutService.IsDarkMode"/>
+<MudPopoverProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<PageTitle>YmKB - 智能知识库问答系统</PageTitle>
 
 <MudLayout>
-
-    <MudAppBar Class="px-8" Elevation="0"
-        Style="@(_isDarkMode ? "background: rgba(21,27,34,0.7)" : "background: rgba(255,255,255,0.7)")">
+    @*顶部导航栏*@
+    <MudAppBar Class="px-2" Elevation="0"
+               Style="@(_layoutService.IsDarkMode ? "background: rgba(21,27,34,0.7)" : "background: rgba(255,255,255,0.7)")">
         @if (!_canMiniSideMenuDrawer)
         {
             <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                <MudTooltip Arrow="true" Text="Toggle menu">
-                    <MudIconButton Class="mr-3" Color="Color.Default" Edge="Edge.Start" Icon="@Icons.Material.Filled.Menu"
-                        OnClick="DrawerToggle" />
-                </MudTooltip>
+                <MudIconButton Class="mr-3" Color="Color.Default" Edge="Edge.Start" Icon="@Icons.Material.Filled.Menu"
+                               OnClick="DrawerToggle"/>
             </MudHidden>
         }
-        <MudTooltip Arrow="true" Text="查询">
-            <MudIconButton Color="Color.Default" Edge="Edge.Start" Icon="@Icons.Material.Filled.Search"
-                OnClick="OpenSearchDialog" />
-        </MudTooltip>
-        <MudSpacer />
-        <MudTooltip Arrow="true" Text="导航至Github">
-            <MudIconButton Class="mx-3" Color="Color.Default" Icon="@Icons.Custom.Brands.GitHub"
-                Link="https://gitee.com" Target="_blank" />
-        </MudTooltip>
-        <MudTooltip Arrow="true" Text="切换明暗主题">
-            <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
-        </MudTooltip>
-        <UserAvatar Class="ml-3" User="_user" />
+        <MudIconButton Class="ml-1" Color="Color.Default" Edge="Edge.Start" Icon="@Icons.Material.Filled.Search"
+                       OnClick="OpenSearchDialog"/>
+        <MudSpacer/>
+        <MudIconButton Class="mx-3" Color="Color.Default" Icon="@Icons.Custom.Brands.GitHub"
+                       Link="https://gitee.com" Target="_blank"/>
+        <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@(() => _layoutService.ToggleDarkMode())"/>
+        <UserAvatar Class="ml-4" User="_user"/>
+        @* <MudButton OnClick="@(() => Console.WriteLine($"_canMiniSideMenuDrawer: {_canMiniSideMenuDrawer} + _drawerOpen: {_drawerOpen}"))">test</MudButton> *@
     </MudAppBar>
 
-
+    @*侧边导航栏*@
     <SideMenu @bind-CanMiniSideMenuDrawer="_canMiniSideMenuDrawer"
               @bind-SideMenuDrawerOpen="_drawerOpen"
               NavProfile="_navProfile"
-              User="_user" />
+              User="_user"/>
 
+    @*主内容*@
     <MudMainContent>
         <MudContainer Class="mb-16 mt-4">
             @Body

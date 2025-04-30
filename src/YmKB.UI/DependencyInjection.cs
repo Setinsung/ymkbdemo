@@ -11,10 +11,18 @@ public static class DependencyInjection
 {
     public static void AddCoreServices(this IServiceCollection services, IConfiguration configuration)
     {
-
+        services
+            // .AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7219") });
+            .AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5045") });
+        services.AddScoped<IKnowledgeBaseService, MockKnowledgeBaseService>();
+        services.AddScoped<IDocumentService, MockDocumentService>();
+        services.AddScoped<IApplicationService, MockApplicationService>();
+        services.AddScoped<IAIModelService, MockAIModelService>();
+        
         services.AddScoped<IStorageService, LocalStorageService>();
         services.AddScoped<ICommonDialogService, CommonDialogService>();
         services.AddScoped<IUserPreferencesService, UserPreferencesService>();
+        services.AddScoped<LayoutService>();
         services.AddBlazoredLocalStorage();
         services.AddMudBlazors(configuration);
     }
@@ -24,6 +32,7 @@ public static class DependencyInjection
         services.AddMudServicesWithExtensions(mudConfig =>
         {
             MudGlobal.InputDefaults.ShrinkLabel = true;
+            MudGlobal.UnhandledExceptionHandler = Console.WriteLine;
             mudConfig.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomCenter;
             mudConfig.SnackbarConfiguration.NewestOnTop = false;
             mudConfig.SnackbarConfiguration.ShowCloseIcon = true;
