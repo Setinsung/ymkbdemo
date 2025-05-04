@@ -35,11 +35,11 @@ public class LayoutService
     /// 获取或设置是否显示导航菜单。
     /// </summary>
     public bool DrawerOpen { get; set; }
-    
+
     /// <summary>
     /// 获取或设置是否可以最小化侧边菜单抽屉。
     /// </summary>
-    public bool CanMiniSideMenuDrawer { get; set; }
+    public bool CanMiniSideMenuDrawer { get; set; } = true;
     
     public DarkLightModeType CurrentDarkLightMode { get; private set; } = DarkLightModeType.Light;
     public MudTheme CurrentTheme { get; private set; }
@@ -134,10 +134,5 @@ public class LayoutService
         _userPreferences!.DarkLightMode = CurrentDarkLightMode;
         await _userPreferencesService.SaveUserPreferences(_userPreferences);
         OnMajorUpdateOccurred();
-    }
-    
-    private void SetDrawerOpen(bool value)
-    {
-        DrawerOpen = value;
     }
 }

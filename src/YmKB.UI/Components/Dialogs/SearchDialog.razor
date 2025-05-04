@@ -4,7 +4,6 @@
     private Dictionary<string, string> _pages = new();
     private Dictionary<string, string> _pagesFiltered = new();
     private string _search;
-    [Inject] private NavigationManager Navigation { get; set; }
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
     [EditorRequired] [Parameter] public List<MenuSectionModel> NavProfile { get; set; }
 

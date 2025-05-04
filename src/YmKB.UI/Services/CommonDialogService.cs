@@ -44,8 +44,8 @@ public class CommonDialogService : ICommonDialogService
     }
 
     public async Task ShowDialogAsync<T>(
-        string title,
-        DialogParameters<T> parameters,
+        string? title = "",
+        DialogParameters<T>? parameters = null,
         DialogOptions? options = null,
         Func<DialogResult, Task>? onConfirm = null,
         Func<Task>? onCancel = null
@@ -58,7 +58,11 @@ public class CommonDialogService : ICommonDialogService
             MaxWidth = MaxWidth.Medium,
             FullWidth = true
         };
-        var dialog = await _dialogService.ShowAsync<T>(title, parameters, options);
+        IDialogReference dialog;
+        if (parameters is null)
+            dialog = await _dialogService.ShowAsync<T>(title, options);
+        else
+            dialog = await _dialogService.ShowAsync<T>(title, parameters, options);
         var result = await dialog.Result;
         if (result is not null && !result.Canceled && onConfirm is not null)
         {

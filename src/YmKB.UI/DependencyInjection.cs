@@ -14,20 +14,21 @@ public static class DependencyInjection
         services
             // .AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7219") });
             .AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5045") });
+        
         services.AddScoped<IKnowledgeBaseService, MockKnowledgeBaseService>();
         services.AddScoped<IDocumentService, MockDocumentService>();
         services.AddScoped<IApplicationService, MockApplicationService>();
         services.AddScoped<IAIModelService, MockAIModelService>();
         
-        services.AddScoped<IStorageService, LocalStorageService>();
+        services.AddScoped<LayoutService>();
         services.AddScoped<ICommonDialogService, CommonDialogService>();
         services.AddScoped<IUserPreferencesService, UserPreferencesService>();
-        services.AddScoped<LayoutService>();
+        services.AddScoped<IStorageService, LocalStorageService>();
         services.AddBlazoredLocalStorage();
         services.AddMudBlazors(configuration);
     }
-    
-    public static void AddMudBlazors(this IServiceCollection services, IConfiguration config)
+
+    private static void AddMudBlazors(this IServiceCollection services, IConfiguration config)
     {
         services.AddMudServicesWithExtensions(mudConfig =>
         {

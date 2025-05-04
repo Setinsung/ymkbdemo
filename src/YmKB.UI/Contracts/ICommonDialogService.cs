@@ -33,8 +33,8 @@ public interface ICommonDialogService
     /// <typeparam name="T">对话框组件的类型。</typeparam>
     /// <returns>一个表示对话框的 <see cref="Task"/>。</returns>
     Task ShowDialogAsync<T>(
-        string title,
-        DialogParameters<T> parameters,
+        string? title = "",
+        DialogParameters<T>? parameters = null,
         DialogOptions? options = null,
         Func<DialogResult, Task>? onConfirm = null,
         Func<Task>? onCancel = null
