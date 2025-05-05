@@ -25,4 +25,12 @@ public interface IStorageService
     /// <param name="value">要设置的项目的值。</param>
     /// <returns>一个 <see cref="ValueTask"/> 表示异步操作。</returns>
     ValueTask SetItemAsync<T>(string key, T value);
+    
+    
+    /// <summary>
+    /// 检测是否包含指定的键。
+    /// </summary>
+    /// <param name="key">键名</param>
+    /// <returns></returns>
+    ValueTask<bool> ContainKeyAsync(string key);
 }

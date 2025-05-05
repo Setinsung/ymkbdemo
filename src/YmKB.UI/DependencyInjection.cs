@@ -1,7 +1,9 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using MudBlazor.Extensions;
 using MudBlazor.Services;
+using YmKB.UI.Providers;
 using YmKB.UI.Services;
 using YmKB.UI.Services.Contracts;
 
@@ -19,12 +21,16 @@ public static class DependencyInjection
         services.AddScoped<IDocumentService, MockDocumentService>();
         services.AddScoped<IApplicationService, MockApplicationService>();
         services.AddScoped<IAIModelService, MockAIModelService>();
+
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
         
+        services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
         services.AddScoped<LayoutService>();
         services.AddScoped<ICommonDialogService, CommonDialogService>();
         services.AddScoped<IUserPreferencesService, UserPreferencesService>();
         services.AddScoped<IStorageService, LocalStorageService>();
         services.AddBlazoredLocalStorage();
+        services.AddAuthorizationCore();
         services.AddMudBlazors(configuration);
     }
 

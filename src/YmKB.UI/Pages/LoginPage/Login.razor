@@ -1,22 +1,31 @@
 ﻿@layout LoginLayout
 @page "/Login"
+@using YmKB.UI.Models
 @inject NavigationManager NavigationManager
-@inject ISnackbar Snackbar
 @code {
     private MudForm form;
     private bool success;
-    private string username = "Administrator";
+    private string userName = "Administrator";
     private string password = "P@ssw0rd!";
     private bool rememberMe = true;
 
+    [Inject]
+    private IAuthenticationService AuthenticationService { get; set; }
+    
     private async Task HandleLogin()
     {
         await form.Validate();
         if (form.IsValid)
         {
-            // TODO: 实现登录逻辑
-            Snackbar.Add("登录成功", Severity.Success);
-            NavigationManager.NavigateTo("/");
+            if (await AuthenticationService.LoginAsync(new UserLoginDto {UserName = userName, Password = password}))
+            {
+                Snackbar.Add("登录成功", Severity.Success);
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                Snackbar.Add("登录失败", Severity.Error);
+            }
         }
     }
 }
@@ -31,7 +40,7 @@
             <MudForm @ref="form" @bind-IsValid="@success">
                 <MudTextField T="string"
                               Label="用户名"
-                              @bind-Value="username"
+                              @bind-Value="userName"
                               Required="true"
                               HelperText=""
                               RequiredError="请输入用户名"

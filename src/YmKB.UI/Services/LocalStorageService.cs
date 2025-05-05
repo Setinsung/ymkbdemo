@@ -29,5 +29,10 @@ public class LocalStorageService : IStorageService
     {
         return _localStorageService.SetItemAsync(key, value);
     }
+
+    public ValueTask<bool> ContainKeyAsync(string key)
+    {
+        return _localStorageService.ContainKeyAsync(key);
+    }
 }
 
