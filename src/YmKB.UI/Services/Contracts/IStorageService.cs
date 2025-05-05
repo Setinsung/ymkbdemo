@@ -1,4 +1,4 @@
-﻿namespace YmKB.UI.Contracts;
+﻿namespace YmKB.UI.Services.Contracts;
 
 public interface IStorageService
 {

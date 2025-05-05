@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
-namespace YmKB.UI.Contracts;
+namespace YmKB.UI.Services.Contracts;
 
 /// <summary>
 /// 对话服务的帮助接口

@@ -1,7 +1,7 @@
 ﻿using MudBlazor;
 using YmKB.UI.ConstantConfigs;
-using YmKB.UI.Contracts;
 using YmKB.UI.Models;
+using YmKB.UI.Services.Contracts;
 
 namespace YmKB.UI.Services;
 

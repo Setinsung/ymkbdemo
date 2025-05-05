@@ -1,6 +1,6 @@
 ﻿using YmKB.UI.Models;
 
-namespace YmKB.UI.Contracts;
+namespace YmKB.UI.Services.Contracts;
 
 /// <summary>
 /// 用于管理用偏好

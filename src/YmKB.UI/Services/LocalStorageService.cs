@@ -1,5 +1,5 @@
 ﻿using Blazored.LocalStorage;
-using YmKB.UI.Contracts;
+using YmKB.UI.Services.Contracts;
 
 namespace YmKB.UI.Services;
 

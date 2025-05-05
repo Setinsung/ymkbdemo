@@ -2,8 +2,8 @@
 using MudBlazor;
 using MudBlazor.Extensions;
 using MudBlazor.Services;
-using YmKB.UI.Contracts;
 using YmKB.UI.Services;
+using YmKB.UI.Services.Contracts;
 
 namespace YmKB.UI;
 

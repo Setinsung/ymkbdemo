@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using YmKB.UI.Components.Dialogs;
-using YmKB.UI.Contracts;
+using YmKB.UI.Services.Contracts;
 
 namespace YmKB.UI.Services;
 
