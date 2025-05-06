@@ -1,26 +1,33 @@
 ﻿@layout LoginLayout
 @page "/Login"
-@using YmKB.UI.Models
-@inject NavigationManager NavigationManager
+@using YMKB.UI.APIs.Models
+
 @code {
+    [Inject] private AuthenticationService AuthenticationService { get; set; }
+
     private MudForm form;
     private bool success;
-    private string userName = "Administrator";
-    private string password = "P@ssw0rd!";
-    private bool rememberMe = true;
 
-    [Inject]
-    private IAuthenticationService AuthenticationService { get; set; }
-    
+    private LoginInModel model = new()
+    {
+        Username = "Administrator",
+        Password = "P@ssw0rd!"
+    };
+
+
     private async Task HandleLogin()
     {
         await form.Validate();
         if (form.IsValid)
         {
-            if (await AuthenticationService.LoginAsync(new UserLoginDto {UserName = userName, Password = password}))
+            if (
+                await AuthenticationService.LoginAsync(
+                    new AuthRequest { UserName = model.Username, Password = model.Password }
+                )
+            )
             {
                 Snackbar.Add("登录成功", Severity.Success);
-                NavigationManager.NavigateTo("/");
+                Navigation.NavigateTo("/");
             }
             else
             {
@@ -28,41 +35,53 @@
             }
         }
     }
+
+    public class LoginInModel
+    {
+        [Required(ErrorMessage = "用户名为必填项。")] public string Username { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Password is required.")]
+        [StringLength(30, ErrorMessage = "密码长度必须介于 6 到 30 个字符之间。", MinimumLength = 6)]
+        [RegularExpression(@"^(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_]).{6,}$", ErrorMessage = "密码必须至少包含一个字母、一个数字和一个特殊字符。")]
+        public string Password { get; set; } = string.Empty;
+
+        [Display(Name = "记住我")] public bool RememberMe { get; set; } = true;
+    }
+
 }
+
 <div class="login-container">
     <div class="login-box">
-        <MudImage Class="login-image-section"  Src="/Logo_full.jpg"></MudImage>
+        <MudImage Class="login-image-section" Src="/Logo_full.jpg"></MudImage>
 
         <div class="login-form-section">
             <MudText Typo="Typo.h4" Class="mb-4">登录</MudText>
-            <MudText Typo="Typo.subtitle1" Color="Color.Default" Class="mb-8">欢迎使用 YmKB 智能问答系统，<br />请输入账号密码！</MudText>
+            <MudText Typo="Typo.subtitle1" Color="Color.Default" Class="mb-8">欢迎使用 YmKB 智能问答系统，<br/>请输入账号密码！
+            </MudText>
 
-            <MudForm @ref="form" @bind-IsValid="@success">
-                <MudTextField T="string"
-                              Label="用户名"
-                              @bind-Value="userName"
+            <MudForm @ref="form" bind-IsValid="success">
+                <MudTextField Label="用户名"
+                              @bind-Value="model.Username"
                               Required="true"
                               HelperText=""
                               RequiredError="请输入用户名"
                               Variant="Variant.Outlined"
                               Class="mb-4"/>
 
-                <MudTextField T="string"
-                              Label="密码"
-                              @bind-Value="password"
-                              Required="true"
-                              RequiredError="请输入密码"
-                              InputType="InputType.Password"
-                              Variant="Variant.Outlined"/>
-
-                <MudCheckBox T="bool" @bind-Checked="rememberMe" Label="记住我" Color="Color.Primary" Class="mb-4"/>
+                <PasswordInput Label="密码"
+                               @bind-Value="model.Password"
+                               Required="true"
+                               RequiredError="请输入密码"
+                               Variant="Variant.Outlined"/>
+                <MudCheckBox T="bool" @bind-Value="model.RememberMe" Label="记住我" Color="Color.Primary" Class="mb-4"/>
 
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
                            FullWidth="true"
                            OnClick="HandleLogin"
                            Size="Size.Large"
-                           Class="login-button">登录</MudButton>
+                           Class="login-button">登录
+                </MudButton>
             </MudForm>
         </div>
     </div>
@@ -82,7 +101,7 @@
         display: flex;
         background-color: white;
         border-radius: 24px;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
         overflow: hidden;
         width: 1000px;
         height: 600px;
@@ -110,13 +129,14 @@
         height: 48px;
         font-size: 16px;
     }
+
     @@media (max-width: 900px) {
         .login-box {
             flex-direction: column;
             width: 90%;
             height: auto;
         }
-    
+
         .login-image-section {
             display: none;
         }

@@ -1,4 +1,5 @@
 ﻿@page "/aimodels"
+@using YMKB.UI.APIs.Models
 @using YmKB.UI.Models
 @inject IAIModelService AIModelService
 @inject IDialogService DialogService
@@ -26,7 +27,7 @@
             <RowTemplate>
                 <MudTd DataLabel="模型ID">@context.Id</MudTd>
                 <MudTd DataLabel="模型描述">@context.ModelDescription</MudTd>
-                <MudTd DataLabel="模型类别">@context.AIModelType</MudTd>
+                <MudTd DataLabel="模型类别">@context.AiModelType</MudTd>
                 <MudTd DataLabel="模型地址">@context.Endpoint</MudTd>
                 <MudTd DataLabel="模型名称">@context.ModelName</MudTd>
                 <MudTd>
@@ -42,7 +43,7 @@
 </MudContainer>
 
 @code {
-    private List<AIModel> _models = new();
+    private List<AIModelDto> _models = new();
     private string _searchString = "";
 
     protected override async Task OnInitializedAsync()
@@ -52,10 +53,10 @@
 
     private async Task LoadModels()
     {
-        _models = await AIModelService.GetAndSearchAllModelsAsync();
+        _models = await AIModelService.GetAndSearchModelsAsync();
     }
 
-    private bool FilterFunc(AIModel model)
+    private bool FilterFunc(AIModelDto model)
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
@@ -72,7 +73,7 @@
             Snackbar.Add("模型创建成功", Severity.Success);
     }
 
-    private async Task OpenEditDialog(AIModel model)
+    private async Task OpenEditDialog(AIModelDto model)
     {
         var parameters = new DialogParameters
         {
@@ -86,7 +87,7 @@
             Snackbar.Add("模型更新成功", Severity.Success);
     }
 
-    private async Task DeleteModel(AIModel model)
+    private async Task DeleteModel(AIModelDto model)
     {
         var isConfirmed = await DialogService.ShowMessageBox(
             "删除确认",

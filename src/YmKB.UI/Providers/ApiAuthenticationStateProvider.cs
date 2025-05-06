@@ -52,7 +52,7 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
             return new AuthenticationState(user);
         }
         // header
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", savedToken);
+        // _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", savedToken);
         
         user = GetClaimsPrincipal(tokenContent);
         return new AuthenticationState(user);

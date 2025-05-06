@@ -15,10 +15,15 @@
 @using YmKB.UI.Services.Contracts
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Authorization
+@using YMKB.UI.APIs
 @using YmKB.UI.Components
+@using System.ComponentModel.DataAnnotations
+@using YmKB.UI.Models
+@using YmKB.UI.Services
 
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject ILogger<App> Logger
 @inject ICommonDialogService CommonDialogService
+@inject ApiClient ApiClient
 

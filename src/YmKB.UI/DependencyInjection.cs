@@ -1,35 +1,66 @@
 ﻿using System.Text.Json.Serialization;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Kiota.Abstractions;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Kiota.Http.HttpClientLibrary;
+using Microsoft.Kiota.Serialization.Form;
+using Microsoft.Kiota.Serialization.Json;
+using Microsoft.Kiota.Serialization.Multipart;
+using Microsoft.Kiota.Serialization.Text;
 using MudBlazor;
 using MudBlazor.Extensions;
 using MudBlazor.Services;
+using YMKB.UI.APIs;
+using YmKB.UI.ConstantConfigs;
+using YmKB.UI.Handlers;
 using YmKB.UI.Providers;
 using YmKB.UI.Services;
 using YmKB.UI.Services.Contracts;
+using YmKB.UI.Services.JsInterops;
 
 namespace YmKB.UI;
 
 public static class DependencyInjection
 {
-    public static void AddCoreServices(this IServiceCollection services, IConfiguration configuration)
+    public static void AddCoreServices(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
-        services
-            // .AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7219") });
-            .AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5045") });
-        
+        // App配置信息
+        var appSettings = configuration.GetSection(AppSettings.KEY).Get<AppSettings>();
+        services.AddSingleton(appSettings!);
+
+        // business service
         services.AddScoped<IKnowledgeBaseService, MockKnowledgeBaseService>();
         services.AddScoped<IDocumentService, MockDocumentService>();
         services.AddScoped<IApplicationService, MockApplicationService>();
         services.AddScoped<IAIModelService, AIModelService>();
 
-        services.AddScoped<IAuthenticationService, AuthenticationService>();
-        
+        // common service
+        services.AddScoped<AuthenticationService>();
         services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
         services.AddScoped<LayoutService>();
         services.AddScoped<ICommonDialogService, CommonDialogService>();
         services.AddScoped<IUserPreferencesService, UserPreferencesService>();
         services.AddScoped<IStorageService, LocalStorageService>();
+        services.AddScoped<IndexedDbCache>();
+
+        // Httpclient Kiota ApiClient Service
+        services.AddScoped<JwtAuthorizationMessageHandler>();
+        services.AddScoped<IAuthenticationProvider, AnonymousAuthenticationProvider>();
+        services
+            .AddHttpClient<IRequestAdapter, HttpClientRequestAdapter>(
+                client => client.BaseAddress = new Uri(appSettings.ServiceBaseUrl)
+            )
+            .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
+        // "http://localhost:5045"
+        // "https://localhost:7219"
+        services.AddScoped<ApiClient>();
+        services.AddScoped<ApiClientServiceProxy>();
+
+        // mudblazor
         services.AddBlazoredLocalStorage();
         services.AddAuthorizationCore();
         services.AddMudBlazors(configuration);
