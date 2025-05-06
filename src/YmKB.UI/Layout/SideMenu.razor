@@ -1,5 +1,4 @@
 ﻿@using Nextended.Core.Helper
-@using YmKB.UI.Models
 @using YmKB.UI.Models.SideMenu
 
 @code {
@@ -10,6 +9,7 @@
     [EditorRequired] [Parameter] public EventCallback<bool> CanMiniSideMenuDrawerChanged { get; set; }
     [EditorRequired] [Parameter] public required UserModel User { get; set; }
 }
+
 @* bug 不设置固定菜单时，主动缩小再回到大屏幕，会导致hover失效 *@
 <MudDrawer Breakpoint="Breakpoint.Md"
            Class="side-menu"
@@ -21,9 +21,11 @@
            Variant="@(CanMiniSideMenuDrawer ? DrawerVariant.Mini : DrawerVariant.Responsive)"
            Width="280px">
     <MudDrawerHeader Class="align-center d-flex justify-center pa-0 pt-4">
-        <MudAvatar Size="Size.Large" Class="@(SideMenuDrawerOpen ? "ml-8" : "")">
-            <MudImage Src="/Logo_full.jpg"></MudImage>
-        </MudAvatar>
+        <MudLink Href="#">
+            <MudAvatar Size="Size.Large" Class="@(SideMenuDrawerOpen ? "ml-8" : "")">
+                <MudImage Src="/Logo_full.jpg"></MudImage>
+            </MudAvatar>
+        </MudLink>
 
         @if (SideMenuDrawerOpen)
         {
@@ -143,7 +145,7 @@
         }
     </MudNavMenu>
 </MudDrawer>
-
+<!--suppress CssUnresolvedCustomProperty -->
 <style>
 
     .mud-nav-link {

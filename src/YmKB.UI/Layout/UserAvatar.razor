@@ -2,6 +2,9 @@
 @code {
     [Parameter] public string Class { get; set; }
     [EditorRequired][Parameter] public UserModel User { get; set; }
+    [Parameter] public EventCallback LogOut { get; set; }
+    [Parameter] public EventCallback ToPerson { get; set; }
+    [Parameter] public EventCallback ToSettings { get; set; }
 }
 
 <MudMenu AnchorOrigin="Origin.BottomRight"
@@ -27,14 +30,14 @@
                 @User.Role
             </MudText>
             <MudDivider Class="my-2" />
-            <MudMenuItem>
+            <MudMenuItem OnClick="ToPerson">
                 <div class="d-flex">
                     <MudIcon Class="mx-2"
                              Icon="@Icons.Material.Filled.Person" />
                     <MudText>个人</MudText>
                 </div>
             </MudMenuItem>
-            <MudMenuItem>
+            <MudMenuItem OnClick="ToSettings">
                 <div class="d-flex">
                     <MudIcon Class="mx-2"
                              Icon="@Icons.Material.Filled.Settings" />
@@ -45,7 +48,8 @@
                 <MudButton Color="Color.Default"
                            FullWidth="true"
                            StartIcon="@Icons.Material.Filled.Logout"
-                           Variant="Variant.Outlined">
+                           Variant="Variant.Outlined"
+                           OnClick="LogOut">
                     登出
                 </MudButton>
             </div>

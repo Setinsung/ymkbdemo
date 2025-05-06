@@ -9,23 +9,20 @@
 @inherits LayoutComponentBase
 
 @code {
-
-    private bool _searchDialogOpen;
+    [Inject] private LayoutService LayoutService { get; set; } = default!;
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+    [Inject] private AuthenticationService AuthenticationService { get; set; } = default!;
 
     // 使用默认主题，同时设置导航配置
     private MudTheme? _theme;
     private List<MenuSectionModel> _navProfile = NavMenuConfig.Default;
-
-    [Inject] private LayoutService _layoutService { get; set; } = default!;
-    
-    [Inject] private AuthenticationStateProvider _authenticationStateProvider { get; set; } = default!;
-
     private UserModel _user = new();
 
     protected override async Task OnInitializedAsync()
     {
-        _theme = _layoutService.CurrentTheme;
-        var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        _theme = LayoutService.CurrentTheme;
+        
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = state.User;
         _user = new()
         {
@@ -33,11 +30,10 @@
             Email = user.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email)?.Value ?? "",
             Role = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? ""
         };
-        
-        Console.WriteLine(JsonSerializer.Serialize(user.Identity));
+        // Console.WriteLine(JsonSerializer.Serialize(user.Identity));
     }
 
-    public string DarkLightModeButtonIcon => !_layoutService.IsDarkMode switch
+    public string DarkLightModeButtonIcon => !LayoutService.IsDarkMode switch
     {
         true => Icons.Material.Outlined.LightMode,
         false => Icons.Material.Outlined.DarkMode,
@@ -55,17 +51,17 @@
             }
         );
     }
-
-    // private void Test(bool b)
-    // {
-    //     Console.WriteLine($"_canMiniSideMenuDrawer {_canMiniSideMenuDrawer} _drawerOpen{_drawerOpen} {JsonSerializer.Serialize(b)}");
-    // }
-
+    
+    private async Task HandleLogOut()
+    {
+        await AuthenticationService.LogoutAsync();
+        Navigation.NavigateTo("/login");
+    }
 }
 
 
 
-<MudThemeProvider Theme="@_theme" IsDarkMode="@_layoutService.IsDarkMode"/>
+<MudThemeProvider Theme="@_theme" IsDarkMode="@LayoutService.IsDarkMode"/>
 <MudPopoverProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
@@ -75,29 +71,29 @@
 <MudLayout>
     @*顶部导航栏*@
     <MudAppBar Class="px-2" Elevation="0"
-               Style="@(_layoutService.IsDarkMode ? "background: rgba(21,27,34,0.7)" : "background: rgba(255,255,255,0.7)")">
+               Style="@(LayoutService.IsDarkMode ? "background: rgba(21,27,34,0.7)" : "background: rgba(255,255,255,0.7)")">
         @*当设置固定侧边路由菜单时，且屏幕不是大屏幕时显示一个切换按钮用于显示侧边路由*@
-        @if (!_layoutService.CanMiniSideMenuDrawer)
+        @if (!LayoutService.CanMiniSideMenuDrawer)
         {
             <MudHidden Breakpoint="Breakpoint.MdAndUp">
                 <MudIconButton Class="mr-3" Color="Color.Default" Edge="Edge.Start" Icon="@Icons.Material.Filled.Menu"
-                               OnClick="@_layoutService.ToggleDrawerOpen"/>
+                               OnClick="@LayoutService.ToggleDrawerOpen"/>
             </MudHidden>
         }
         <MudIconButton Class="ml-1" Color="Color.Default" Edge="Edge.Start" Icon="@Icons.Material.Filled.Search"
                        OnClick="OpenSearchDialog"/>
         <MudSpacer/>
         <MudIconButton Class="mx-3" Color="Color.Default" Icon="@Icons.Custom.Brands.GitHub"
-                       Link="https://gitee.com" Target="_blank"/>
+                       Href="https://github.com" 
+                       Target="_blank"/>
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit"
-                       OnClick="@(() => _layoutService.ToggleDarkMode())"/>
-        <UserAvatar Class="ml-4" User="_user"/>
-        @* <MudButton OnClick="@(() => Console.WriteLine($"_canMiniSideMenuDrawer: {_canMiniSideMenuDrawer} + _drawerOpen: {_drawerOpen}"))">test</MudButton> *@
+                       OnClick="@(() => LayoutService.ToggleDarkMode())"/>
+        <UserAvatar Class="ml-4" User="_user" LogOut="@HandleLogOut" />
     </MudAppBar>
 
     @*侧边导航栏*@
-    <SideMenu @bind-CanMiniSideMenuDrawer="@_layoutService.CanMiniSideMenuDrawer"
-              @bind-SideMenuDrawerOpen="@_layoutService.DrawerOpen"
+    <SideMenu @bind-CanMiniSideMenuDrawer="@LayoutService.CanMiniSideMenuDrawer"
+              @bind-SideMenuDrawerOpen="@LayoutService.DrawerOpen"
               NavProfile="_navProfile"
               User="_user"/>
 
