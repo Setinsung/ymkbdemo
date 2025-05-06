@@ -27,6 +27,24 @@
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="_content/MudBlazor.Extensions/js/components/MudExAppLoader.min.js"></script>
+    <script src="js/onlinestatus.js"></script>
+    <script src="js/indexeddbstorage.js"></script>
+    <script src="js/downloadfile.js"></script>
+    <script>
+        window.displayModeInterop = {
+            getDisplayMode: function () {
+                if (window.matchMedia('(display-mode: standalone)').matches) {
+                    return 'standalone';
+                }
+                if (window.matchMedia('(display-mode: fullscreen)').matches) {
+                    return 'fullscreen';
+                }
+                if (window.matchMedia('(display-mode: minimal-ui)').matches) {
+                    return 'minimal-ui';
+                }
+                return 'browser';
+            }};
+    </script>
 </body>
 
 </html>
