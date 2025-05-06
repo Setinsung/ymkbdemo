@@ -1,0 +1,34 @@
+{
+  "descriptionHash": "6E787ED980B1EB4ECE9899CA2C0728C852C4A9F4FA2E821D7C8EDA209596D2EC986AD70C64D6591171480744FC1F9B516621D30BE8D15EFC905649D15F9C46D4",
+  "descriptionLocation": "http://localhost:5045/openapi/v1.json",
+  "lockFileVersion": "1.0.0",
+  "kiotaVersion": "1.25.1",
+  "clientClassName": "YMKBApiClient",
+  "typeAccessModifier": "Public",
+  "clientNamespaceName": "YMKB.ConsoleTests.Client",
+  "language": "CSharp",
+  "usesBackingStore": false,
+  "excludeBackwardCompatible": false,
+  "includeAdditionalData": true,
+  "disableSSLValidation": false,
+  "serializers": [
+    "Microsoft.Kiota.Serialization.Json.JsonSerializationWriterFactory",
+    "Microsoft.Kiota.Serialization.Text.TextSerializationWriterFactory",
+    "Microsoft.Kiota.Serialization.Form.FormSerializationWriterFactory",
+    "Microsoft.Kiota.Serialization.Multipart.MultipartSerializationWriterFactory"
+  ],
+  "deserializers": [
+    "Microsoft.Kiota.Serialization.Json.JsonParseNodeFactory",
+    "Microsoft.Kiota.Serialization.Text.TextParseNodeFactory",
+    "Microsoft.Kiota.Serialization.Form.FormParseNodeFactory"
+  ],
+  "structuredMimeTypes": [
+    "application/json",
+    "text/plain;q=0.9",
+    "application/x-www-form-urlencoded;q=0.2",
+    "multipart/form-data;q=0.1"
+  ],
+  "includePatterns": [],
+  "excludePatterns": [],
+  "disabledValidationRules": []
+}
