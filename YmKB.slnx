@@ -24,6 +24,7 @@
     <Project Path="src/YmKB.UI/YmKB.UI.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests\YmKB.ConsoleTests\YmKB.ConsoleTests.csproj" Type="Classic C#" />
     <Project Path="tests\YmKB.TrialTests\YmKB.TrialTests.csproj" Type="Classic C#" />
   </Folder>
 </Solution>

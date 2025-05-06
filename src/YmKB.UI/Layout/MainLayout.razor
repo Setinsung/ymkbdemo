@@ -1,4 +1,6 @@
-﻿@using System.Text.Json
+﻿@using System.IdentityModel.Tokens.Jwt
+@using System.Security.Claims
+@using System.Text.Json
 @using YmKB.UI.Components.Dialogs;
 @using YmKB.UI.ConstantConfigs
 @using YmKB.UI.Models
@@ -15,19 +17,24 @@
     private List<MenuSectionModel> _navProfile = NavMenuConfig.Default;
 
     [Inject] private LayoutService _layoutService { get; set; } = default!;
+    
+    [Inject] private AuthenticationStateProvider _authenticationStateProvider { get; set; } = default!;
 
-    private readonly UserModel _user = new()
-    {
-        Avatar = "./avatar.png",
-        DisplayName = "MudDemo",
-        Email = "muddemo@demo.com.au",
-        Role = "Admin"
-    };
+    private UserModel _user = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _theme = _layoutService.CurrentTheme;
-        base.OnInitialized();
+        var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+        _user = new()
+        {
+            DisplayName = user.Identity?.Name ?? "",
+            Email = user.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email)?.Value ?? "",
+            Role = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? ""
+        };
+        
+        Console.WriteLine(JsonSerializer.Serialize(user.Identity));
     }
 
     public string DarkLightModeButtonIcon => !_layoutService.IsDarkMode switch

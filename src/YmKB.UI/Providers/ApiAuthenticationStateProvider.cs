@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
 using YmKB.UI.Services.Contracts;
@@ -8,11 +9,13 @@ namespace YmKB.UI.Providers;
 public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 {
     private readonly IStorageService _storageService;
+    private readonly HttpClient _httpClient;
     private readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler;
 
-    public ApiAuthenticationStateProvider(IStorageService storageService)
+    public ApiAuthenticationStateProvider(IStorageService storageService, HttpClient httpClient)
     {
         _storageService = storageService;
+        _httpClient = httpClient;
         _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
     }
     
@@ -38,9 +41,7 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
         var user = new ClaimsPrincipal(new ClaimsIdentity());
         var isTokenPresent = await _storageService.ContainKeyAsync("token");
         if (isTokenPresent == false)
-        {
             return new AuthenticationState(user);
-        }
 
         var savedToken = await _storageService.GetItemAsync<string>("token");
         var tokenContent = _jwtSecurityTokenHandler.ReadJwtToken(savedToken);
@@ -50,6 +51,9 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
             await _storageService.RemoveItemAsync("token");
             return new AuthenticationState(user);
         }
+        // header
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", savedToken);
+        
         user = GetClaimsPrincipal(tokenContent);
         return new AuthenticationState(user);
     }

@@ -1,4 +1,5 @@
-﻿using Blazored.LocalStorage;
+﻿using System.Text.Json.Serialization;
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using MudBlazor.Extensions;
@@ -20,7 +21,7 @@ public static class DependencyInjection
         services.AddScoped<IKnowledgeBaseService, MockKnowledgeBaseService>();
         services.AddScoped<IDocumentService, MockDocumentService>();
         services.AddScoped<IApplicationService, MockApplicationService>();
-        services.AddScoped<IAIModelService, MockAIModelService>();
+        services.AddScoped<IAIModelService, AIModelService>();
 
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         

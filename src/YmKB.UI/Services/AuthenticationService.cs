@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.Authorization;
 using YmKB.UI.Models;
@@ -30,18 +31,14 @@ public class AuthenticationService : IAuthenticationService
     {
         try
         {
-            var content = JsonSerializer.Serialize(userLoginDto);
-            var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
-            var authResult = await _httpClient.PostAsync("Auth/login", bodyContent);
+            var authResult = await _httpClient.PostAsJsonAsync("Auth/login", userLoginDto);
             var authContent = await authResult.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<AuthResponse>(authContent, _options);
-            if (result is not null && !string.IsNullOrEmpty(result.Token))
-            {
-                await _storageService.SetItemAsync("token", result.Token);
-                await ((ApiAuthenticationStateProvider)_authenticationStateProvider).LoggedIn();
-                return true;
-            }
-            return false;
+            if (result is null || string.IsNullOrEmpty(result.Token)) return false;
+            
+            await _storageService.SetItemAsync("token", result.Token);
+            await ((ApiAuthenticationStateProvider)_authenticationStateProvider).LoggedIn();
+            return true;
         }
         catch (Exception)
         {

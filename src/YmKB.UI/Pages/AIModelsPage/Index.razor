@@ -1,6 +1,5 @@
 ﻿@page "/aimodels"
 @using YmKB.UI.Models
-@using YmKB.UI.Services
 @inject IAIModelService AIModelService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -19,19 +18,17 @@
             <HeaderContent>
                 <MudTh>模型ID</MudTh>
                 <MudTh>模型描述</MudTh>
-                <MudTh>AI类型</MudTh>
-                <MudTh>模型类别</MudTh>
+                <MudTh>模型类型</MudTh>
                 <MudTh>模型地址</MudTh>
                 <MudTh>模型名称</MudTh>
                 <MudTh>操作</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="模型ID">@context.Id</MudTd>
-                <MudTd DataLabel="模型描述">@context.Description</MudTd>
-                <MudTd DataLabel="AI类型">@context.AIType</MudTd>
-                <MudTd DataLabel="模型类别">@context.ModelType</MudTd>
+                <MudTd DataLabel="模型描述">@context.ModelDescription</MudTd>
+                <MudTd DataLabel="模型类别">@context.AIModelType</MudTd>
                 <MudTd DataLabel="模型地址">@context.Endpoint</MudTd>
-                <MudTd DataLabel="模型名称">@context.Name</MudTd>
+                <MudTd DataLabel="模型名称">@context.ModelName</MudTd>
                 <MudTd>
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => OpenEditDialog(context))" />
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteModel(context))" />
@@ -55,7 +52,7 @@
 
     private async Task LoadModels()
     {
-        _models = await AIModelService.GetAllModelsAsync();
+        _models = await AIModelService.GetAndSearchAllModelsAsync();
     }
 
     private bool FilterFunc(AIModel model)
@@ -63,10 +60,8 @@
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        return model.Description.Contains(_searchString, StringComparison.OrdinalIgnoreCase)
-            || model.AIType.Contains(_searchString, StringComparison.OrdinalIgnoreCase)
-            || model.ModelType.Contains(_searchString, StringComparison.OrdinalIgnoreCase)
-            || model.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase);
+        return model.ModelDescription.Contains(_searchString, StringComparison.OrdinalIgnoreCase)
+            || model.ModelName.Contains(_searchString, StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task OpenCreateDialog()
@@ -102,7 +97,7 @@
 
         if (isConfirmed ?? false)
         {
-            await AIModelService.DeleteModelAsync(model.Id);
+            // await AIModelService.DeleteModelAsync(model.Id);
             await LoadModels();
             Snackbar.Add("模型删除成功", Severity.Success);
         }

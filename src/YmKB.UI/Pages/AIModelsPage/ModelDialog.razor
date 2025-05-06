@@ -1,28 +1,17 @@
 @using YmKB.UI.Models
-@using YmKB.UI.Services
 @inject IAIModelService AIModelService
 
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form" @bind-IsValid="@_isValid">
-            <MudTextField @bind-Value="_model.Description" Label="模型描述" Required="true" />
-            <MudSelect @bind-Value="_model.AIType" Label="AI类型" Required="true" Class="mt-3">
-                <MudSelectItem Value="@("OpenAI")">OpenAI</MudSelectItem>
-                <MudSelectItem Value="@("AzureOpenAI")">AzureOpenAI</MudSelectItem>
-                <MudSelectItem Value="@("星火大模型")">星火大模型</MudSelectItem>
-                <MudSelectItem Value="@("灵积大模型")">灵积大模型</MudSelectItem>
-                <MudSelectItem Value="@("Ollama本地模型")">Ollama本地模型</MudSelectItem>
-                <MudSelectItem Value="@("LLamaFactory本地模型")">LLamaFactory本地模型</MudSelectItem>
-                <MudSelectItem Value="@("模拟输出")">模拟输出</MudSelectItem>
-            </MudSelect>
-            <MudSelect @bind-Value="_model.ModelType" Label="模型类别" Required="true" Class="mt-3">
-                <MudSelectItem Value="@("会话模型")">会话模型</MudSelectItem>
-                <MudSelectItem Value="@("向量模型")">向量模型</MudSelectItem>
-                <MudSelectItem Value="@("Rerank重排模型")">Rerank重排模型</MudSelectItem>
+            <MudTextField @bind-Value="_model.ModelDescription" Label="模型描述" Required="true" />
+            <MudSelect @bind-Value="_model.AIModelType" Label="模型类型" Required="true" Class="mt-3">
+                <MudSelectItem Value="@AIModelType.Chat">会话模型</MudSelectItem>
+                <MudSelectItem Value="@AIModelType.Embedding">向量模型</MudSelectItem>
             </MudSelect>
             <MudTextField @bind-Value="_model.Endpoint" Label="请求地址" Required="true" Class="mt-3" />
-            <MudTextField @bind-Value="_model.Name" Label="模型名称" Required="true" Class="mt-3" />
-            <MudTextField @bind-Value="_model.Secret" Label="模型密钥" Required="true" Class="mt-3" InputType="InputType.Password" />
+            <MudTextField @bind-Value="_model.ModelName" Label="模型名称" Required="true" Class="mt-3" />
+            <MudTextField @bind-Value="_model.ModelKey" Label="模型密钥" Required="true" Class="mt-3" InputType="InputType.Password" />
         </MudForm>
     </DialogContent>
     <DialogActions>
@@ -33,7 +22,7 @@
 
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
-    [Parameter] public AIModel Model { get; set; }
+    [Parameter] public AIModel? Model { get; set; }
 
     private MudForm _form;
     private bool _isValid;
@@ -46,12 +35,11 @@
             _model = new AIModel
             {
                 Id = Model.Id,
-                Description = Model.Description,
-                AIType = Model.AIType,
-                ModelType = Model.ModelType,
+                ModelDescription = Model.ModelDescription,
+                AIModelType = Model.AIModelType,
                 Endpoint = Model.Endpoint,
-                Name = Model.Name,
-                Secret = Model.Secret
+                ModelName = Model.ModelName,
+                ModelKey = Model.ModelKey
             };
         }
     }
@@ -63,11 +51,11 @@
         {
             if (string.IsNullOrEmpty(_model.Id))
             {
-                await AIModelService.CreateModelAsync(_model);
+                // await AIModelService.CreateModelAsync(_model);
             }
             else
             {
-                await AIModelService.UpdateModelAsync(_model.Id, _model);
+                // await AIModelService.UpdateModelAsync(_model.Id, _model);
             }
             MudDialog.Close(DialogResult.Ok(true));
         }

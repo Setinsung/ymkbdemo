@@ -40,12 +40,19 @@ builder
         // Don't serialize null values
         options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        // options.SerializerOptions.Converters.Add(new JsonStringEnumMemberConverter());
         // Pretty print JSON
         options.SerializerOptions.WriteIndented = true;
     });
+
 builder.Services.AddExceptionHandler<ProblemExceptionHandler>();
 
 builder.Services.AddControllers();
+// builder.Services.AddControllers(options =>
+// {
+//     options.ModelBinderProviders.Insert(0, new NullableEnumModelBinderProvider());
+// });
+
 builder
     .Services
     .AddCors(options =>

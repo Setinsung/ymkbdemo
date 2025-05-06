@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using YmKB.Domain.Entities;
 
 namespace YmKB.API.Controllers;
 

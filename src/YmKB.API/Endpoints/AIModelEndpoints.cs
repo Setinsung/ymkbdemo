@@ -1,9 +1,12 @@
-﻿using Mediator;
+﻿using System.Text.Json.Serialization;
+using Mediator;
 using Microsoft.AspNetCore.Mvc;
+using YmKB.API.Converters;
 using YmKB.Application.Features.AIModels.Commands;
 using YmKB.Application.Features.AIModels.DTOs;
 using YmKB.Application.Features.AIModels.Queries;
 using YmKB.Domain.Entities;
+using static YmKB.API.Endpoints.AIModelType;
 
 namespace YmKB.API.Endpoints;
 
@@ -11,7 +14,7 @@ public class AIModelEndpoins(ILogger<AIModelEndpoins> logger) : IEndpointRegistr
 {
     public void RegisterRoutes(IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup("/AIModels").WithTags("AIModels");
+        var group = routes.MapGroup("/AIModels").WithTags("AIModels").RequireAuthorization();
 
         group
             .MapGet(
@@ -34,9 +37,17 @@ public class AIModelEndpoins(ILogger<AIModelEndpoins> logger) : IEndpointRegistr
                 async (
                     [FromServices] IMediator mediator,
                     [FromQuery] string? searchKeyword,
-                    [FromQuery] AIModelType? aiModelType
-                ) => await mediator.Send(new SearchAIModelsQuery(searchKeyword, aiModelType))
-            )
+                    [FromQuery] AIModelType aiModelType = All
+                ) =>
+                {
+                    YmKB.Domain.Entities.AIModelType? aiModelTypeNullable = aiModelType switch
+                    {
+                        Chat => YmKB.Domain.Entities.AIModelType.Chat,
+                        Embedding => YmKB.Domain.Entities.AIModelType.Embedding,
+                        All or _ => null
+                    };
+                    return await mediator.Send(new SearchAIModelsQuery(searchKeyword, aiModelTypeNullable));
+                })
             .Produces<IEnumerable<AIModelDto>>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
@@ -49,7 +60,7 @@ public class AIModelEndpoins(ILogger<AIModelEndpoins> logger) : IEndpointRegistr
                 (IMediator mediator, [FromRoute] string id) =>
                     mediator.Send(new GetAIModelByIdQuery(id))
             )
-            .Produces<AIModelDto>(StatusCodes.Status200OK)
+            .Produces<AIModelDto>()
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
@@ -97,4 +108,12 @@ public class AIModelEndpoins(ILogger<AIModelEndpoins> logger) : IEndpointRegistr
             .WithSummary("Delete AIModels by IDs")
             .WithDescription("Deletes one or more AIModels by their unique IDs.");
     }
+}
+
+public enum AIModelType
+{
+
+    Chat,
+    Embedding,
+    All
 }
