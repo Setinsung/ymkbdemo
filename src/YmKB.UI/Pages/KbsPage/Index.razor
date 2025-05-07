@@ -1,78 +1,53 @@
 ﻿@page "/knowledgebases"
-@using YmKB.UI.Models
-@using YmKB.UI.Services
 @inject IKnowledgeBaseService KnowledgeBaseService
 @inject NavigationManager NavigationManager
-
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
-    <MudGrid>
-        <MudItem xs="12">
-            <MudPaper Class="pa-4">
-                <MudStack Row="true" Justify="Justify.SpaceBetween" Class="mb-4">
-                    <MudText Typo="Typo.h5">知识库列表</MudText>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateKnowledgeBase">创建知识库</MudButton>
-                </MudStack>
-
-                <MudTextField @bind-Value="searchString" Placeholder="输入回车" Immediate="true" 
-                            AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start" 
-                            OnKeyDown="@SearchOnEnter" Class="mb-4"/>
-
-                <MudGrid>
-                    @foreach (var kb in filteredKnowledgeBases)
-                    {
-                        <MudItem xs="12" sm="6" md="4" lg="3">
-                            <MudCard>
-                                <MudCardHeader>
-                                    <CardHeaderContent>
-                                        <MudText Typo="Typo.h6">@kb.Name</MudText>
-                                        <MudText Typo="Typo.body2">@kb.Description</MudText>
-                                    </CardHeaderContent>
-                                    <CardHeaderActions>
-                                        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default" />
-                                    </CardHeaderActions>
-                                </MudCardHeader>
-                                <MudCardContent>
-                                    <MudText>
-                                        <MudChip T="string" Size="Size.Small" Color="Color.Primary">段落切片: @kb.SegmentTokens</MudChip>
-                                    </MudText>
-                                    <MudText Class="mt-2">
-                                        <MudChip T="string" Size="Size.Small" Color="Color.Secondary">文档数量: @kb.DocumentCount</MudChip>
-                                        <MudChip T="string" Size="Size.Small" Color="Color.Info">切片数量: @kb.SegmentCount</MudChip>
-                                    </MudText>
-                                </MudCardContent>
-                                <MudCardActions>
-                                    <MudButton OnClick="@(() => ViewKnowledgeBase(kb.Id))">查看</MudButton>
-                                    <MudButton OnClick="@(() => EditKnowledgeBase(kb.Id))">修改</MudButton>
-                                    <MudButton Color="Color.Error" OnClick="@(() => DeleteKnowledgeBase(kb))">删除</MudButton>
-                                </MudCardActions>
-                            </MudCard>
-                        </MudItem>
-                    }
-                </MudGrid>
-            </MudPaper>
-        </MudItem>
-    </MudGrid>
-</MudContainer>
-
 @code {
-    private List<KnowledgeBase> knowledgeBases = new();
-    private string searchString = "";
+    private PaginatedResultOfKnowledgeDbDto _kbs = new();
+    private string _searchString = "";
+    private bool _loading;
+    private int pageIndex = 1;
+    private int pageSize = 12;
+    private int totalCount = 0;
 
-    private IEnumerable<KnowledgeBase> filteredKnowledgeBases => knowledgeBases
-        .Where(x => string.IsNullOrWhiteSpace(searchString) ||
-                   x.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-                   x.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase));
+    // private IEnumerable<KnowledgeBase> filteredKnowledgeBases => knowledgeBases
+    //     .Where(x => string.IsNullOrWhiteSpace(_searchString) ||
+    //                 x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
+    //                 x.Description.Contains(_searchString, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
-        knowledgeBases = await KnowledgeBaseService.GetKnowledgeBasesAsync();
+        await LoadAllKbs();
     }
 
-    private void SearchOnEnter(KeyboardEventArgs e)
+    private async Task LoadAllKbs()
+    {
+        _loading = true;
+        try
+        {
+            PaginatedResultOfKnowledgeDbDto? result = await ApiClient.KnowledgeDbs.Pagination.PostAsync(new KnowledgeDbsWithPaginationQuery()
+            {
+                Keywords = _searchString,
+                PageNumber = pageIndex - 1,
+                PageSize = pageSize,
+                OrderBy = "Id"
+            });
+            _loading = false;
+            _kbs = result;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "查询模型配置列表失败");
+            Snackbar.Add("查询模型配置列表失败", Severity.Error);
+            _loading = false;
+            _kbs = new();
+        }    }
+
+    private async Task SearchOnEnter(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
-            StateHasChanged();
+            await LoadAllKbs();
+            // StateHasChanged();
         }
     }
 
@@ -93,11 +68,78 @@
 
     private async Task DeleteKnowledgeBase(KnowledgeBase kb)
     {
-        var result = await KnowledgeBaseService.DeleteKnowledgeBaseAsync(kb.Id);
-        if (result)
-        {
-            knowledgeBases.Remove(kb);
-            StateHasChanged();
-        }
+        // var result = await KnowledgeBaseService.DeleteKnowledgeBaseAsync(kb.Id);
+        // if (result)
+        // {
+        //     knowledgeBases.Remove(kb);
+        //     StateHasChanged();
+        // }
     }
+
+    private async Task PageChanged(int i)
+    {
+        pageIndex = i;
+        await LoadAllKbs();
+    }
+
 }
+
+<MudText Typo="Typo.h5" Class="mb-4">知识库管理</MudText>
+
+<MudToolBar>
+    <MudStack Row Spacing="1">
+        <MudTextField T="string"
+                      @bind-Value="_searchString" Adornment="Adornment.End" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small"
+                      OnKeyDown="@SearchOnEnter">
+        </MudTextField>
+    </MudStack>
+    <MudSpacer/>
+    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="CreateKnowledgeBase">新增模型
+    </MudFab>
+</MudToolBar>
+@if (_loading)
+{
+    <div class="d-flex flex-column align-center mt-4">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+    </div>
+}
+<MudGrid>
+    @foreach (var kb in _kbs.Items ?? [])
+    {
+        <MudItem xs="12" sm="6" md="4" lg="3">
+            <MudCard Class="card-hover-effect">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <div class="d-flex align-start">
+                            <MudIcon Class="mt-2" Icon="@Icons.Material.Outlined.Info" Size="Size.Large" Color="Color.Primary"/>
+                            <div class="ml-4">
+                                <MudText Typo="Typo.h6">@kb.Name</MudText>
+                                <MudText Typo="Typo.body2">@kb.Description</MudText>
+                            </div>
+                        </div>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default"/>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudText>
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Secondary">
+                            文档数量: 0</MudChip>
+                    </MudText>
+                </MudCardContent>
+                <MudCardActions Class="d-flex justify-end">
+                    <MudButton OnClick="@(() => ViewKnowledgeBase(kb.Id))">查看</MudButton>
+                    <MudButton OnClick="@(() => EditKnowledgeBase(kb.Id))">修改</MudButton>
+                    <MudButton Color="Color.Error">删除</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+<div class="d-flex flex-column align-center mt-4">
+    <MudPagination ShowFirstButton="true" ShowLastButton="true" Class="mt-4"
+                   Count="@(_kbs.TotalPages ?? 0)"
+                   SelectedChanged="PageChanged"/>
+</div>
