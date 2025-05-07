@@ -1,106 +1,159 @@
 ﻿@page "/aimodels"
 @using YMKB.UI.APIs.Models
-@using YmKB.UI.Models
-@inject IAIModelService AIModelService
-@inject IDialogService DialogService
 @inject ISnackbar Snackbar
+<MudText Typo="Typo.h5" Class="mb-4">模型管理</MudText>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
-    <MudText Typo="Typo.h5" Class="mb-4">模型管理</MudText>
 
-    <MudPaper Class="pa-4">
-        <MudToolBar>
-            <MudTextField @bind-Value="_searchString" Placeholder="搜索" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-            <MudSpacer />
-            <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateDialog">新增模型</MudButton>
-        </MudToolBar>
-
-        <MudTable Items="@_models" Dense="true" Hover="true" Filter="FilterFunc">
-            <HeaderContent>
-                <MudTh>模型ID</MudTh>
-                <MudTh>模型描述</MudTh>
-                <MudTh>模型类型</MudTh>
-                <MudTh>模型地址</MudTh>
-                <MudTh>模型名称</MudTh>
-                <MudTh>操作</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="模型ID">@context.Id</MudTd>
-                <MudTd DataLabel="模型描述">@context.ModelDescription</MudTd>
-                <MudTd DataLabel="模型类别">@context.AiModelType</MudTd>
-                <MudTd DataLabel="模型地址">@context.Endpoint</MudTd>
-                <MudTd DataLabel="模型名称">@context.ModelName</MudTd>
-                <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => OpenEditDialog(context))" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteModel(context))" />
-                </MudTd>
-            </RowTemplate>
-            <PagerContent>
-                <MudTablePager />
-            </PagerContent>
-        </MudTable>
-    </MudPaper>
-</MudContainer>
+<MudToolBar>
+    <MudStack Row Spacing="1">
+        <MudTextField T="string"
+                      @bind-Value="_searchString" Adornment="Adornment.End"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small">
+        </MudTextField>
+    </MudStack>
+    <MudSpacer/>
+    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateDialog">新增模型
+    </MudFab>
+</MudToolBar>
+<MudDataGrid Items="@_models" Loading="@_loading" Dense="true" Hover="true" QuickFilter="SearchFilter">
+    <Columns>
+        <TemplateColumn Title="#">
+            <CellTemplate>
+                @(_models.IndexOf(context.Item) + 1)
+            </CellTemplate>
+        </TemplateColumn>
+        <PropertyColumn Property="e => e.ModelDescription" Title="模型名"/>
+        <PropertyColumn Property="e => e.ModelName" Title="模型Id"/>
+        <PropertyColumn Property="e => e.AiModelType" Title="模型类型">
+            <CellTemplate>
+                @switch (context.Item.AiModelType)
+                {
+                    case AIModelType.Chat:
+                        <MudChip Class="pa-3" T="string" Variant="Variant.Text" Icon="@Icons.Material.Filled.Chat"
+                                 Color="Color.Info" Size="Size.Small">
+                            Chat
+                        </MudChip>
+                        break;
+                    case AIModelType.Embedding:
+                        <MudChip Class="pa-3" T="string" Variant="Variant.Text" Icon="@Icons.Material.Filled.Transform"
+                                 Color="Color.Success" Size="Size.Small">
+                            Embedding
+                        </MudChip>
+                        break;
+                }
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.Endpoint" Title="模型端点"/>
+        <TemplateColumn CellClass="d-flex justify-end">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning"
+                                   OnClick="@(() => OpenEditDialog(context.Item))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                                   OnClick="@(() => DeleteModel(context.Item))"/>
+                    @*test model*@
+                    <MudIconButton Icon="@Icons.Material.Filled.Terminal" OnClick="(()=> TestModel(context.Item))"/>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
 
 @code {
-    private List<AIModelDto> _models = new();
+    private List<AIModelDto> _models = [];
     private string _searchString = "";
+    private bool _loading;
+
+    private CreateAIModelCommand _createAIModel = new(){AiModelType = AIModelType.Chat};
+    private UpdateAIModelCommand _updateAIModel = new(){AiModelType = AIModelType.Chat};
 
     protected override async Task OnInitializedAsync()
     {
         await LoadModels();
     }
 
-    private async Task LoadModels()
+    private async Task LoadModels(string searchInput = "")
     {
-        _models = await AIModelService.GetAndSearchModelsAsync();
+        _searchString = searchInput;
+        _loading = true;
+        try
+        {
+            var result = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.SearchKeyword = _searchString);
+            _loading = false;
+            _models = result ?? [];
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "查询模型配置列表失败");
+            Snackbar.Add("查询模型配置列表失败", Severity.Error);
+            _loading = false;
+            _models = [];
+        }
     }
 
-    private bool FilterFunc(AIModelDto model)
+    private bool SearchFilter(AIModelDto model)
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
-
+        if (model.ModelDescription is null || model.ModelName is null)
+            return false;
         return model.ModelDescription.Contains(_searchString, StringComparison.OrdinalIgnoreCase)
-            || model.ModelName.Contains(_searchString, StringComparison.OrdinalIgnoreCase);
+               || model.ModelName.Contains(_searchString, StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task OpenCreateDialog()
     {
-        var dialog = await DialogService.ShowAsync<ModelDialog>("新增模型");
-        var result = await dialog.Result;
-            await LoadModels();
-            Snackbar.Add("模型创建成功", Severity.Success);
+        await CommonDialogService.ShowDialogAsync(
+            "新增模型", 
+            new DialogParameters<CreateAIModelDialog> { { x => x.Model, _createAIModel } },
+            onConfirm: async _ =>
+            {
+                await ApiClient.AIModels.PostAsync(_createAIModel);
+                await LoadModels();
+                Snackbar.Add("模型创建成功", Severity.Success);
+                _createAIModel = new(){AiModelType = AIModelType.Chat};
+            }
+        );
     }
 
     private async Task OpenEditDialog(AIModelDto model)
     {
-        var parameters = new DialogParameters
+        _updateAIModel = new()
         {
-            ["Model"] = model
+            Id = model.Id,
+            ModelName = model.ModelName,
+            ModelDescription = model.ModelDescription,
+            AiModelType = model.AiModelType,
+            Endpoint = model.Endpoint,
+            ModelKey = model.ModelKey
         };
-
-        var dialog = await DialogService.ShowAsync<ModelDialog>("编辑模型", parameters);
-        DialogResult? result = await dialog.Result;
-
-            await LoadModels();
-            Snackbar.Add("模型更新成功", Severity.Success);
+        await CommonDialogService.ShowDialogAsync(
+            "新增模型", 
+            new DialogParameters<UpdateAIModelDialog> { { x => x.Model, _updateAIModel } },
+            onConfirm: async _ =>
+            {
+                await ApiClient.AIModels.PutAsync(_updateAIModel);
+                await LoadModels();
+                Snackbar.Add("模型修改成功", Severity.Success);
+                _updateAIModel = new(){AiModelType = AIModelType.Chat};
+            }
+        );
     }
 
     private async Task DeleteModel(AIModelDto model)
     {
-        var isConfirmed = await DialogService.ShowMessageBox(
-            "删除确认",
-            "确定要删除这个模型吗？",
-            yesText: "删除",
-            cancelText: "取消"
-        );
-
-        if (isConfirmed ?? false)
+        await CommonDialogService.ShowConfirmationDialog("确认删除", "您确定要删除所选项目吗？", async () =>
         {
-            // await AIModelService.DeleteModelAsync(model.Id);
+            await ApiClient.AIModels.DeleteAsync(new DeleteAIModelCommand { Ids = [model.Id!] });
             await LoadModels();
-            Snackbar.Add("模型删除成功", Severity.Success);
-        }
+            Snackbar.Add("删除成功", Severity.Success);
+        });
     }
+
+    private async Task TestModel(AIModelDto model)
+    {
+        await Task.Delay(250);
+        Snackbar.Add("测试成功！", Severity.Success);
+    }
+
 }

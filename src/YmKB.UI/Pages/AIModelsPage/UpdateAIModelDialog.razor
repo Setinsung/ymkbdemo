@@ -1,0 +1,46 @@
+@using YMKB.UI.APIs.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form" @bind-IsValid="@_isValid">
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="Model.ModelName" Label="模型Id" Required="true" Class="mt-3"/>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudSelect @bind-Value="Model.AiModelType" Label="模型类型" Required="true" Class="mt-3">
+                        <MudSelectItem T="AIModelType?" Value="@AIModelType.Chat">会话模型</MudSelectItem>
+                        <MudSelectItem T="AIModelType?" Value="@AIModelType.Embedding">向量模型</MudSelectItem>
+                    </MudSelect>                
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="Model.Endpoint" Label="模型端点" Required="true" Class="mt-3"/>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <PasswordInput @bind-Value="Model.ModelKey" Label="模型密钥" Required="true" Class="mt-3"/>
+                </MudItem>
+                <MudItem xs="12" md="12">
+                    <MudTextField @bind-Value="Model.ModelDescription" Label="模型名"/>
+                </MudItem>
+            </MudGrid>
+
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">取消</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Disabled="!_isValid">确定</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public UpdateAIModelCommand Model { get; set; }
+
+    private MudForm _form;
+    private bool _isValid;
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+
+    private void Cancel() => MudDialog.Cancel();
+} 

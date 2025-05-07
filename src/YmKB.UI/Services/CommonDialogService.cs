@@ -7,11 +7,11 @@ namespace YmKB.UI.Services;
 
 public class CommonDialogService : ICommonDialogService
 {
-    private readonly IDialogService _dialogService;
+    public IDialogService DialogService { get; set; }
 
     public CommonDialogService(IDialogService dialogService)
     {
-        _dialogService = dialogService;
+        DialogService = dialogService;
     }
 
     public async Task ShowConfirmationDialog(
@@ -31,7 +31,7 @@ public class CommonDialogService : ICommonDialogService
             MaxWidth = MaxWidth.ExtraSmall,
             FullWidth = true
         };
-        var dialog = await _dialogService.ShowAsync<ConfirmationDialog>(title, parameters, options);
+        var dialog = await DialogService.ShowAsync<ConfirmationDialog>(title, parameters, options);
         var result = await dialog.Result;
         if (result is not null && !result.Canceled)
         {
@@ -60,9 +60,9 @@ public class CommonDialogService : ICommonDialogService
         };
         IDialogReference dialog;
         if (parameters is null)
-            dialog = await _dialogService.ShowAsync<T>(title, options);
+            dialog = await DialogService.ShowAsync<T>(title, options);
         else
-            dialog = await _dialogService.ShowAsync<T>(title, parameters, options);
+            dialog = await DialogService.ShowAsync<T>(title, parameters, options);
         var result = await dialog.Result;
         if (result is not null && !result.Canceled && onConfirm is not null)
         {

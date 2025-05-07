@@ -8,6 +8,8 @@ namespace YmKB.UI.Services.Contracts;
 /// </summary>
 public interface ICommonDialogService
 {
+    IDialogService DialogService { get; set; }
+    
     /// <summary>
     /// 显示一个带有指定标题和内容文本的确认对话框。
     /// </summary>

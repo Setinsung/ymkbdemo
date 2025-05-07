@@ -1,0 +1,21 @@
+
+.mud-table.mud-data-grid.mud-xs-table.mud-table-dense.mud-table-hover.mud-elevation-1 .mud-toolbar {
+    height: auto !important;
+    padding: 1rem
+}
+
+
+.mud-table.mud-data-grid.mud-xs-table.mud-table-dense.mud-table-hover.mud-elevation-1 .mud-toolbar-gutters {
+    height: auto !important;
+    padding: 1rem
+}
+
+.mud-table.mud-data-grid.mud-xs-table.mud-table-dense.mud-table-hover.mud-elevation-1 .mud-table-toolbar {
+    height: auto !important;
+    padding: 1rem
+}
+
+.mud-table.mud-data-grid.mud-xs-table.mud-table-dense.mud-table-hover.mud-elevation-1 .mud-table-pagination-toolbar {
+    height: auto !important;
+    padding: 0rem !important;
+}
