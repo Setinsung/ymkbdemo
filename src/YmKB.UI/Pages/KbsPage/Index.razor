@@ -1,6 +1,4 @@
 ﻿@page "/knowledgebases"
-@inject IKnowledgeBaseService KnowledgeBaseService
-@inject NavigationManager NavigationManager
 @code {
     private PaginatedResultOfKnowledgeDbDto _kbs = new();
     private string _searchString = "";
@@ -53,27 +51,27 @@
 
     private void CreateKnowledgeBase()
     {
-        NavigationManager.NavigateTo("/knowledgebases/create");
+        Navigation.NavigateTo("/knowledgebases/create");
     }
 
     private void ViewKnowledgeBase(string id)
     {
-        NavigationManager.NavigateTo($"/knowledgebases/{id}");
+        Navigation.NavigateTo($"/knowledgebases/{id}");
     }
 
     private void EditKnowledgeBase(string id)
     {
-        NavigationManager.NavigateTo($"/knowledgebases/{id}/edit");
+        Navigation.NavigateTo($"/knowledgebases/{id}/edit");
     }
 
-    private async Task DeleteKnowledgeBase(KnowledgeBase kb)
+    private async Task DeleteKnowledgeBase(string id)
     {
-        // var result = await KnowledgeBaseService.DeleteKnowledgeBaseAsync(kb.Id);
-        // if (result)
-        // {
-        //     knowledgeBases.Remove(kb);
-        //     StateHasChanged();
-        // }
+        await CommonDialogService.ShowConfirmationDialog("确认删除", "您确定要删除所选项目吗？", async () =>
+        {
+            await ApiClient.KnowledgeDbs.DeleteAsync(new DeleteKnowledgeDbCommand { Ids = [id] });
+            await LoadAllKbs();
+            Snackbar.Add("删除成功", Severity.Success);
+        });
     }
 
     private async Task PageChanged(int i)
@@ -108,14 +106,16 @@
     @foreach (var kb in _kbs.Items ?? [])
     {
         <MudItem xs="12" sm="6" md="4" lg="3">
-            <MudCard Class="card-hover-effect">
+            <MudCard Class="card-hover-effect overflow-hidden">
                 <MudCardHeader>
                     <CardHeaderContent>
                         <div class="d-flex align-start">
                             <MudIcon Class="mt-2" Icon="@Icons.Material.Outlined.Info" Size="Size.Large" Color="Color.Primary"/>
                             <div class="ml-4">
                                 <MudText Typo="Typo.h6">@kb.Name</MudText>
-                                <MudText Typo="Typo.body2">@kb.Description</MudText>
+                                <MudTooltip Text="@kb.Description">
+                                    <MudText Typo="Typo.body2" Class="truncate-text">@kb.Description</MudText>
+                                </MudTooltip>
                             </div>
                         </div>
                     </CardHeaderContent>
@@ -132,7 +132,7 @@
                 <MudCardActions Class="d-flex justify-end">
                     <MudButton OnClick="@(() => ViewKnowledgeBase(kb.Id))">查看</MudButton>
                     <MudButton OnClick="@(() => EditKnowledgeBase(kb.Id))">修改</MudButton>
-                    <MudButton Color="Color.Error">删除</MudButton>
+                    <MudButton Color="Color.Error" OnClick="()=>DeleteKnowledgeBase(kb.Id)">删除</MudButton>
                 </MudCardActions>
             </MudCard>
         </MudItem>
@@ -143,3 +143,11 @@
                    Count="@(_kbs.TotalPages ?? 0)"
                    SelectedChanged="PageChanged"/>
 </div>
+<style>
+    .truncate-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 110px;
+    }
+</style>

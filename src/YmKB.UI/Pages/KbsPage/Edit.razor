@@ -1,79 +1,133 @@
 @page "/knowledgebases/create"
 @page "/knowledgebases/{Id}/edit"
-@using YmKB.UI.Models
-@using YmKB.UI.Services
-@inject IKnowledgeBaseService KnowledgeBaseService
-@inject NavigationManager NavigationManager
-
-<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
-    <MudPaper Class="pa-4">
-        <MudForm @ref="form" @bind-IsValid="@success">
-            <MudText Typo="Typo.h5" Class="mb-4">@(Id == null ? "新增知识库" : "编辑知识库")</MudText>
-
-            <MudTextField @bind-Value="model.Name" Label="知识库名称" Required="true" RequiredError="知识库名称是必填项"/>
-            <MudTextField @bind-Value="model.Description" Label="描述" Class="mt-3"/>
-
-            <MudSelect T="string" Label="会话模型" @bind-Value="model.ConversationModel" Required="true" RequiredError="请选择会话模型" Class="mt-3">
-                <MudSelectItem Value="@("【OpenAI】deepseek-rt-清血版")">【OpenAI】deepseek-rt-清血版</MudSelectItem>
-            </MudSelect>
-
-            <MudSelect T="string" Label="向量模型" @bind-Value="model.EmbeddingModel" Required="true" RequiredError="请选择向量模型" Class="mt-3">
-                <MudSelectItem Value="@("【OpenAI】text-embedding-ada-002")">【OpenAI】text-embedding-ada-002</MudSelectItem>
-            </MudSelect>
-
-            <MudNumericField @bind-Value="model.SegmentTokens" Label="段落切片数(token)" Required="true" RequiredError="请输入段落切片数" Class="mt-3"/>
-            <MudNumericField @bind-Value="model.LineTokens" Label="行切片数(token)" Required="true" RequiredError="请输入行切片数" Class="mt-3"/>
-            <MudNumericField @bind-Value="model.OverlapTokens" Label="重叠部分(token)" Required="true" RequiredError="请输入重叠部分" Class="mt-3"/>
-
-            @* <MudSwitch @bind-Checked="model.EnableOcr" Label="是否开启OCR" Color="Color.Primary" Class="mt-3"/> *@
-
-            <MudStack Row="true" Class="mt-6">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit" Disabled="@(!success)">保存</MudButton>
-                <MudButton Variant="Variant.Outlined" OnClick="GoBack">返回</MudButton>
-            </MudStack>
-        </MudForm>
-    </MudPaper>
-</MudContainer>
-
 @code {
-    [Parameter]
-    public string? Id { get; set; }
+    [Parameter] public string? Id { get; set; }
 
-    private KnowledgeBase model = new();
-    private bool success;
+    private KnowledgeDbDto model = new();
+    private List<AIModelDto> _conversationModels = [];
+    private List<AIModelDto> _embeddingModels = [];
+    private bool _isValid;
     private MudForm form;
+    private bool _isUpdate;
 
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(Id))
         {
-            var kb = await KnowledgeBaseService.GetKnowledgeBaseAsync(Id);
-            if (kb != null)
-            {
-                model = kb;
-            }
+            model = await ApiClient.KnowledgeDbs[Id].GetAsync() ?? new();
+            _isUpdate = true;
         }
+
+        await LoadAllAIModels();
+    }
+
+    private async Task LoadAllAIModels()
+    {
+        _conversationModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsAIModelType2 = AIModelType2.Chat) ?? [];
+        _embeddingModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsAIModelType2 = AIModelType2.Embedding) ?? [];
     }
 
     private async Task Submit()
     {
-        await form.Validate();
-        if (form.IsValid)
+        if (_isUpdate)
         {
-            if (string.IsNullOrEmpty(Id))
+            await ApiClient.KnowledgeDbs.PutAsync(new UpdateKnowledgeDbCommand()
             {
-                await KnowledgeBaseService.CreateKnowledgeBaseAsync(model);
-            }
-            else
+                Id = model.Id,
+                Name = model.Name,
+                Description = model.Description,
+                ChatModelID = model.ChatModelID,
+                EmbeddingModelID = model.EmbeddingModelID,
+                MaxTokensPerParagraph = model.MaxTokensPerParagraph,
+                MaxTokensPerLine = model.MaxTokensPerLine,
+                OverlappingTokens = model.OverlappingTokens
+            });
+            Snackbar.Add("知识库修改成功", Severity.Success);
+            GoBack();
+        }
+        else
+        {
+            await ApiClient.KnowledgeDbs.PostAsync(new CreateKnowledgeDbCommand()
             {
-                await KnowledgeBaseService.UpdateKnowledgeBaseAsync(model);
-            }
-            NavigationManager.NavigateTo("/knowledgebases");
+                Name = model.Name,
+                Description = model.Description,
+                ChatModelID = model.ChatModelID,
+                EmbeddingModelID = model.EmbeddingModelID,
+                MaxTokensPerParagraph = model.MaxTokensPerParagraph,
+                MaxTokensPerLine = model.MaxTokensPerLine,
+                OverlappingTokens = model.OverlappingTokens
+            });
+            Snackbar.Add("知识库创建成功", Severity.Success);
+            GoBack();
         }
     }
 
     private void GoBack()
     {
-        NavigationManager.NavigateTo("/knowledgebases");
+        Navigation.NavigateTo("/knowledgebases");
     }
-} 
+
+}
+
+<MudText Typo="Typo.h5" Class="mb-4">@(Id == null ? "新增知识库" : "编辑知识库")</MudText>
+
+<MudContainer Class="mt-4">
+    <MudForm @ref="form" @bind-IsValid="@_isValid">
+        <MudGrid>
+            <MudItem xs="12" md="12">
+                <MudTextField @bind-Value="model.Name" Label="名称" Required="true" 
+                              Margin="Margin.Dense"
+                              RequiredError="名称是必填项" Variant="Variant.Outlined"/>
+            </MudItem>
+            <MudItem xs="12" md="12">
+                <MudTextField @bind-Value="model.Description" Label="描述" Class="mt-3" Variant="Variant.Outlined" Lines="3"/>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudSelect T="string" Label="会话模型" @bind-Value="model.ChatModelID" Required="true"
+                           RequiredError="请选择会话模型" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var item in _conversationModels)
+                    {
+                        <MudSelectItem Value="item.Id">
+                            【@(item.ModelDescription)】— @(item.ModelName)
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudSelect T="string" Label="向量模型" @bind-Value="model.EmbeddingModelID" Required="true"
+                           RequiredError="请选择向量模型" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var item in _embeddingModels)
+                    {
+                        <MudSelectItem Value="item.Id">
+                            【@(item.ModelDescription)】— @(item.ModelName)
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudNumericField @bind-Value="model.MaxTokensPerParagraph" Label="段落切片数" Required="true"
+                                 RequiredError="请输入段落切片数" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense"/>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudNumericField @bind-Value="model.MaxTokensPerLine" Label="行切片数" Required="true"
+                                 RequiredError="请输入行切片数" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense"/>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudNumericField @bind-Value="model.OverlappingTokens" Label="重叠部分" Required="true"
+                                 RequiredError="请输入重叠部分" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense"/>
+            </MudItem>
+        </MudGrid>
+        @* <MudSwitch @bind-Checked="model.EnableOcr" Label="是否开启OCR" Color="Color.Primary" Class="mt-3"/> *@
+        <MudStack Row="true" Class="mt-6 d-flex justify-end">
+            <MudButton Variant="Variant.Outlined" OnClick="GoBack">返回</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit" Disabled="@(!_isValid)">保存
+            </MudButton>
+        </MudStack>
+    </MudForm>
+</MudContainer>
+<style>
+    .aimodel-select-item .mud-list-item-text .mud-typography {
+        display: flex;
+        justify-content: space-between;
+    }
+</style>

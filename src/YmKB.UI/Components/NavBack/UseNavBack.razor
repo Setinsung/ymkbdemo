@@ -1,0 +1,88 @@
+﻿@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+@code {
+
+    /// <summary>
+    /// 当用户使用浏览器后退按钮导航时调用的函数。如果导航由组件处理，则返回 true。如果浏览器应处理导航，则返回 false。
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public required Func<bool> OnBack { get; set; }
+
+    /// <summary>
+    /// 当用户单击组件后退按钮（不是浏览器）时要调用的处理程序。
+    /// </summary>
+    [Parameter]
+    public Func<Task>? OnClickHandler { get; set; }
+
+    [Parameter]
+    public EventCallback<Func<Task>> OnClickHandlerChanged { get; set; }
+
+    private DotNetObjectReference<UseNavBack>? DotNetObject { get; set; }
+
+    [JSInvokable]
+    public bool HandlePopState()
+    {
+        return OnBack();
+    }
+
+    public async Task HandleOnClick()
+    {
+        var module = await _InputModuleTask;
+        // 调用 js 函数
+        await module.InvokeVoidAsync("handleUiBackButton");
+    }
+
+    private static bool _Mounted;
+
+    private const string JsFileLocation = "/js/useNavBack.js";
+
+    private Task<IJSObjectReference> _InputModuleTask = null!;
+    protected override void OnInitialized()
+    {
+        if (_Mounted)
+        {
+            throw new InvalidOperationException("You should not have more than one UseNavBack on a page.");
+        }
+
+        _Mounted = true;
+
+        _InputModuleTask = JSRuntime
+            .InvokeAsync<IJSObjectReference>(
+                "import",
+                JsFileLocation
+            )
+            .AsTask();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // 设置父组件要使用的 Handler
+            OnClickHandlerChanged.InvokeAsync(HandleOnClick);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var module = await _InputModuleTask;
+            DotNetObject = DotNetObjectReference.Create(this);
+            await module.InvokeVoidAsync("addPopStateListener", DotNetObject);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _Mounted = false;
+
+        var module = await _InputModuleTask;
+        await module.InvokeVoidAsync("removePopStateListener");
+        await module.DisposeAsync();
+
+        DotNetObject?.Dispose();
+    }
+}
