@@ -253,6 +253,21 @@
                         </MudTooltip>
                 </MudTd>
                 <MudTd DataLabel="文件大小">@FormatFileSize(context.Size!.Value)</MudTd>
+                
+                <MudTd DataLabel="文件大小">
+                    @if (context.Status == NullableOfQuantizationState.Loading)
+                    {   
+                        <MudChip T="string" Size="Size.Small" Color="Color.Info">@context.Status</MudChip>
+                    }
+                    else if (context.Status == NullableOfQuantizationState.Accomplish)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Success">@context.Status</MudChip>
+                    }
+                    else
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Error">@context.Status</MudChip>
+                    }
+                </MudTd>
                 <MudTd DataLabel="上传时间">@FormatDateTimeOst(context.Created!.Value)</MudTd>
                 <MudTd>
                     <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small"
