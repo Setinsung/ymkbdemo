@@ -14,6 +14,14 @@ namespace YMKB.UI.APIs.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
+        /// <summary>文件名称。</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? FileName { get; set; }
+#nullable restore
+#else
+        public string FileName { get; set; }
+#endif
         /// <summary>保存上传文件的路径。</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -57,6 +65,7 @@ namespace YMKB.UI.APIs.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
+                { "fileName", n => { FileName = n.GetStringValue(); } },
                 { "path", n => { Path = n.GetStringValue(); } },
                 { "size", n => { Size = n.GetLongValue(); } },
                 { "url", n => { Url = n.GetStringValue(); } },
@@ -69,6 +78,7 @@ namespace YMKB.UI.APIs.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
+            writer.WriteStringValue("fileName", FileName);
             writer.WriteStringValue("path", Path);
             writer.WriteLongValue("size", Size);
             writer.WriteStringValue("url", Url);

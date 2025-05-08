@@ -32,6 +32,8 @@ namespace YMKB.UI.APIs.Models
 #endif
         /// <summary>The segmentPattern property</summary>
         public global::YMKB.UI.APIs.Models.NullableOfSegmentPattern? SegmentPattern { get; set; }
+        /// <summary>The size property</summary>
+        public long? Size { get; set; }
         /// <summary>The tags property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -86,6 +88,7 @@ namespace YMKB.UI.APIs.Models
                 { "fileName", n => { FileName = n.GetStringValue(); } },
                 { "kbId", n => { KbId = n.GetStringValue(); } },
                 { "segmentPattern", n => { SegmentPattern = n.GetEnumValue<global::YMKB.UI.APIs.Models.NullableOfSegmentPattern>(); } },
+                { "size", n => { Size = n.GetLongValue(); } },
                 { "tags", n => { Tags = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
                 { "type", n => { Type = n.GetStringValue(); } },
                 { "url", n => { Url = n.GetStringValue(); } },
@@ -101,6 +104,7 @@ namespace YMKB.UI.APIs.Models
             writer.WriteStringValue("fileName", FileName);
             writer.WriteStringValue("kbId", KbId);
             writer.WriteEnumValue<global::YMKB.UI.APIs.Models.NullableOfSegmentPattern>("segmentPattern", SegmentPattern);
+            writer.WriteLongValue("size", Size);
             writer.WriteCollectionOfPrimitiveValues<string>("tags", Tags);
             writer.WriteStringValue("type", Type);
             writer.WriteStringValue("url", Url);
