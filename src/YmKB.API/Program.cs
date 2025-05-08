@@ -61,7 +61,9 @@ builder
     .Services
     .AddCors(options =>
     {
-        options.AddPolicy("all", cfg => cfg.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+        options.AddPolicy("all", cfg => cfg.WithOrigins("https://localhost:7179", "http://localhost:5128")
+            .SetIsOriginAllowed((host) => true) // this for using localhost address
+            .AllowAnyHeader().AllowAnyMethod());
     });
 builder.Services.Scan(scan => scan
     .FromAssemblyOf<Program>()
@@ -119,7 +121,7 @@ if (app.Environment.IsDevelopment())
 // app.UseHttpsRedirection();
 app.UseCors("all");
 app.UseAntiforgery();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapEndpointDefinitions();

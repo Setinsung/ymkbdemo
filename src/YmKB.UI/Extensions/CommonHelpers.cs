@@ -39,7 +39,7 @@ public static class CommonHelpers
     public static string CombinePathWithBaseUrl(string serviceBaseUrl, string localPath)
     {
         localPath = localPath.TrimStart('\\');
-        localPath = localPath.Replace('\\', '/');
+        localPath = localPath.Replace(@"\\", "/");
         serviceBaseUrl = serviceBaseUrl.TrimEnd('/');
         return $"{serviceBaseUrl}/{localPath}";
     }

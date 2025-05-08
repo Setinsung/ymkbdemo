@@ -183,78 +183,78 @@ public class FileUploadEndpointRegistrar : IEndpointRegistrar
                 "允许将多个具有可选裁剪选项的图像文件上传到服务器上的特定文件夹。"
             );
 
-        // group
-        //     .MapGet(
-        //         "/",
-        //         async Task<Results<FileStreamHttpResult, ValidationProblem, NotFound<string>>> (
-        //             [FromQuery] string path,
-        //             HttpContext context
-        //         ) =>
-        //         {
-        //             if (path.Contains("..") || path.StartsWith("/") || path.StartsWith("\\"))
-        //             {
-        //                 var validationProblem = TypedResults.ValidationProblem(
-        //                     new Dictionary<string, string[]>
-        //                     {
-        //                         { "path", ["Invalid file path."] }
-        //                     }
-        //                 );
-        //                 return validationProblem;
-        //             }
-        //
-        //             var baseDirectory = Path.GetFullPath(Directory.GetCurrentDirectory());
-        //             var filePath = Path.GetFullPath(Path.Combine(baseDirectory, path));
-        //             if (!filePath.StartsWith(baseDirectory))
-        //             {
-        //                 var validationProblem = TypedResults.ValidationProblem(
-        //                     new Dictionary<string, string[]>
-        //                     {
-        //                         { "path", ["Invalid file path."] }
-        //                     }
-        //                 );
-        //                 return validationProblem;
-        //             }
-        //             if (!File.Exists(filePath))
-        //             {
-        //                 return TypedResults.NotFound($"File '{filePath}' does not exist.");
-        //             }
-        //             FileStream fileStream;
-        //             try
-        //             {
-        //                 fileStream = new FileStream(
-        //                     filePath,
-        //                     FileMode.Open,
-        //                     FileAccess.Read,
-        //                     FileShare.Read,
-        //                     bufferSize: 4096,
-        //                     useAsync: true
-        //                 );
-        //             }
-        //             catch (Exception ex)
-        //             {
-        //                 var validationProblem = TypedResults.ValidationProblem(
-        //                     new Dictionary<string, string[]>
-        //                     {
-        //                         {
-        //                             "file",
-        //                             [
-        //                                 "An error occurred while accessing the file.",
-        //                                 ex.Message
-        //                             ]
-        //                         }
-        //                     }
-        //                 );
-        //                 return validationProblem;
-        //             }
-        //             var contentType = GetContentType(filePath);
-        //             var fileName = Path.GetFileName(filePath);
-        //             return TypedResults.File(fileStream, contentType, fileName);
-        //         }
-        //     )
-        //     .WithSummary("从服务器下载或预览文件")
-        //     .WithDescription(
-        //         "允许客户端通过指定文件夹和文件名来下载或预览文件。"
-        //     );
+        group
+            .MapGet(
+                "/",
+                async Task<Results<FileStreamHttpResult, ValidationProblem, NotFound<string>>> (
+                    [FromQuery] string path,
+                    HttpContext context
+                ) =>
+                {
+                    if (path.Contains("..") || path.StartsWith("/") || path.StartsWith("\\"))
+                    {
+                        var validationProblem = TypedResults.ValidationProblem(
+                            new Dictionary<string, string[]>
+                            {
+                                { "path", ["Invalid file path."] }
+                            }
+                        );
+                        return validationProblem;
+                    }
+        
+                    var baseDirectory = Path.GetFullPath(Directory.GetCurrentDirectory());
+                    var filePath = Path.GetFullPath(Path.Combine(baseDirectory, path));
+                    if (!filePath.StartsWith(baseDirectory))
+                    {
+                        var validationProblem = TypedResults.ValidationProblem(
+                            new Dictionary<string, string[]>
+                            {
+                                { "path", ["Invalid file path."] }
+                            }
+                        );
+                        return validationProblem;
+                    }
+                    if (!File.Exists(filePath))
+                    {
+                        return TypedResults.NotFound($"File '{filePath}' does not exist.");
+                    }
+                    FileStream fileStream;
+                    try
+                    {
+                        fileStream = new FileStream(
+                            filePath,
+                            FileMode.Open,
+                            FileAccess.Read,
+                            FileShare.Read,
+                            bufferSize: 4096,
+                            useAsync: true
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        var validationProblem = TypedResults.ValidationProblem(
+                            new Dictionary<string, string[]>
+                            {
+                                {
+                                    "file",
+                                    [
+                                        "An error occurred while accessing the file.",
+                                        ex.Message
+                                    ]
+                                }
+                            }
+                        );
+                        return validationProblem;
+                    }
+                    var contentType = GetContentType(filePath);
+                    var fileName = Path.GetFileName(filePath);
+                    return TypedResults.File(fileStream, contentType, fileName);
+                }
+            )
+            .WithSummary("从服务器下载或预览文件")
+            .WithDescription(
+                "允许客户端通过指定文件夹和文件名来下载或预览文件。"
+            );
 
         group
             .MapDelete(
