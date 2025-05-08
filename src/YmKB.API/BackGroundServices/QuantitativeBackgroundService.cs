@@ -1,8 +1,11 @@
 ﻿using System.Threading.Channels;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.KernelMemory;
 using Microsoft.KernelMemory.Handlers;
 using YmKB.Application.Contracts.Persistence;
+using YmKB.Application.Features.KnowledgeDbs.Queries;
+using YmKB.Application.Features.QuantizedLists.Commands;
 using YmKB.Domain.Entities;
 using YmKB.Infrastructure.Handlers;
 using YmKB.Infrastructure.Services;
@@ -52,12 +55,16 @@ public class QuantitativeBackgroundService : BackgroundService
         // 首次启动
         await LoadingKbDocFileAsync();
         
+        
         var tasks = new List<Task>();
         for (var i = 0; i < _maxTask; i++) tasks.Add(Task.Factory.StartNew(KbDocFileStartHandlerAsync, stoppingToken));
 
         await Task.WhenAll(tasks);
     }
 
+    /// <summary>
+    /// 首次启动时，加载量化失败且存在的文档
+    /// </summary>
     private async Task LoadingKbDocFileAsync()
     {
         using var asyncServiceScope = _serviceProvider.CreateScope();
@@ -87,11 +94,18 @@ public class QuantitativeBackgroundService : BackgroundService
         }
     }
     
+    /// <summary>
+    /// 向量化队列中添加文档
+    /// </summary>
+    /// <param name="kbDocFileId"></param>
     public static async Task AddKbDocFileAsync(string kbDocFileId)
     {
         await KbDocFileChannel.Writer.WriteAsync(kbDocFileId);
     }
     
+    /// <summary>
+    /// 循环消费队列
+    /// </summary>
     private async Task KbDocFileStartHandlerAsync()
     {
         using var asyncServiceScope = _serviceProvider.CreateScope();
@@ -114,12 +128,12 @@ public class QuantitativeBackgroundService : BackgroundService
     {
         var dbContext = service.GetRequiredService<IApplicationDbContext>();
         var aiKernelCreateService = service.GetRequiredService<AIKernelCreateService>();
+        var mediator = service.GetRequiredService<IMediator>();
 
         // 获取知识文档，关联的知识库，知识库配置的模型
         var kbDocFile = await dbContext.KbDocFiles.FirstOrDefaultAsync(e => e.Id == kbDocFileId);
         if(kbDocFile is null)
             throw new InvalidOperationException($"文档不存在：{kbDocFileId}");
-        var kbs = await dbContext.KnowledgeDbs.ToListAsync();
         var kb = await dbContext.KnowledgeDbs.SingleOrDefaultAsync(e => e.Id == kbDocFile.KbId);
         if(kb is null) 
             throw new InvalidOperationException($"知识库不存在：{kbDocFile.KbId}");
@@ -151,9 +165,11 @@ public class QuantitativeBackgroundService : BackgroundService
                 Remark = remark,
                 Status = QuantizedListState.Pending
             };
-            await dbContext.QuantizedLists.AddAsync(newQuantizedItem);
-            await dbContext.SaveChangesAsync();
-            qlId = newQuantizedItem.Id;
+
+            qlId = await mediator.Send(new CreateQuantizedListCommand(kb.Id, kbDocFile.Id, remark));
+            // await dbContext.QuantizedLists.AddAsync(newQuantizedItem);
+            // await dbContext.SaveChangesAsync();
+            // qlId = newQuantizedItem.Id;
         }
         
         
@@ -219,7 +235,6 @@ public class QuantitativeBackgroundService : BackgroundService
             await UpdateQuantizedListStatus(dbContext, qlId,
                 $"量化成功：{kbDocFile.FileName} {kbDocFile.Url} {kbDocFile.Id} {result}",
                 QuantizedListState.Success);
-            await dbContext.SaveChangesAsync();
         }
         catch (Exception e)
         {
