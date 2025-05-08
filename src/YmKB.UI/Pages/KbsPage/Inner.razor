@@ -1,4 +1,8 @@
 ﻿@page "/knowledgebases/{Id}"
+@using System.Text.Json
+@using Microsoft.Kiota.Abstractions
+@using MudBlazor.Extensions.Core
+@inject IDialogService DialogService
 
 @code {
     [Parameter] public string? Id { get; set; }
@@ -51,6 +55,95 @@
         public string Snippet { get; set; }
     }
 
+    private string[] _mimeTypes =
+    {
+        "application/zip*",
+        "application/x-zip*",
+        "application/x-compressed",
+        "application/x-rar-compressed",
+        "audio/*",
+        "application/pdf",
+        "application/xml",
+        "text/markdown",
+        "application/msword",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.*",
+        "image/*",
+        "text/*"
+    };
+
+    private async Task ShowUploadDialog()
+    {
+        var parameters = new DialogParameters
+        {
+            { nameof(MudExMessageDialog.Buttons), MudExDialogResultAction.OkCancel("Upload") },
+            { nameof(MudExMessageDialog.Icon), Icons.Material.Filled.FileUpload }
+        };
+        var res = await DialogService.ShowComponentInDialogAsync<MudExUploadEdit<UploadableFile>>("上传内容", "拖放文件或点击上传",
+            uploadEdit =>
+            {
+                uploadEdit.AllowAudioRecording = true;
+                uploadEdit.MinHeight = 250;
+                uploadEdit.AutoExtractArchive = true;
+                uploadEdit.DropZoneClickAction = DropZoneClickAction.UploadFile;
+                uploadEdit.MimeTypes = _mimeTypes;
+            }, parameters, options =>
+            {
+                options.Resizeable = true;
+                options.FullWidth = true;
+                options.MaxWidth = MaxWidth.Medium;
+                options.DialogAppearance = MudExAppearance.FromStyle(new
+                {
+                    Border = "2px solid",
+                    BorderColor = Color.Primary,
+                    BorderRadius = 8
+                });
+            });
+        // 上传
+        if (!res.DialogResult.Canceled && res.Component.UploadRequests.Any())
+        {
+            // todo上传后可以按钮变为加载
+            var antiforgeryToken = await ApiClient.FileManagement.AntiforgeryToken.GetAsync();
+            var request = new MultipartBody();
+            request.AddOrReplacePart("overwrite", "text/plain", "false");
+            request.AddOrReplacePart("folder", "text/plain", $"{DateTime.UtcNow.ToString("yyyyMMdd")}");
+
+            request.AddOrReplacePart($"{antiforgeryToken.HeaderName}", "text/plain", $"{antiforgeryToken.RequestToken}");
+            var i = 0;
+            var uploads = res.Component.UploadRequests;
+            Console.WriteLine(JsonSerializer.Serialize(uploads));
+            foreach (var upload in uploads)
+            {
+                var filename = upload.FileName;
+                var stream = new MemoryStream(upload.Data);
+                request.AddOrReplacePart($"files[{i++}]", "application/octet-stream", stream, filename);
+            }
+
+            var response = await ApiClient.FileManagement.Upload.PostAsync(request, q => q.Headers.Add($"{antiforgeryToken.HeaderName}", $"{antiforgeryToken.RequestToken}"));
+            if (response is not null && response.Any())
+            {
+                Snackbar.Add("文件上传成功", Severity.Success);
+                Console.WriteLine(JsonSerializer.Serialize(response));
+                await CreateKbDocFileAssociation(response);
+            }
+        }
+    }
+
+    private async Task CreateKbDocFileAssociation(List<FileUploadResponse> fileuploaded)
+    {
+        // 文件上传后，依次创建kbdocfile关联知识库
+        foreach (var file in fileuploaded)
+        {
+            await ApiClient.KbDocFiles.PostAsync(new CreateKbDocFileCommand()
+            {
+                KbId = Id,
+                FileName = file.FileName,
+                Size = file.Size,
+                Url = file.Url
+            });
+        }
+    }
+
 }
 
 <MudTabs @bind-ActivePanelIndex="_activeTab" Rounded="true" Class="kbs-tabs">
@@ -63,9 +156,11 @@
                 </MudTextField>
             </MudStack>
             <MudSpacer/>
-            <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Upload">文档上传
+            <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Upload"
+                    OnClick="ShowUploadDialog">文档上传
             </MudFab>
         </MudToolBar>
+
         <MudTable Items="@_docs" Hover="true" Bordered="true" Striped="true">
             <HeaderContent>
                 <MudTh>文件名</MudTh>
@@ -130,7 +225,7 @@
     </MudTabPanel>
 </MudTabs>
 <style>
-    .kbs-tabs .mud-tabs-tabbar{
+    .kbs-tabs .mud-tabs-tabbar {
         background-color: transparent;
     }
 </style>
