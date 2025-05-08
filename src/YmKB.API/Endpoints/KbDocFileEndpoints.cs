@@ -1,5 +1,6 @@
 ﻿using Mediator;
 using Microsoft.AspNetCore.Mvc;
+using YmKB.API.BackGroundServices;
 using YmKB.Application.Features.KbDocFiles.Commands;
 using YmKB.Application.Features.KbDocFiles.DTOs;
 using YmKB.Application.Features.KbDocFiles.Queries;
@@ -43,10 +44,11 @@ public class KbDocFileEndpoins(ILogger<KbDocFileEndpoins> logger) : IEndpointReg
 
         group
             .MapPost(
-                "/",
-                ([FromServices] IMediator mediator, [FromBody] CreateKbDocFileCommand command) =>
-                    mediator.Send(command)
-            )
+                "/", async ([FromServices] IMediator mediator, [FromBody] CreateKbDocFileCommand command) =>
+                {
+                    var res = await mediator.Send(command);
+                    await QuantitativeBackgroundService.AddKbDocFileAsync(res);
+                })
             .Produces<KbDocFileDto>(StatusCodes.Status201Created)
             .ProducesValidationProblem(StatusCodes.Status422UnprocessableEntity)
             .ProducesProblem(StatusCodes.Status400BadRequest)

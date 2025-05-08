@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
+using YmKB.API.BackGroundServices;
 using YmKB.API.Common;
 using YmKB.API.Endpoints;
 using YmKB.API.ExceptionHandlers;
@@ -14,6 +15,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.RegisterSerilog();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddHostedService<QuantitativeBackgroundService>();
+
+    
 builder
     .Services
     .AddProblemDetails(options =>

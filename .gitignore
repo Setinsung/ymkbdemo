@@ -42,6 +42,7 @@ bld/
 Generated\ Files/
 
 /src/YmKB.API/files/*
+/src/YmKB.API/tmp-memory-files/*
 
 # MSTest test Results
 [Tt]est[Rr]esult*/

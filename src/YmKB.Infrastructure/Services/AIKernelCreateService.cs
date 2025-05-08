@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Microsoft.KernelMemory;
 using Microsoft.KernelMemory.Configuration;
+using Microsoft.KernelMemory.DocumentStorage.DevTools;
 using Microsoft.SemanticKernel;
 using YmKB.Domain.Entities;
 using YmKB.Infrastructure.Configurations;
@@ -60,6 +61,7 @@ public class AIKernelCreateService
                 false,
                 new HttpClient(new OpenAICustomHttpClientHandler(embeddingModel.Endpoint))
             )
+            .WithSimpleFileStorage(SimpleFileStorageConfig.Persistent)
             .AddSingleton(new AIKernelCreateService(_optionsQdrantSettings))
             .Build<MemoryServerless>();
         return memoryServerless;
