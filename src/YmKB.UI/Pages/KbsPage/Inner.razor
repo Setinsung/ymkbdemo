@@ -152,8 +152,7 @@
     {
         if (!string.IsNullOrEmpty(url))
         {
-            await new ClipboardInterop(JS).CopyToClipboard(url);
-
+            await new ClipboardInterop(JS).CopyToClipboard(CombinePathWithBaseUrl(appSettings.ServiceBaseUrl, url));
         }
     }
 
@@ -170,7 +169,7 @@
     private async Task DownloadDocument(KbDocFileDto? file)
     {
         if (file is null) return;
-        await JS.InvokeVoidAsync("triggerFileDownload", file.FileName, file.Url);
+        await JS.InvokeVoidAsync("triggerFileDownload", file.FileName, CombinePathWithBaseUrl(appSettings.ServiceBaseUrl, file.Url!));
     }
     
     private async Task SearchOnEnter(KeyboardEventArgs e)

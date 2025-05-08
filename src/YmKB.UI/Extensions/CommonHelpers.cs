@@ -35,4 +35,12 @@ public static class CommonHelpers
         string customFormat = adjustedDateTime.ToString("yyyy-MM-dd HH:mm:ss");
         return customFormat;
     }
+    
+    public static string CombinePathWithBaseUrl(string serviceBaseUrl, string localPath)
+    {
+        localPath = localPath.TrimStart('\\');
+        localPath = localPath.Replace('\\', '/');
+        serviceBaseUrl = serviceBaseUrl.TrimEnd('/');
+        return $"{serviceBaseUrl}/{localPath}";
+    }
 }

@@ -23,6 +23,7 @@
 @using YMKB.UI.APIs.Models
 @using static YmKB.UI.Extensions.CommonHelpers
 @using MudBlazor.Extensions.Helper
+@using YmKB.UI.ConstantConfigs
 @using YmKB.UI.Services.JsInterops
 
 @inject ISnackbar Snackbar
@@ -30,4 +31,5 @@
 @inject ILogger<App> Logger
 @inject ICommonDialogService CommonDialogService
 @inject ApiClient ApiClient
+@inject AppSettings appSettings
 
