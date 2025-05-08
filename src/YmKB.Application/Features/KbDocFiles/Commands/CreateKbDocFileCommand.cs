@@ -12,6 +12,7 @@ public record CreateKbDocFileCommand(
     string KbId,
     string FileName,
     string Url,
+    long Size = 0,
     SegmentPattern? SegmentPattern = SegmentPattern.Subsection,
     string? Type = "file"
 ) : IFusionCacheRefreshRequest<string>, IRequiresValidation

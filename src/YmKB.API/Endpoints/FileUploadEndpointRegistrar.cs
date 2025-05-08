@@ -55,6 +55,7 @@ public class FileUploadEndpointRegistrar : IEndpointRegistrar
                     var requestHost = context.Request.Host.Value; // 'host:port'
                     foreach (var file in request.Files)
                     {
+                        // var uniqueFileName = $"{Guid.CreateVersion7().ToString()}_{file.FileName}";
                         var filestream = file.OpenReadStream();
                         var stream = new MemoryStream();
                         await filestream.CopyToAsync(stream);
@@ -74,6 +75,7 @@ public class FileUploadEndpointRegistrar : IEndpointRegistrar
                         response.Add(
                             new FileUploadResponse
                             {
+                                FileName = file.FileName,
                                 Path = result,
                                 Url = fileUrl,
                                 Size = size
@@ -85,6 +87,7 @@ public class FileUploadEndpointRegistrar : IEndpointRegistrar
             )
             .Accepts<FileUploadRequest>("multipart/form-data")
             .Produces<IEnumerable<FileUploadResponse>>()
+            .DisableAntiforgery()
             .WithMetadata(new ConsumesAttribute("multipart/form-data"))
             .WithSummary("将文件上传到服务器")
             .WithDescription("允许将多个文件上传到服务器上的特定文件夹。");
@@ -347,6 +350,12 @@ public class FileUploadEndpointRegistrar : IEndpointRegistrar
 
     public class FileUploadResponse
     {
+        /// <summary>
+        /// 文件名称。
+        /// </summary>
+        [Description("文件名称。")]
+        public string FileName { get; set; }
+        
         /// <summary>
         /// 用于访问上传文件的完整 URL。
         /// </summary>
