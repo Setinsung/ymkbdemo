@@ -15,11 +15,11 @@ public record KbDocFilesWithPaginationQuery(
     int PageSize = 9,
     string OrderBy = "Id",
     string SortDirection = "Descending"
-) : IFusionCacheRequest<PaginatedResult<KbDocFileDto>>
+) : IRequest<PaginatedResult<KbDocFileDto>>
 {
-    public string CacheKey =>
-        $"KbDocFileswithpagination_{Keywords}_{KbId}_{PageNumber}_{PageSize}_{OrderBy}_{SortDirection}";
-    public IEnumerable<string>? Tags => [ "KbDocFiles" ];
+    // public string CacheKey =>
+    //     $"KbDocFileswithpagination_{Keywords}_{KbId}_{PageNumber}_{PageSize}_{OrderBy}_{SortDirection}";
+    // public IEnumerable<string>? Tags => [ "KbDocFiles" ];
 }
 
 public class KbDocFilesWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper)

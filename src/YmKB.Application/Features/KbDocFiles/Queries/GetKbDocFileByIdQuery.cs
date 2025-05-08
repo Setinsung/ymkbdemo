@@ -7,11 +7,11 @@ using YmKB.Application.Features.KbDocFiles.DTOs;
 
 namespace YmKB.Application.Features.KbDocFiles.Queries;
 
-public record GetKbDocFileByIdQuery(string Id) : IFusionCacheRequest<KbDocFileDto?>
+public record GetKbDocFileByIdQuery(string Id) : IRequest<KbDocFileDto?>
 {
-    public string CacheKey => $"KbDocFile_{Id}";
-
-    public IEnumerable<string>? Tags => ["KbDocFiles"];
+    // public string CacheKey => $"KbDocFile_{Id}";
+    //
+    // public IEnumerable<string>? Tags => ["KbDocFiles"];
 }
 
 public class GetKbDocFileByIdQueryHandler(IApplicationDbContext dbContext, IMapper mapper)

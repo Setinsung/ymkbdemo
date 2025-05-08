@@ -14,10 +14,10 @@ public record UpdateKbDocFileCommand(
     string FileName,
     string Url,
     string Type,
-    string Size,
-    string DataCount,
+    long Size,
     QuantizationState Status,
-    SegmentPattern SegmentPattern
+    SegmentPattern SegmentPattern,
+    int? DataCount = null
 ) : IFusionCacheRefreshRequest<Unit>, IRequiresValidation
 {
     public IEnumerable<string>? Tags => [ "KbDocFiles" ];
