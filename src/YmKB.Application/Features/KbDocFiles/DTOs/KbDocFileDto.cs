@@ -13,5 +13,5 @@ public class KbDocFileDto
     public int? DataCount { get; set; }
     public QuantizationState? Status { get; set; }
     public SegmentPattern SegmentPattern { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public DateTime Created { get; set; }
 }

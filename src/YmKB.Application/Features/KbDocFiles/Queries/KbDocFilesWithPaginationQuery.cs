@@ -10,6 +10,7 @@ namespace YmKB.Application.Features.KbDocFiles.Queries;
 
 public record KbDocFilesWithPaginationQuery(
     string? Keywords,
+    string? KbId,
     int PageNumber = 0,
     int PageSize = 9,
     string OrderBy = "Id",
@@ -17,7 +18,7 @@ public record KbDocFilesWithPaginationQuery(
 ) : IFusionCacheRequest<PaginatedResult<KbDocFileDto>>
 {
     public string CacheKey =>
-        $"KbDocFileswithpagination_{Keywords}_{PageNumber}_{PageSize}_{OrderBy}_{SortDirection}";
+        $"KbDocFileswithpagination_{Keywords}_{KbId}_{PageNumber}_{PageSize}_{OrderBy}_{SortDirection}";
     public IEnumerable<string>? Tags => [ "KbDocFiles" ];
 }
 
@@ -31,6 +32,7 @@ public class KbDocFilesWithPaginationQueryHandler(IApplicationDbContext context,
     {
         var data = await context
             .KbDocFiles
+            .Where(e => request.KbId == null || e.KbId == request.KbId)
             .OrderBy(request.OrderBy, request.SortDirection) // Dynamic ordering
             .ProjectToPaginatedDataAsync(
                 condition: x =>
