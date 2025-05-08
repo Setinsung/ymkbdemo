@@ -1,0 +1,136 @@
+﻿@page "/knowledgebases/{Id}"
+
+@code {
+    [Parameter] public string? Id { get; set; }
+    private int _activeTab = 0;
+    private List<SearchResult> _searchResults = new();
+    private string _docSearchString = "";
+    private string _vectorSearchString = "";
+
+    private List<DocItem> _docs = new()
+    {
+        new DocItem { Name = "产品手册.pdf", UploadTime = DateTime.Now.AddDays(-2) },
+        new DocItem { Name = "技术白皮书.docx", UploadTime = DateTime.Now.AddDays(-1) },
+        new DocItem { Name = "FAQ.xlsx", UploadTime = DateTime.Now.AddHours(-5) }
+    };
+
+    private List<QuantTask> _quantTasks = new()
+    {
+        new QuantTask { Id = "Q20240501", FileName = "产品手册.pdf", Progress = 100, Status = "完成" },
+        new QuantTask { Id = "Q20240502", FileName = "技术白皮书.docx", Progress = 60, Status = "进行中" },
+        new QuantTask { Id = "Q20240503", FileName = "FAQ.xlsx", Progress = 30, Status = "进行中" }
+    };
+
+    private void OnSearch()
+    {
+        _searchResults = new List<SearchResult>
+        {
+            new SearchResult { FileName = "产品手册.pdf", Score = 0.92, Snippet = "本产品支持多种接入方式..." },
+            new SearchResult { FileName = "技术白皮书.docx", Score = 0.85, Snippet = "系统架构采用分布式设计..." }
+        };
+    }
+
+    public class DocItem
+    {
+        public string Name { get; set; }
+        public DateTime UploadTime { get; set; }
+    }
+
+    public class QuantTask
+    {
+        public string Id { get; set; }
+        public string FileName { get; set; }
+        public int Progress { get; set; }
+        public string Status { get; set; }
+    }
+
+    public class SearchResult
+    {
+        public string FileName { get; set; }
+        public double Score { get; set; }
+        public string Snippet { get; set; }
+    }
+
+}
+
+<MudTabs @bind-ActivePanelIndex="_activeTab" Rounded="true" Class="kbs-tabs">
+    <MudTabPanel Icon="@Icons.Material.Filled.DocumentScanner" Text="文档上传">
+        <MudToolBar>
+            <MudStack Row Spacing="1">
+                <MudTextField T="string"
+                              @bind-Value="_docSearchString" Adornment="Adornment.End" Immediate="true"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small">
+                </MudTextField>
+            </MudStack>
+            <MudSpacer/>
+            <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Upload">文档上传
+            </MudFab>
+        </MudToolBar>
+        <MudTable Items="@_docs" Hover="true" Bordered="true" Striped="true">
+            <HeaderContent>
+                <MudTh>文件名</MudTh>
+                <MudTh>上传时间</MudTh>
+                <MudTh>操作</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="文件名">@context.Name</MudTd>
+                <MudTd DataLabel="上传时间">@context.UploadTime.ToString("yyyy-MM-dd HH:mm")</MudTd>
+                <MudTd>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small">下载</MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudTabPanel>
+    <MudTabPanel Icon="@Icons.Material.Filled.Build" Text="量化队列">
+        <MudText Typo="Typo.h6" Class="mb-2">量化任务队列</MudText>
+        <MudTable Items="@_quantTasks" Hover="true" Bordered="true" Striped="true">
+            <HeaderContent>
+                <MudTh>任务ID</MudTh>
+                <MudTh>文件名</MudTh>
+                <MudTh>进度</MudTh>
+                <MudTh>状态</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="任务ID">@context.Id</MudTd>
+                <MudTd DataLabel="文件名">@context.FileName</MudTd>
+                <MudTd DataLabel="进度">
+                    <MudProgressLinear Value="@context.Progress" Color="Color.Info" Style="min-width:100px;"/>
+                </MudTd>
+                <MudTd DataLabel="状态">
+                    <MudChip T="string"
+                             Color="@(context.Status == "完成" ? Color.Success : Color.Warning)">@context.Status</MudChip>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudTabPanel>
+    <MudTabPanel Icon="@Icons.Material.Filled.ContentPasteSearch" Text="搜索测试">
+        <MudGrid>
+            <MudItem xs="12" sm="4">
+                <MudTextField @bind-Value="_vectorSearchString" Placeholder="请输入搜索内容..."
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true" Class="w-100 mb-2"/>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnSearch">搜索</MudButton>
+            </MudItem>
+            <MudItem xs="12" sm="8">
+                <MudText Typo="Typo.h6" Class="mb-2">搜索结果</MudText>
+                <MudTable Items="@_searchResults" Hover="true" Bordered="true" Striped="true">
+                    <HeaderContent>
+                        <MudTh>文件名</MudTh>
+                        <MudTh>相似度</MudTh>
+                        <MudTh>内容片段</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="文件名">@context.FileName</MudTd>
+                        <MudTd DataLabel="相似度">@context.Score.ToString("P1")</MudTd>
+                        <MudTd DataLabel="内容片段">@context.Snippet</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudItem>
+        </MudGrid>
+    </MudTabPanel>
+</MudTabs>
+<style>
+    .kbs-tabs .mud-tabs-tabbar{
+        background-color: transparent;
+    }
+</style>
