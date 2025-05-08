@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\YmKB.Application\YmKB.Application.csproj" />
+      <ProjectReference Include="..\YmKB.JSFunctionCall\YmKB.JSFunctionCall.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -51,9 +51,21 @@ public static class DependencyInjection
         services.AddDatabase(configuration);
         services.AddFusionCacheService();
         services.AddIdentityService(configuration);
+        services.AddAIService(configuration);
         return services;
     }
 
+    // 添加ai相关服务
+    private static IServiceCollection AddAIService(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
+    {
+        services.Configure<QdrantSettings>(configuration.GetSection("QdrantSettings"));
+        services.AddSingleton<AIKernelCreateService>();
+        return services;
+    }
+    
     private static IServiceCollection AddIdentityService(
         this IServiceCollection services,
         IConfiguration configuration

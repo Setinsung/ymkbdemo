@@ -2,23 +2,15 @@
 
 public class QdrantSettings
 {
+    
     /// <summary>
-    /// Qdrant 密钥
+    /// endpoint
     /// </summary>
-    public string WikiAPIKey { get; set; }
+    public string Endpoint { get; set; }
+    
+    /// <summary>
+    /// API Key
+    /// </summary>
+    public string? ApiKey { get; set; }
 
-    /// <summary>
-    /// QdrantPort
-    /// </summary>
-    public string QdrantPort { get; set; }
-
-    /// <summary>
-    /// Qdrant API Key
-    /// </summary>
-    public string QdrantAPIKey { get; set; }
-
-    /// <summary>
-    /// Qdrant Endpoint
-    /// </summary>
-    public string QdrantEndpoint { get; set; }
 }

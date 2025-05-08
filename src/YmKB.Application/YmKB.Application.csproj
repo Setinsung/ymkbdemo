@@ -12,6 +12,7 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.KernelMemory.Core" Version="0.98.250324.1" />
+      <PackageReference Include="Microsoft.KernelMemory.AI.OpenAI" Version="0.98.250324.1" />
       <PackageReference Include="Microsoft.KernelMemory.MemoryDb.Qdrant" Version="0.98.250324.1" />
       <PackageReference Include="Microsoft.KernelMemory.SemanticKernelPlugin" Version="0.98.250324.1" />
       <PackageReference Include="Microsoft.SemanticKernel" Version="1.46.0" />
