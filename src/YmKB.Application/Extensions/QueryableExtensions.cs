@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using YmKB.Application.Features.QuantizedLists.DTOs;
 using YmKB.Application.Models;
 using YmKB.Domain.Abstractions.Common;
 
@@ -81,7 +82,7 @@ public static class QueryableExtensions
         Func<T, TResult> mapperFunc,
         CancellationToken cancellationToken = default
     )
-        where T : class, IEntity
+        where T : class
     {
         if (condition != null)
         {
