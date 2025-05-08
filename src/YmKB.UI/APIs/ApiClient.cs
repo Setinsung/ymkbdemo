@@ -17,6 +17,7 @@ using YMKB.UI.APIs.KbApps;
 using YMKB.UI.APIs.KbDocFiles;
 using YMKB.UI.APIs.KnowledgeDbs;
 using YMKB.UI.APIs.Products;
+using YMKB.UI.APIs.QuantizedLists;
 using YMKB.UI.APIs.WeatherForecast;
 namespace YMKB.UI.APIs
 {
@@ -60,6 +61,11 @@ namespace YMKB.UI.APIs
         public global::YMKB.UI.APIs.Products.ProductsRequestBuilder Products
         {
             get => new global::YMKB.UI.APIs.Products.ProductsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The QuantizedLists property</summary>
+        public global::YMKB.UI.APIs.QuantizedLists.QuantizedListsRequestBuilder QuantizedLists
+        {
+            get => new global::YMKB.UI.APIs.QuantizedLists.QuantizedListsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The WeatherForecast property</summary>
         public global::YMKB.UI.APIs.WeatherForecast.WeatherForecastRequestBuilder WeatherForecast

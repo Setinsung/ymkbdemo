@@ -9,21 +9,11 @@ namespace YMKB.UI.APIs.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class UpdateKbDocFileCommand : IAdditionalDataHolder, IParsable
+    public partial class UpdateQuantizedListCommand : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The dataCount property</summary>
-        public int? DataCount { get; set; }
-        /// <summary>The fileName property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? FileName { get; set; }
-#nullable restore
-#else
-        public string FileName { get; set; }
-#endif
         /// <summary>The id property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -31,6 +21,14 @@ namespace YMKB.UI.APIs.Models
 #nullable restore
 #else
         public string Id { get; set; }
+#endif
+        /// <summary>The kbDocFileId property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? KbDocFileId { get; set; }
+#nullable restore
+#else
+        public string KbDocFileId { get; set; }
 #endif
         /// <summary>The kbId property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -40,12 +38,18 @@ namespace YMKB.UI.APIs.Models
 #else
         public string KbId { get; set; }
 #endif
-        /// <summary>The segmentPattern property</summary>
-        public global::YMKB.UI.APIs.Models.SegmentPattern? SegmentPattern { get; set; }
-        /// <summary>The size property</summary>
-        public long? Size { get; set; }
+        /// <summary>The processTime property</summary>
+        public DateTimeOffset? ProcessTime { get; set; }
+        /// <summary>The remark property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? Remark { get; set; }
+#nullable restore
+#else
+        public string Remark { get; set; }
+#endif
         /// <summary>The status property</summary>
-        public global::YMKB.UI.APIs.Models.QuantizationState? Status { get; set; }
+        public global::YMKB.UI.APIs.Models.QuantizedListState2? Status { get; set; }
         /// <summary>The tags property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -54,38 +58,23 @@ namespace YMKB.UI.APIs.Models
 #else
         public List<string> Tags { get; set; }
 #endif
-        /// <summary>The type property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? Type { get; set; }
-#nullable restore
-#else
-        public string Type { get; set; }
-#endif
-        /// <summary>The url property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? Url { get; set; }
-#nullable restore
-#else
-        public string Url { get; set; }
-#endif
         /// <summary>
-        /// Instantiates a new <see cref="global::YMKB.UI.APIs.Models.UpdateKbDocFileCommand"/> and sets the default values.
+        /// Instantiates a new <see cref="global::YMKB.UI.APIs.Models.UpdateQuantizedListCommand"/> and sets the default values.
         /// </summary>
-        public UpdateKbDocFileCommand()
+        public UpdateQuantizedListCommand()
         {
             AdditionalData = new Dictionary<string, object>();
+            Status = global::YMKB.UI.APIs.Models.QuantizedListState2.Pending;
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::YMKB.UI.APIs.Models.UpdateKbDocFileCommand"/></returns>
+        /// <returns>A <see cref="global::YMKB.UI.APIs.Models.UpdateQuantizedListCommand"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::YMKB.UI.APIs.Models.UpdateKbDocFileCommand CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::YMKB.UI.APIs.Models.UpdateQuantizedListCommand CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             _ = parseNode ?? throw new ArgumentNullException(nameof(parseNode));
-            return new global::YMKB.UI.APIs.Models.UpdateKbDocFileCommand();
+            return new global::YMKB.UI.APIs.Models.UpdateQuantizedListCommand();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -95,16 +84,13 @@ namespace YMKB.UI.APIs.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "dataCount", n => { DataCount = n.GetIntValue(); } },
-                { "fileName", n => { FileName = n.GetStringValue(); } },
                 { "id", n => { Id = n.GetStringValue(); } },
+                { "kbDocFileId", n => { KbDocFileId = n.GetStringValue(); } },
                 { "kbId", n => { KbId = n.GetStringValue(); } },
-                { "segmentPattern", n => { SegmentPattern = n.GetEnumValue<global::YMKB.UI.APIs.Models.SegmentPattern>(); } },
-                { "size", n => { Size = n.GetLongValue(); } },
-                { "status", n => { Status = n.GetEnumValue<global::YMKB.UI.APIs.Models.QuantizationState>(); } },
+                { "processTime", n => { ProcessTime = n.GetDateTimeOffsetValue(); } },
+                { "remark", n => { Remark = n.GetStringValue(); } },
+                { "status", n => { Status = n.GetEnumValue<global::YMKB.UI.APIs.Models.QuantizedListState2>(); } },
                 { "tags", n => { Tags = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
-                { "type", n => { Type = n.GetStringValue(); } },
-                { "url", n => { Url = n.GetStringValue(); } },
             };
         }
         /// <summary>
@@ -114,16 +100,13 @@ namespace YMKB.UI.APIs.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
-            writer.WriteIntValue("dataCount", DataCount);
-            writer.WriteStringValue("fileName", FileName);
             writer.WriteStringValue("id", Id);
+            writer.WriteStringValue("kbDocFileId", KbDocFileId);
             writer.WriteStringValue("kbId", KbId);
-            writer.WriteEnumValue<global::YMKB.UI.APIs.Models.SegmentPattern>("segmentPattern", SegmentPattern);
-            writer.WriteLongValue("size", Size);
-            writer.WriteEnumValue<global::YMKB.UI.APIs.Models.QuantizationState>("status", Status);
+            writer.WriteDateTimeOffsetValue("processTime", ProcessTime);
+            writer.WriteStringValue("remark", Remark);
+            writer.WriteEnumValue<global::YMKB.UI.APIs.Models.QuantizedListState2>("status", Status);
             writer.WriteCollectionOfPrimitiveValues<string>("tags", Tags);
-            writer.WriteStringValue("type", Type);
-            writer.WriteStringValue("url", Url);
             writer.WriteAdditionalData(AdditionalData);
         }
     }
