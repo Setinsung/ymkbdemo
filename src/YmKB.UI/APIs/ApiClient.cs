@@ -14,6 +14,7 @@ using YMKB.UI.APIs.AIModels;
 using YMKB.UI.APIs.Auth;
 using YMKB.UI.APIs.FileManagement;
 using YMKB.UI.APIs.KbApps;
+using YMKB.UI.APIs.KbDocFiles;
 using YMKB.UI.APIs.KnowledgeDbs;
 using YMKB.UI.APIs.Products;
 using YMKB.UI.APIs.WeatherForecast;
@@ -44,6 +45,11 @@ namespace YMKB.UI.APIs
         public global::YMKB.UI.APIs.KbApps.KbAppsRequestBuilder KbApps
         {
             get => new global::YMKB.UI.APIs.KbApps.KbAppsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The KbDocFiles property</summary>
+        public global::YMKB.UI.APIs.KbDocFiles.KbDocFilesRequestBuilder KbDocFiles
+        {
+            get => new global::YMKB.UI.APIs.KbDocFiles.KbDocFilesRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The KnowledgeDbs property</summary>
         public global::YMKB.UI.APIs.KnowledgeDbs.KnowledgeDbsRequestBuilder KnowledgeDbs
