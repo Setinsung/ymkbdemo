@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <Folder Include="APIs\" />
-    <Folder Include="Extensions\" />
   </ItemGroup>
 
 </Project>

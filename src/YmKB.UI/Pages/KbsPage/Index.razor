@@ -7,11 +7,6 @@
     private int pageSize = 12;
     private int totalCount = 0;
 
-    // private IEnumerable<KnowledgeBase> filteredKnowledgeBases => knowledgeBases
-    //     .Where(x => string.IsNullOrWhiteSpace(_searchString) ||
-    //                 x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
-    //                 x.Description.Contains(_searchString, StringComparison.OrdinalIgnoreCase));
-
     protected override async Task OnInitializedAsync()
     {
         await LoadAllKbs();
@@ -38,7 +33,8 @@
             Snackbar.Add("查询模型配置列表失败", Severity.Error);
             _loading = false;
             _kbs = new();
-        }    }
+        }
+    }
 
     private async Task SearchOnEnter(KeyboardEventArgs e)
     {
