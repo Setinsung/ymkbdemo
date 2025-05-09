@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFramework>net8.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<PackageId>ReallzeV.SemanticKernel.Plugins.Web.ShaBing</PackageId>
+	<Version>1.0.1-pre</Version>
+	<Description>这是一个基于PlayWright的Unofficial Bing Search API简单实现，用于SemanticKernel.Plugins.Web中测试使用。也可直接使用。</Description>
+	<PackageTags>AI;SemanticKernel;Bing;BingSearch</PackageTags>
+	<RepositoryUrl>https://github.com/reallzevirtual/ShaBingSearch</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<Authors>reallzevirtual</Authors>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<NoWarn>SKEXP0001,SKEXP0050</NoWarn>
+  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="AngleSharp" Version="1.2.0" />
+		<PackageReference Include="Microsoft.Playwright" Version="1.52.0" />
+		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Web" Version="1.49.0-alpha" />
+	</ItemGroup>
+
+</Project>

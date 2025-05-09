@@ -12,6 +12,7 @@
     <Project Path="src\YmKB.Domain.Entities\YmKB.Domain.Entities.csproj" Type="Classic C#" />
   </Folder>
   <Folder Name="/src/Infrastructure/">
+    <Project Path="src\Plugins.Web.ShaBing\Plugins.Web.ShaBing.csproj" Type="Classic C#" />
     <Project Path="src\YmKB.Infrastructure\YmKB.Infrastructure.csproj" Type="Classic C#" />
     <Project Path="src\YmKB.JSFunctionCall\YmKB.JSFunctionCall.csproj" Type="Classic C#" />
   </Folder>
