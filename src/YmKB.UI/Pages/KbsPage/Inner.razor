@@ -2,6 +2,7 @@
 @using System.Text.Json
 @using Microsoft.Kiota.Abstractions
 @using MudBlazor.Extensions.Core
+@using MudBlazor.Extensions.Options
 @using YmKB.UI.Services.JsInterops
 @inject IJSRuntime JS
 @inject IDialogService DialogService
@@ -11,22 +12,55 @@
 
     private Dictionary<string, string> _fileNameWithContentTypes = [];
     private int _activeTab;
+    private bool _isLoading;
     private PaginatedResultOfKbDocFileDto _kbDocs = new();
     private PaginatedResultOfQuantizedListDto _quantifyLists = new();
     private string _docSearchString = "";
     private string _quantifyListSearchString = "";
     private int _kbDoc_pageIndex = 1;
     private int _kbDoc_pageSize = 12;
-    
+
     private int _quantifyList_pageIndex = 1;
     private int _quantifyList_pageSize = 12;
-    
-    
+
     private string _vectorSearchString;
-    private List<SearchResult> _searchResults = [];
+    private SearchedVectorsDto? _searchedVectorsDto = null;
+    private double _minRelevance = 0;
+
 
     protected override async Task OnInitializedAsync()
     {
+        // _searchedVectorsDto = new SearchedVectorsDto(){Results = [new SearchVectorItem()
+        // {
+        //     Content = "这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容",
+        //     DocumentId = "awdawdadawdad",
+        //     Relevance = 0.71031314111,
+        //     FileName = "测试文件.docx"
+        // },new SearchVectorItem()
+        // {
+        //     Content = "这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容",
+        //     DocumentId = "awdawdadawdad",
+        //     Relevance = 0.71031314111,
+        //     FileName = "测试文件.docx"
+        // },new SearchVectorItem()
+        // {
+        //     Content = "这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容",
+        //     DocumentId = "awdawdadawdad",
+        //     Relevance = 0.71031314111,
+        //     FileName = "测试文件.docx"
+        // },new SearchVectorItem()
+        // {
+        //     Content = "这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容",
+        //     DocumentId = "awdawdadawdad",
+        //     Relevance = 0.71031314111,
+        //     FileName = "测试文件.docx"
+        // },new SearchVectorItem()
+        // {
+        //     Content = "这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容这是一个测试内容",
+        //     DocumentId = "awdawdadawdad",
+        //     Relevance = 0.71031314111,
+        //     FileName = "测试文件.docx"
+        // }]};
         await LoadKbDocs();
         await LoadQuantifyLists();
     }
@@ -58,13 +92,13 @@
         _kbDoc_pageIndex = i;
         await LoadKbDocs();
     }
-    
+
     private async Task QuantifyListPageChanged(int i)
     {
         _quantifyList_pageIndex = i;
         await LoadQuantifyLists();
     }
-    
+
 
     private string[] _mimeTypes =
     {
@@ -160,7 +194,7 @@
 
         await LoadKbDocs();
     }
-    
+
     private async Task CopyDocumentUrl(string? url)
     {
         if (!string.IsNullOrEmpty(url))
@@ -184,7 +218,7 @@
         if (file is null) return;
         await JS.InvokeVoidAsync("triggerFileDownload", file.FileName, CombinePathWithBaseUrl(appSettings.ServiceBaseUrl, file.Url!));
     }
-    
+
     private async Task KbDocsSearchOnEnter(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
@@ -192,7 +226,7 @@
             await LoadKbDocs();
         }
     }
-        
+
     private async Task LoadQuantifyLists()
     {
         try
@@ -214,7 +248,7 @@
             _kbDocs = new();
         }
     }
-    
+
     private async Task quantifyListSearchOnEnter(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
@@ -222,44 +256,65 @@
             await LoadQuantifyLists();
         }
     }
-    
-    
-
-    private List<QuantTask> _quantTasks = new()
-    {
-        new QuantTask { Id = "Q20240501", FileName = "产品手册.pdf", Progress = 100, Status = "完成" },
-        new QuantTask { Id = "Q20240502", FileName = "技术白皮书.docx", Progress = 60, Status = "进行中" },
-        new QuantTask { Id = "Q20240503", FileName = "FAQ.xlsx", Progress = 30, Status = "进行中" }
-    };
-
-    private void OnSearch()
-    {
-        _searchResults = new List<SearchResult>
-        {
-            new SearchResult { FileName = "产品手册.pdf", Score = 0.92, Snippet = "本产品支持多种接入方式..." },
-            new SearchResult { FileName = "技术白皮书.docx", Score = 0.85, Snippet = "系统架构采用分布式设计..." }
-        };
-    }
-
-    public class QuantTask
-    {
-        public string Id { get; set; }
-        public string FileName { get; set; }
-        public int Progress { get; set; }
-        public string Status { get; set; }
-    }
-
-    public class SearchResult
-    {
-        public string FileName { get; set; }
-        public double Score { get; set; }
-        public string Snippet { get; set; }
-    }
 
     private async Task Refresh()
     {
         await LoadKbDocs();
         await LoadQuantifyLists();
+    }
+
+    private async Task DeleteQuantizedList(string? id)
+    {
+        await CommonDialogService.ShowConfirmationDialog("确认删除", "您确定要删除所选项目吗？", async () =>
+        {
+            await ApiClient.QuantizedLists.DeleteAsync(new DeleteQuantizedListCommand() { Ids = [id!] });
+            await LoadQuantifyLists();
+            Snackbar.Add("删除成功", Severity.Success);
+        });
+    }
+
+    private async Task OnVectorSearchTest()
+    {
+        _isLoading = true;
+        try
+        {
+            _searchedVectorsDto = await ApiClient.KnowledgeDbs.SearchVectorTest.GetAsync(q =>
+            {
+                q.QueryParameters.KbId = Id;
+                q.QueryParameters.Search = _vectorSearchString;
+                q.QueryParameters.MinRelevance = _minRelevance;
+            });
+            Snackbar.Add($"查询成功，用时 {_searchedVectorsDto.ElapsedTime}mm", Severity.Success);
+            _isLoading = false;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "查询失败");
+            Snackbar.Add("查询失败", Severity.Error);
+            _searchedVectorsDto = null;
+            _isLoading = false;
+        }
+    }
+    
+    private async Task ShowContentDialog(string? content = "")
+    {
+        var options = new DialogOptionsEx()
+        {
+            MaximizeButton = true,
+            CloseButton = true,
+            FullHeight = true,
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Medium,
+            MaxHeight = MaxHeight.False,
+            FullWidth = true,
+            DragMode = MudDialogDragMode.Simple,
+            Animations = [AnimationType.SlideIn],
+            Position = DialogPosition.CenterRight,
+            DisableSizeMarginY = true,
+            DisablePositionMargin = true
+        };
+        await DialogService.ShowExAsync<ShowContentDialog>("", dialog => { dialog.ContentMessage = content; }, options);
+        
     }
 
 }
@@ -295,14 +350,14 @@
                     </MudStack>
                 </MudTd>
                 <MudTd DataLabel="文件类型">
-                        <MudTooltip Text="@context.Type">
-                            <ChildContent>
-                                <MudChip T="string" Size="Size.Small">@TruncateText(context.Type, 20)</MudChip>
-                            </ChildContent>
-                        </MudTooltip>
+                    <MudTooltip Text="@context.Type">
+                        <ChildContent>
+                            <MudChip T="string" Size="Size.Small">@TruncateText(context.Type, 20)</MudChip>
+                        </ChildContent>
+                    </MudTooltip>
                 </MudTd>
                 <MudTd DataLabel="文件大小">@FormatFileSize(context.Size!.Value)</MudTd>
-                
+
                 <MudTd DataLabel="文件大小">
                     @switch (context.Status)
                     {
@@ -338,13 +393,14 @@
         <MudToolBar Class="align-center">
             <MudStack Row Spacing="1">
                 <MudTextField T="string"
-                              @bind-Value="_quantifyListSearchString" Adornment="Adornment.End" @onkeypress="quantifyListSearchOnEnter"
+                              @bind-Value="_quantifyListSearchString" Adornment="Adornment.End"
+                              @onkeypress="quantifyListSearchOnEnter"
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small">
                 </MudTextField>
             </MudStack>
             <MudSpacer/>
             <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh"
-                    OnClick="Refresh">刷新
+                       OnClick="Refresh">刷新
             </MudButton>
         </MudToolBar>
         <MudTable Items="@_quantifyLists.Items" Hover="true">
@@ -356,6 +412,7 @@
                 <MudTh>备注</MudTh>
                 <MudTh>创建时间</MudTh>
                 <MudTh>完成时间</MudTh>
+                <MudTh></MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="文件名">@context.FileName</MudTd>
@@ -364,13 +421,16 @@
                     @switch (context.Status)
                     {
                         case QuantizedListState.Pending:
-                            <MudProgressLinear Value="100" Indeterminate="true" Color="Color.Info" Style="min-width:100px;"/>
+                            <MudProgressLinear Value="100" Indeterminate="true" Color="Color.Info"
+                                               Style="min-width:100px;"/>
                             break;
                         case QuantizedListState.Success:
-                            <MudProgressLinear Value="100" Indeterminate="false" Color="Color.Success" Style="min-width:100px;"/>
+                            <MudProgressLinear Value="100" Indeterminate="false" Color="Color.Success"
+                                               Style="min-width:100px;"/>
                             break;
                         default:
-                            <MudProgressLinear Value="100" Indeterminate="false" Color="Color.Error" Style="min-width:100px;"/>
+                            <MudProgressLinear Value="100" Indeterminate="false" Color="Color.Error"
+                                               Style="min-width:100px;"/>
                             break;
                     }
                 </MudTd>
@@ -395,8 +455,17 @@
                         </ChildContent>
                     </MudTooltip>
                 </MudTd>
-                <MudTd DataLabel="上传时间">@(context.Created != null ? FormatDateTimeOst(context.Created.Value) : "")</MudTd>
-                <MudTd DataLabel="完成时间">@(context.ProcessTime != null ? FormatDateTimeOst(context.ProcessTime.Value) : "")</MudTd>
+                <MudTd
+                    DataLabel="上传时间">@(context.Created != null ? FormatDateTimeOst(context.Created.Value) : "")</MudTd>
+                <MudTd
+                    DataLabel="完成时间">@(context.ProcessTime != null ? FormatDateTimeOst(context.ProcessTime.Value) : "")</MudTd>
+                <MudTd>
+                    @if (context.Status == QuantizedListState.Fail)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                       OnClick="@(() => DeleteQuantizedList(context.Id))"/>
+                    }
+                </MudTd>
             </RowTemplate>
         </MudTable>
         <div class="d-flex flex-column align-center mt-4">
@@ -406,30 +475,50 @@
         </div>
     </MudTabPanel>
     <MudTabPanel Icon="@Icons.Material.Filled.ContentPasteSearch" Text="搜索测试">
-        <MudGrid>
+        <MudGrid Class="mt-4">
             <MudItem xs="12" sm="6">
+                <MudSlider @bind-Value="_minRelevance" Min="0" Max="1" Step="0.01" Color="Color.Info">最小相似度: @_minRelevance</MudSlider>
                 <MudTextField @bind-Value="_vectorSearchString"
                               Label="请输入搜索内容..." Variant="Variant.Outlined"
                               Lines="5"
                               Adornment="Adornment.End"
                               AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true" Class="w-100 mb-2"/>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnSearch">搜索</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnVectorSearchTest">搜索</MudButton>
             </MudItem>
             <MudItem xs="12" sm="6">
-                <MudText Typo="Typo.h6" Class="mb-2">搜索结果</MudText>
-                <MudTable Items="@_searchResults" Hover="true" Bordered="true" Striped="true">
-                    <HeaderContent>
-                        <MudTh>文件名</MudTh>
-                        <MudTh>相似度</MudTh>
-                        <MudTh>内容片段</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd DataLabel="文件名">@context.FileName</MudTd>
-                        <MudTd DataLabel="相似度">@context.Score.ToString("P1")</MudTd>
-                        <MudTd DataLabel="内容片段">@context.Snippet</MudTd>
-                    </RowTemplate>
-                </MudTable>
+                @if (_searchedVectorsDto is not null)
+                {
+                    <MudGrid>
+                        @foreach (var result in _searchedVectorsDto.Results!)
+                        {
+                            <MudItem xs="12" sm="12">
+                                <MudCard Class="card-hover-effect mb-3">
+                                    <MudCardHeader>
+                                        <CardHeaderContent>
+                                            <div class="d-flex align-center justify-space-between">
+                                                <MudText Typo="Typo.subtitle2">@result.FileName</MudText>
+                                                <MudText Typo="Typo.subtitle2"><MudChip Size="Size.Small" T="double" Color="Color.Success" Variant="Variant.Outlined">相似度: @result.Relevance</MudChip></MudText>
+                                            </div>
+                                        </CardHeaderContent>
+                                    </MudCardHeader>
+                                    <MudCardContent>
+                                        <MudText>
+                                            @(TruncateText(result.Content, 100))
+                                        </MudText>
+                                    </MudCardContent>
+                                    <MudCardActions>
+                                        <MudButton Color="Color.Primary" Size="Size.Small" OnClick="@(()=>ShowContentDialog(result.Content))">查看详情</MudButton>
+                                    </MudCardActions>
+                                </MudCard>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                }else if (_isLoading)
+                {
+                    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+                }
             </MudItem>
+
         </MudGrid>
     </MudTabPanel>
 </MudTabs>
