@@ -93,7 +93,7 @@ namespace YMKB.UI.APIs.AIModels.Search
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         public partial class SearchRequestBuilderGetQueryParameters 
         {
-            [Obsolete("This property is deprecated, use AiModelTypeAsAIModelType2 instead")]
+            [Obsolete("This property is deprecated, use AiModelTypeAsGetAiModelTypeQueryParameterType instead")]
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
             [QueryParameter("aiModelType")]
@@ -104,7 +104,7 @@ namespace YMKB.UI.APIs.AIModels.Search
             public string AiModelType { get; set; }
 #endif
             [QueryParameter("aiModelType")]
-            public global::YMKB.UI.APIs.Models.AIModelType2? AiModelTypeAsAIModelType2 { get; set; }
+            public global::YMKB.UI.APIs.AIModels.Search.GetAiModelTypeQueryParameterType? AiModelTypeAsGetAiModelTypeQueryParameterType { get; set; }
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
             [QueryParameter("searchKeyword")]

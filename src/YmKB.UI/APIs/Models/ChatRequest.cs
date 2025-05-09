@@ -30,6 +30,8 @@ namespace YMKB.UI.APIs.Models
 #else
         public string ConversationId { get; set; }
 #endif
+        /// <summary>The isWebTextSearch property</summary>
+        public bool? IsWebTextSearch { get; set; }
         /// <summary>The message property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -65,6 +67,7 @@ namespace YMKB.UI.APIs.Models
             {
                 { "applicationId", n => { ApplicationId = n.GetStringValue(); } },
                 { "conversationId", n => { ConversationId = n.GetStringValue(); } },
+                { "isWebTextSearch", n => { IsWebTextSearch = n.GetBoolValue(); } },
                 { "message", n => { Message = n.GetStringValue(); } },
             };
         }
@@ -77,6 +80,7 @@ namespace YMKB.UI.APIs.Models
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("applicationId", ApplicationId);
             writer.WriteStringValue("conversationId", ConversationId);
+            writer.WriteBoolValue("isWebTextSearch", IsWebTextSearch);
             writer.WriteStringValue("message", Message);
             writer.WriteAdditionalData(AdditionalData);
         }
