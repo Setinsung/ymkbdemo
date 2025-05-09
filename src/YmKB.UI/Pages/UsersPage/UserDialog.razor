@@ -1,0 +1,88 @@
+@*@using CreateUserRequest = YMKB.UI.APIs.Models.CreateUserRequest
+@using YmKB.UI.APIs.Models
+@using UserResponse = YMKB.UI.APIs.Models.UserResponse
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="form" @bind-IsValid="success">
+            <MudTextField T="string" 
+                         Label="用户名"
+                         @bind-Value="User.UserName"
+                         Required="true"
+                         RequiredError="请输入用户名"
+                         Class="mb-3"/>
+
+            <MudTextField T="string" 
+                         Label="邮箱"
+                         @bind-Value="User.Email"
+                         Required="true"
+                         RequiredError="请输入邮箱"
+                         Class="mb-3"/>
+
+            @if (IsNewUser)
+            {
+                <MudTextField T="string" 
+                             Label="密码"
+                             @bind-Value="Password"
+                             Required="true"
+                             RequiredError="请输入密码"
+                             InputType="InputType.Password"
+                             Class="mb-3"/>
+            }
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">取消</MudButton>
+        <MudButton Color="Color.Primary" 
+                  OnClick="Submit" 
+                  Disabled="@(!success)">保存</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public CreateUserRequest User { get; set; }
+    [Parameter] public EventCallback<UserResponse> OnSave { get; set; }
+
+    private MudForm form;
+    private bool success;
+    private string Password { get; set; }
+    private bool IsNewUser => string.IsNullOrEmpty(User.Id);
+
+    private async Task Submit()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            try
+            {
+                UserResponse result;
+                if (IsNewUser)
+                {
+                    result = await ApiClient.User.CreateAsync(new CreateUserRequest
+                    {
+                        UserName = User.UserName,
+                        Email = User.Email,
+                        Password = Password
+                    });
+                }
+                else
+                {
+                    result = await ApiClient.User.UpdateAsync(User.Id, new UpdateUserRequest
+                    {
+                        Email = User.Email
+                    });
+                }
+
+                await OnSave.InvokeAsync(result);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add("保存失败：" + ex.Message, Severity.Error);
+            }
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+} *@

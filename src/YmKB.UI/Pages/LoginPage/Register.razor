@@ -1,0 +1,178 @@
+@layout LoginLayout
+@page "/Register"
+
+@code {
+    [Inject] private AuthenticationService AuthenticationService { get; set; }
+
+    private MudForm form;
+    private bool success;
+
+    private RegisterRequest model = new();
+    private string _confirmPassword;
+
+    private async Task HandleRegister()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            try
+            {
+                if (_confirmPassword != model.Password)
+                {
+                    _confirmPassword = "";
+                    model.Password = "";
+                    Snackbar.Add("两次输入密码不一致，请重新输入", Severity.Error);
+                }
+                var response = await ApiClient.User.Register.PostAsync(new RegisterRequest
+                {
+                    UserName = model.UserName,
+                    Password = model.Password,
+                    Email = model.Email
+                });
+
+                if (response != null)
+                {
+                    Snackbar.Add("注册成功，请登录", Severity.Success);
+                    Navigation.NavigateTo("/Login");
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add("注册失败：" + ex.Message, Severity.Error);
+            }
+        }
+    }
+}
+
+<div class="login-container">
+    <div class="login-box">
+        <MudImage Class="login-image-section" Src="/Logo_full_tpt.png">
+        </MudImage>
+
+        <div class="login-form-section">
+            <MudText Typo="Typo.h4" Class="mb-2">注册</MudText>            
+            <MudText Typo="Typo.subtitle1" Color="Color.Default" Class="mb-8">欢迎使用 YmKB 智能问答系统，<br/>请填写以下信息完成注册！
+            </MudText>
+
+            <MudForm @ref="form" bind-IsValid="success">
+                <MudTextField Label="用户名"
+                              @bind-Value="model.UserName"
+                              Required="true"
+                              HelperText=""
+                              RequiredError="请输入用户名"
+                              Variant="Variant.Outlined"
+                              Class="mb-4"/>
+
+                <PasswordInput Label="密码"
+                               @bind-Value="model.Password"
+                               Required="true"
+                               RequiredError="请输入密码"
+                               Variant="Variant.Outlined"
+                               Class="mb-4"/>
+                
+                <PasswordInput Label="确认密码"
+                               @bind-Value="_confirmPassword"
+                               Required="true"
+                               RequiredError="请确认密码"
+                               Variant="Variant.Outlined"
+                               Class="mb-4"/>
+
+                <MudButton Variant="Variant.Filled"
+                           FullWidth="true"
+                           OnClick="HandleRegister"
+                           Size="Size.Large"
+                           Class="login-button">登录
+                </MudButton>
+
+                <MudText Class="mt-4 text-center">
+                    已有账号？<MudLink Href="/Login" Color="Color.Primary">立即登录</MudLink>
+                </MudText>
+            </MudForm>
+        </div>
+    </div>
+</div>
+
+<style>
+    .login-container {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(-55deg, #a592bf 4%, #e6e4fc 25%, #ffffff 45%, #ffffff 60%, #e6e4fc 75%, #a592bf 97%);
+        background-size: 600% 600%;
+        animation: gradientBG 11s ease-in-out infinite;
+    }
+
+    .login-box {
+        display: flex;
+        background-color: transparent;
+        border-radius: 24px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        width: 1000px;
+        height: 600px;
+    }
+
+    .login-form-section {
+        flex: 1;
+        padding: 48px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .login-image-section {
+        flex: 1;
+        background-color: transparent;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    .login-button {
+        border-radius: 8px;
+        height: 48px;
+        font-size: 16px;
+        background: linear-gradient(45deg, #a592bf, #e6e4fc);
+        color: rgba(255,255,255,0.7);
+        transition: all 0.7s ease;
+    }
+
+    .login-button:hover {
+        background: linear-gradient(45deg, #8f7ba8, #d4d2f0);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(165, 146, 191, 0.3);
+    }
+    .password-input .mud-icon-button-label {
+        color: #a592bf;
+    }
+    .remember-me .mud-primary-text {
+        color: #a592bf !important;
+    }
+
+    @@media (max-width: 900px) {
+        .login-box {
+            flex-direction: column;
+            width: 90%;
+            height: auto;
+        }
+
+        .login-image-section {
+            display: none;
+        }
+    }
+
+    @@keyframes gradientBG {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+</style>

@@ -1,6 +1,186 @@
 ﻿@page "/users"
-<h3>users</h3>
+@using YmKB.UI.APIs.Models
+@using CreateUserRequest = YMKB.UI.APIs.Models.CreateUserRequest
+@using UserResponse = YMKB.UI.APIs.Models.UserResponse
+@attribute [Authorize(Roles = "Admin")]
+@inject IDialogService DialogService
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudPaper Class="pa-4">
+        <MudGrid>
+            <MudItem xs="12" Class="d-flex justify-space-between align-center mb-4">
+                <MudText Typo="Typo.h5">用户管理</MudText>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="@(() => OpenDialog())">
+                    添加用户
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+
+        <MudTable Items="@Users"
+                  Dense="true"
+                  Hover="true"
+                  Bordered="true"
+                  Striped="true"
+                  Loading="@_loading"
+                  LoadingProgressColor="Color.Primary">
+            <HeaderContent>
+                <MudTh>用户名</MudTh>
+                <MudTh>邮箱</MudTh>
+                <MudTh>角色</MudTh>
+                <MudTh>操作</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="用户名">@context.UserName</MudTd>
+                <MudTd DataLabel="邮箱">@context.Email</MudTd>
+                <MudTd DataLabel="角色">
+                    @foreach (var role in context.Roles)
+                    {
+                        <MudChip T="string" 
+                                 Color="Color.Primary"
+                                 Size="Size.Small"
+                                 Class="ma-1"
+                                 OnClose="@(() => RemoveRole(context.Id, role))">
+                            @role
+                        </MudChip>
+                    }
+                    <MudIconButton Icon="@Icons.Material.Filled.Add"
+                                   Size="Size.Small"
+                                   OnClick="@(() => OpenRoleDialog(context))"/>
+                </MudTd>
+                <MudTd DataLabel="操作">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   OnClick="@(() => OpenEditDialog(context))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   Size="Size.Small"
+                                   OnClick="@(() => DeleteUser(context.Id))"/>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
 
 @code {
-    
+    private List<UserResponse> Users { get; set; } = new();
+    private bool _loading = true;
+    private UserResponse _selectedUser;
+    private string _selectedRole;
+
+    private List<RoleResponse> _availableRoles = new()
+    {
+        new RoleResponse { Name = "Admin", IsSelected = false },
+        new RoleResponse { Name = "User", IsSelected = false }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            _loading = true;
+            Users = await ApiClient.User.GetAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("加载用户列表失败：" + ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OpenDialog()
+    {
+        var parameters = new DialogParameters
+        {
+            ["User"] = new CreateUserRequest(),
+            ["OnSave"] = new EventCallback<UserResponse>(this, async (UserResponse user) =>
+            {
+                await LoadUsers();
+                StateHasChanged();
+            })
+        };
+
+        var dialog = await DialogService.ShowAsync<UserDialog>("添加用户", parameters);
+        await dialog.Result;
+    }
+
+    private async Task OpenEditDialog(UserResponse user)
+    {
+        var parameters = new DialogParameters
+        {
+            ["User"] = new CreateUserRequest
+            {
+                UserName = user.UserName,
+                Email = user.Email
+            },
+            ["OnSave"] = new EventCallback<UserResponse>(this, async (UserResponse updatedUser) =>
+            {
+                await LoadUsers();
+                StateHasChanged();
+            })
+        };
+
+        var dialog = await DialogService.ShowAsync<UserDialog>("编辑用户", parameters);
+        await dialog.Result;
+    }
+
+    private async Task OpenRoleDialog(UserResponse user)
+    {
+        var roles = _availableRoles.Select(r => new RoleResponse
+        {
+            Name = r.Name,
+            IsSelected = user.Roles.Contains(r.Name)
+        }).ToList();
+
+        var parameters = new DialogParameters
+        {
+            ["UserId"] = user.Id,
+            ["UserName"] = user.UserName,
+            ["AvailableRoles"] = roles,
+            ["OnSave"] = new EventCallback(this, async () =>
+            {
+                await LoadUsers();
+                StateHasChanged();
+            })
+        };
+
+        var dialog = await DialogService.ShowAsync<RoleDialog>("分配角色", parameters);
+        await dialog.Result;
+    }
+
+    private async Task RemoveRole(string userId, string role)
+    {
+        try
+        {
+            await ApiClient.User[userId].Roles[role].DeleteAsync();
+            await LoadUsers();
+            Snackbar.Add("角色移除成功", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("角色移除失败：" + ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task DeleteUser(string userId)
+    {
+        await CommonDialogService.ShowConfirmationDialog("确认删除", "您确定要删除所选项目吗？", async () =>
+        {
+            await ApiClient.User[userId].DeleteAsync();
+            await LoadUsers();
+            Snackbar.Add("用户删除成功", Severity.Success);
+        });
+    }
+
 }

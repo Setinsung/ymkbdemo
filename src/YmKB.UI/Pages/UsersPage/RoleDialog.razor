@@ -1,0 +1,52 @@
+@using YmKB.UI.APIs.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudText Class="mb-4">为用户 @UserName 分配角色</MudText>
+        <MudList T="RoleResponse" Clickable="true">
+            @foreach (var role in AvailableRoles)
+            {
+                <MudListItem T="RoleResponse" Clickable="true">
+                    <MudCheckBox T="bool" 
+                                @bind-Checked="role.IsSelected"
+                                Label="@role.Name"
+                                Color="Color.Primary"/>
+                </MudListItem>
+            }
+        </MudList>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">取消</MudButton>
+        <MudButton Color="Color.Primary" 
+                  OnClick="Submit">保存</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public string UserId { get; set; }
+    [Parameter] public string UserName { get; set; }
+    [Parameter] public List<RoleResponse> AvailableRoles { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    private async Task Submit()
+    {
+        try
+        {
+            var selectedRoles = AvailableRoles
+                .Where(r => r.IsSelected)
+                .Select(r => r.Name)
+                .ToList();
+
+            await ApiClient.User[UserId].Roles[selectedRoles[0]].PostAsync();
+            await OnSave.InvokeAsync();
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("保存失败：" + ex.Message, Severity.Error);
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+} 
