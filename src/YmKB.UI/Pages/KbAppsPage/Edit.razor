@@ -12,6 +12,8 @@
     private MudForm form;
     private bool _isUpdate;
 
+    private string _kblist = "";
+
     // out form
     private double _relevance = 0.4;
     private double _temperature = 0.5;
@@ -22,6 +24,7 @@
         if (!string.IsNullOrEmpty(Id))
         {
             model = await ApiClient.KbApps[Id].GetAsync() ?? new();
+            _kblist = model.KbIdList ?? _kblist;
             _relevance = model.Relevance ?? _relevance;
             _temperature = model.Temperature ?? _temperature;
             _answerTokens = model.AnswerTokens ?? _answerTokens;
@@ -53,7 +56,7 @@
                 EmbeddingModelId = model.EmbeddingModelId,
                 Temperature = _temperature,
                 Prompt = model.Prompt,
-                KbIdList = model.KbIdList,
+                KbIdList = _kblist,
                 Relevance = _relevance,
                 AnswerTokens = model.AnswerTokens,
                 NoReplyFoundTemplate = model.NoReplyFoundTemplate,
@@ -111,9 +114,8 @@
                 </MudRadioGroup>
             </MudItem>
             <MudItem xs="12" md="8">
-                @if (model.KbAppType == KbAppType.KbChat)
-                {
-                    <MudSelect T="string" MultiSelection="true" Label="绑定知识库" @bind-Value="model.KbIdList"
+                    <MudText>@_kblist</MudText>
+                    <MudSelect T="string" MultiSelection="true" Label="绑定知识库" @bind-Value="_kblist"
                                RequiredError="请选择知识库" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense">
                         @foreach (var item in _knowledgeDbDtos)
                         {
@@ -122,7 +124,6 @@
                             </MudSelectItem>
                         }
                     </MudSelect>
-                }
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudSelect T="string" Label="会话模型" @bind-Value="model.ChatModelId" Required="true"
