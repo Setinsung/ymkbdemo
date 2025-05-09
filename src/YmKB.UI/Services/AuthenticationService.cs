@@ -1,13 +1,8 @@
-﻿using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.Kiota.Abstractions;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using YMKB.UI.APIs;
 using YMKB.UI.APIs.Models;
 using YmKB.UI.Providers;
 using YmKB.UI.Services.Contracts;
-using AuthResponse = YmKB.UI.Models.AuthResponse;
 
 namespace YmKB.UI.Services;
 

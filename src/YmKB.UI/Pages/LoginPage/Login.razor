@@ -1,6 +1,5 @@
 ﻿@layout LoginLayout
 @page "/Login"
-@using YMKB.UI.APIs.Models
 
 @code {
     [Inject] private AuthenticationService AuthenticationService { get; set; }
@@ -75,7 +74,7 @@
                                RequiredError="请输入密码"
                                Variant="Variant.Outlined"
                                Class="password-input"/>
-                <MudCheckBox T="bool" @bind-Value="model.RememberMe" Label="记住我" Color="Color.Primary" Class="mb-4 remember-me"/>
+                <MudCheckBox T="bool" @bind-Value="model.RememberMe" Label="记住我" Color="Color.Primary" Class="mb-1 remember-me"/>
 
                 <MudButton Variant="Variant.Filled"
                            FullWidth="true"
@@ -83,6 +82,10 @@
                            Size="Size.Large"
                            Class="login-button">登录
                 </MudButton>
+
+                <MudText Class="mt-4 text-center">
+                    还没有账号？<MudLink Href="/Register" Color="Color.Primary">立即注册</MudLink>
+                </MudText>
             </MudForm>
         </div>
     </div>
@@ -95,7 +98,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        /*background: linear-gradient(-55deg, #e73c7e3f 25%, #23a5d560 40%, #23d5ab2e 65%, #fff 75%);*/
         background: linear-gradient(-55deg, #a592bf 4%, #e6e4fc 25%, #ffffff 45%, #ffffff 60%, #e6e4fc 75%, #a592bf 97%);
         background-size: 600% 600%;
         animation: gradientBG 11s ease-in-out infinite;
@@ -132,10 +134,16 @@
         border-radius: 8px;
         height: 48px;
         font-size: 16px;
-        background-color: transparent;
+        background: linear-gradient(45deg, #a592bf, #e6e4fc);
+        animation: gradientBG 7s ease-in-out infinite;
+        color: rgba(255,255,255,0.7);
+        transition: all 0.7s ease;
     }
+    
     .login-button:hover {
-        background-color: transparent;
+        background: linear-gradient(45deg, #8f7ba8, #d4d2f0);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(165, 146, 191, 0.3);
     }
     .password-input .mud-icon-button-label {
         color: #a592bf;

@@ -32,12 +32,6 @@ public static class DependencyInjection
         var appSettings = configuration.GetSection(AppSettings.KEY).Get<AppSettings>();
         services.AddSingleton(appSettings!);
 
-        // business service
-        services.AddScoped<IKnowledgeBaseService, MockKnowledgeBaseService>();
-        services.AddScoped<IDocumentService, MockDocumentService>();
-        services.AddScoped<IApplicationService, MockApplicationService>();
-        services.AddScoped<IAIModelService, AIModelService>();
-
         // common service
         services.AddScoped<AuthenticationService>();
         services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
