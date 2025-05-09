@@ -10,5 +10,7 @@ public class ChatRequest
     [Required]
     public string Message { get; set; } = null!;
 
+    public bool IsWebTextSearch { get; set; }
+
     public string? ConversationId { get; set; }
 }

@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Data;
+using ReallzeV.SemanticKernel.Plugins.Web.ShaBing;
 using YmKB.API.Models;
 using YmKB.Application.Contracts;
 using YmKB.Application.Contracts.Persistence;
@@ -22,7 +25,6 @@ public class AIChatController : ControllerBase
     private readonly IApplicationDbContext _dbContext;
     private readonly IMediator _mediator;
     private static readonly Dictionary<string, ChatHistory> _chatHistories = new();
-
     public AIChatController(
         ILogger<AIChatController> logger,
         IAIKernelCreateService aiKernelCreateService,
@@ -49,6 +51,7 @@ public class AIChatController : ControllerBase
             {
                 return NotFound("应用不存在");
             }
+            
             // 获取模型信息
             var chatModel = await _dbContext
                 .AIModels
@@ -64,7 +67,18 @@ public class AIChatController : ControllerBase
 
             // 创建Semantic Kernel
             var kernel = _aiKernelCreateService.CreateFunctionKernel(chatModel);
-
+            OpenAIPromptExecutionSettings aiPromptExecutionSettings = new()
+            {
+                Temperature = application.Temperature,
+                MaxTokens = application.AnswerTokens
+            };
+            if (request.IsWebTextSearch)
+            {
+                var textSearch = new ShaBingTextSearch();
+                var searchPlugin = textSearch.CreateWithSearch("SearchPlugin");
+                kernel.Plugins.Add(searchPlugin);
+            }
+            
             // 获取或创建聊天历史
             var conversationId = request.ConversationId ?? Guid.NewGuid().ToString();
             if (!_chatHistories.TryGetValue(conversationId, out var chatHistory))
@@ -72,7 +86,7 @@ public class AIChatController : ControllerBase
                 chatHistory = new ChatHistory();
                 _chatHistories[conversationId] = chatHistory;
             }
-
+            
             // 知识库对话
             if (application.KbAppType is KbAppType.KbChat)
             {
@@ -103,6 +117,7 @@ public class AIChatController : ControllerBase
                 );
                 var prompt = string.IsNullOrEmpty(application.Prompt)
                     ? $@"你是一个知识库助手。请基于以下参考信息回答问题。如果参考信息不足以回答问题，请说明无法回答。
+                        无法回答时，如果允许联网查询，请说明无法回答但通过网络查询得到结果...
                 
                 参考信息：
                 {context}
@@ -118,8 +133,7 @@ public class AIChatController : ControllerBase
                 // 获取AI响应
                 var chatCompletion = kernel.GetRequiredService<IChatCompletionService>();
                 chatHistory.AddUserMessage(prompt);
-                var response = await chatCompletion.GetChatMessageContentAsync(chatHistory);
-
+                var response = await chatCompletion.GetChatMessageContentAsync(chatHistory, aiPromptExecutionSettings, kernel);
                 // 构建响应
                 var chatResponse = new ChatResponse
                 {
@@ -149,7 +163,7 @@ public class AIChatController : ControllerBase
                 // 添加用户消息到对话历史
                 chatHistory.AddUserMessage(request.Message);
                 // 直接调用AI模型获取回复，不使用知识库参考
-                var response = await chatCompletion.GetChatMessageContentAsync(chatHistory);
+                var response = await chatCompletion.GetChatMessageContentAsync(chatHistory, aiPromptExecutionSettings, kernel);
                 // 添加AI回复到对话历史
                 chatHistory.AddAssistantMessage(response.Content);
                 // 构建普通聊天响应（不包含知识库引用）
