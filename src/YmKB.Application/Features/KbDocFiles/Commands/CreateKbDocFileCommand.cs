@@ -28,11 +28,26 @@ public class CreateKbDocFileCommandHandler(IApplicationDbContext context, IMappe
         CancellationToken cancellationToken
     )
     {
-        var toCreate = mapper.Map<KbDocFile>(request);
-        toCreate.DataCount = 0;
-        toCreate.AddDomainEvent(new KbDocFileCreatedEvent(toCreate));
-        context.KbDocFiles.Add(toCreate);
-        await context.SaveChangesAsync(cancellationToken);
-        return toCreate.Id;
+        // 文件
+        if (request.Type != "web")
+        {
+            var toCreate = mapper.Map<KbDocFile>(request);
+            toCreate.DataCount = 0;
+            toCreate.AddDomainEvent(new KbDocFileCreatedEvent(toCreate));
+            context.KbDocFiles.Add(toCreate);
+            await context.SaveChangesAsync(cancellationToken);
+            return toCreate.Id;
+        }
+        // 网页链接
+        else
+        {
+            var toCreate = mapper.Map<KbDocFile>(request);
+            toCreate.DataCount = 0;
+            toCreate.AddDomainEvent(new KbDocFileCreatedEvent(toCreate));
+            context.KbDocFiles.Add(toCreate);
+            await context.SaveChangesAsync(cancellationToken);
+            return toCreate.Id;
+        }
+
     }
 }

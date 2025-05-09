@@ -16,7 +16,8 @@ public record DeleteKbDocFileCommand(params IEnumerable<string> Ids)
 
 public class DeleteKbDocFileCommandHandler(
     ILogger<DeleteKbDocFileCommandHandler> logger,
-    IApplicationDbContext dbContext
+    IApplicationDbContext dbContext,
+    IMediator mediator
 ) : IRequestHandler<DeleteKbDocFileCommand>
 {
     public async ValueTask<Unit> Handle(
@@ -31,8 +32,20 @@ public class DeleteKbDocFileCommandHandler(
             item.AddDomainEvent(new KbDocFileDeletedEvent(item));
             dbContext.KbDocFiles.Remove(item); // todo: executedelete
         }
-
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        // 删除后同时删除向量
+        try
+        {
+            foreach (var item in toDeletes)
+            {
+                await mediator.Send(new DeleteKbDocFileVectorCommand(item.Id));
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, $"删除{request.Ids}的文档时，同时删除向量失败");
+        }
 
         return Unit.Value;
     }

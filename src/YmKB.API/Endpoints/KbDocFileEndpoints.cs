@@ -131,6 +131,22 @@ public class KbDocFileEndpoins(ILogger<KbDocFileEndpoins> logger) : IEndpointReg
             .WithDescription("Deletes one or more KbDocFiles by their unique IDs.");
 
         group
+            .MapDelete(
+                "/vector",
+                (
+                    [FromServices] IMediator mediator,
+                    [FromBody] DeleteKbDocFileVectorCommand command
+                ) => mediator.Send(command)
+            )
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesValidationProblem(StatusCodes.Status422UnprocessableEntity)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .WithSummary("Delete KbDocFileVectors by DocumentId")
+            .WithDescription("Delete vector in vector database by DocumentId.");
+
+        group
             .MapPost(
                 "/pagination",
                 (
