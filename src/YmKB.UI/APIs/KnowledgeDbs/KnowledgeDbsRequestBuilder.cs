@@ -10,6 +10,7 @@ using System.Threading;
 using System;
 using YMKB.UI.APIs.KnowledgeDbs.Item;
 using YMKB.UI.APIs.KnowledgeDbs.Pagination;
+using YMKB.UI.APIs.KnowledgeDbs.SearchVectorTest;
 using YMKB.UI.APIs.Models;
 namespace YMKB.UI.APIs.KnowledgeDbs
 {
@@ -23,6 +24,11 @@ namespace YMKB.UI.APIs.KnowledgeDbs
         public global::YMKB.UI.APIs.KnowledgeDbs.Pagination.PaginationRequestBuilder Pagination
         {
             get => new global::YMKB.UI.APIs.KnowledgeDbs.Pagination.PaginationRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The SearchVectorTest property</summary>
+        public global::YMKB.UI.APIs.KnowledgeDbs.SearchVectorTest.SearchVectorTestRequestBuilder SearchVectorTest
+        {
+            get => new global::YMKB.UI.APIs.KnowledgeDbs.SearchVectorTest.SearchVectorTestRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>Gets an item from the YMKB.UI.APIs.KnowledgeDbs.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>
