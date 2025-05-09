@@ -157,7 +157,7 @@ public class AIKernelCreateService : IAIKernelCreateService
     {
         var kernel = Kernel
             .CreateBuilder()
-            .AddOpenAIChatCompletion(chatModel.ModelName, chatModel.ModelKey, chatModel.Endpoint)
+            .AddOpenAIChatCompletion(chatModel.ModelName, endpoint: new(chatModel.Endpoint) ,chatModel.ModelKey)
             .Build();
         return kernel;
     }

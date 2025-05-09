@@ -3,6 +3,7 @@ using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.KernelMemory;
 using Microsoft.KernelMemory.Handlers;
+using YmKB.Application.Contracts;
 using YmKB.Application.Contracts.Persistence;
 using YmKB.Application.Features.KnowledgeDbs.Queries;
 using YmKB.Application.Features.QuantizedLists.Commands;
@@ -127,7 +128,7 @@ public class QuantitativeBackgroundService : BackgroundService
     private async ValueTask HandlerAsync(string kbDocFileId, IServiceProvider service)
     {
         var dbContext = service.GetRequiredService<IApplicationDbContext>();
-        var aiKernelCreateService = service.GetRequiredService<AIKernelCreateService>();
+        var aiKernelCreateService = service.GetRequiredService<IAIKernelCreateService>();
         var mediator = service.GetRequiredService<IMediator>();
 
         // 获取知识文档，关联的知识库，知识库配置的模型

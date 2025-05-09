@@ -24,7 +24,6 @@
 
     <ItemGroup>
       <Folder Include="files\document\" />
-      <Folder Include="files\document\20250508\" />
     </ItemGroup>
 
 </Project>

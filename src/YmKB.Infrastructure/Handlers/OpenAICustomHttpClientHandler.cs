@@ -24,7 +24,7 @@ public partial class OpenAICustomHttpClientHandler : HttpClientHandler
     /// 使用指定的模型URL初始化<see cref="OpenAICustomHttpClientHandler"/>类的新实例。
     /// </summary>
     /// <param name="baseUrl">用于OpenAI或Azure OpenAI请求的基础URL。</param>
-    public OpenAICustomHttpClientHandler(string baseUrl, bool isLog = false)
+    public OpenAICustomHttpClientHandler(string baseUrl, bool isLog = true)
     {
         if (string.IsNullOrWhiteSpace(baseUrl))
             throw new ArgumentException("模型URL不能为空或空白。", nameof(baseUrl));
@@ -71,8 +71,8 @@ public partial class OpenAICustomHttpClientHandler : HttpClientHandler
             }
 
             // 将 POST 请求的内容读取为字符串
-            var requestBody = await request.Content.ReadAsStringAsync();
-            ConsoleWrite($"Request Body: {requestBody}");
+            // var requestBody = await request.Content.ReadAsStringAsync();
+            // ConsoleWrite($"Request Body: {requestBody}");
         }
 
         // 编码转换
@@ -85,8 +85,8 @@ public partial class OpenAICustomHttpClientHandler : HttpClientHandler
 
         HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
         // Read the content of the POST response as a string
-        var responseBody = await response.Content.ReadAsStringAsync();
-        ConsoleWrite($"Response Body: {responseBody}");
+        // var responseBody = await response.Content.ReadAsStringAsync();
+        // ConsoleWrite($"Response Body: {responseBody}");
         return response;
     }
 

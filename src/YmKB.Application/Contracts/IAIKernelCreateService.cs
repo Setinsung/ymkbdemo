@@ -7,7 +7,7 @@ namespace YmKB.Application.Contracts;
 public interface IAIKernelCreateService
 {
     /// <summary>
-    /// 创建可用于处理向量搜索的内存服务
+    /// 创建用于处理向量的内存服务
     /// </summary>
     /// <param name="searchClientConfig"></param>
     /// <param name="maxTokensPerParagraph"></param>
@@ -24,7 +24,7 @@ public interface IAIKernelCreateService
     );
 
     /// <summary>
-    /// 仅用于操作的内存服务，不用于向量搜索
+    /// 仅用于操作的内存服务，可用于单独向量搜索
     /// </summary>
     /// <returns></returns>
     MemoryServerless CreateMemoryServerless(AIModel chatModel, AIModel embeddingModel);
