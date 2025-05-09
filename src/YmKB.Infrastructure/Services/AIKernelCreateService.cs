@@ -4,6 +4,7 @@ using Microsoft.KernelMemory;
 using Microsoft.KernelMemory.Configuration;
 using Microsoft.KernelMemory.DocumentStorage.DevTools;
 using Microsoft.SemanticKernel;
+using YmKB.Application.Contracts;
 using YmKB.Domain.Entities;
 using YmKB.Infrastructure.Configurations;
 using YmKB.Infrastructure.Handlers;
@@ -14,7 +15,7 @@ namespace YmKB.Infrastructure.Services;
 /// <summary>
 /// AI内核创建服务
 /// </summary>
-public class AIKernelCreateService
+public class AIKernelCreateService : IAIKernelCreateService
 {
     private static readonly JsFunctionCallContext JsFunctionCallContext = new();
     private readonly QdrantSettings _qdrantSettings;
@@ -90,6 +91,7 @@ public class AIKernelCreateService
                 false,
                 new HttpClient(new OpenAICustomHttpClientHandler(embeddingModel.Endpoint))
             )
+            .WithSimpleFileStorage(SimpleFileStorageConfig.Persistent)
             .Build<MemoryServerless>();
 
         return memoryServerless;

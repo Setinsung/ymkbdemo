@@ -35,12 +35,28 @@ public class KnowledgeDbEndpoins(ILogger<KnowledgeDbEndpoins> logger) : IEndpoin
                 (IMediator mediator, [FromRoute] string id) =>
                     mediator.Send(new GetKnowledgeDbByIdQuery(id))
             )
-            .Produces<KnowledgeDbDto>(StatusCodes.Status200OK)
+            .Produces<KnowledgeDbDto>()
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
             .WithSummary("Get KnowledgeDb by ID")
             .WithDescription("Returns the details of a specific KnowledgeDb by its unique ID.");
+
+        group
+            .MapGet(
+                "/SearchVectorTest",
+                (
+                    [FromServices] IMediator mediator,
+                    string kbId,
+                    string search,
+                    double minRelevance = 0D
+                ) => mediator.Send(new SearchVectorTestQuery(kbId, search, minRelevance)))
+            .Produces<SearchedVectorsDto>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .WithSummary("Search test KnowledgeDbs by keywords")
+            .WithDescription("Returns a list of KnowledgeDbs matching the search keywords.");
 
         group
             .MapPost(

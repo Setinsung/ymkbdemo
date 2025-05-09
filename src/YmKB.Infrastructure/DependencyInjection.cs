@@ -62,7 +62,7 @@ public static class DependencyInjection
     )
     {
         services.Configure<QdrantSettings>(configuration.GetSection("QdrantSettings"));
-        services.AddSingleton<AIKernelCreateService>();
+        services.AddSingleton<IAIKernelCreateService, AIKernelCreateService>();
         return services;
     }
     
