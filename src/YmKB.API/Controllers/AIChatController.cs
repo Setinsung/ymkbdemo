@@ -45,12 +45,10 @@ public class AIChatController : ControllerBase
             var application = await _dbContext
                 .KbApps
                 .FirstOrDefaultAsync(a => a.Id == request.ApplicationId);
-
             if (application == null)
             {
                 return NotFound("应用不存在");
             }
-
             // 获取模型信息
             var chatModel = await _dbContext
                 .AIModels
@@ -64,9 +62,6 @@ public class AIChatController : ControllerBase
                 return BadRequest("模型配置错误");
             }
 
-            // 创建Kernel Memory服务
-            var memory = _aiKernelCreateService.CreateMemoryServerless(chatModel, embeddingModel);
-
             // 创建Semantic Kernel
             var kernel = _aiKernelCreateService.CreateFunctionKernel(chatModel);
 
@@ -78,63 +73,94 @@ public class AIChatController : ControllerBase
                 _chatHistories[conversationId] = chatHistory;
             }
 
-            // 解析知识库ID列表
-            var kbIds = application.KbIdList.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            var allSearchResults = new List<Citation>();
-
-            // 对每个知识库进行搜索
-            foreach (var kbId in kbIds)
+            // 知识库对话
+            if (application.KbAppType is KbAppType.KbChat)
             {
-                var searchResults = await memory.SearchAsync(
-                    request.Message,
-                    "kb",
-                    new MemoryFilter().ByTag("kbId", kbId),
-                    minRelevance: application.Relevance,
-                    limit: application.MaxMatchesCount
+                // 创建Kernel Memory服务
+                var memory = _aiKernelCreateService.CreateMemoryServerless(chatModel, embeddingModel);
+
+                // 解析知识库ID列表
+                var kbIds = application.KbIdList.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                var allSearchResults = new List<Citation>();
+
+                // 对每个知识库进行搜索
+                foreach (var kbId in kbIds)
+                {
+                    var searchResults = await memory.SearchAsync(
+                        request.Message,
+                        "kb",
+                        new MemoryFilter().ByTag("kbId", kbId),
+                        minRelevance: application.Relevance,
+                        limit: application.MaxMatchesCount
+                    );
+                    allSearchResults.AddRange(searchResults.Results);
+                }
+
+                // 构建提示词
+                var context = string.Join(
+                    "\n\n",
+                    allSearchResults.SelectMany(r => r.Partitions.Select(p => p.Text))
                 );
-                allSearchResults.AddRange(searchResults.Results);
+                var prompt = string.IsNullOrEmpty(application.Prompt)
+                    ? $@"你是一个知识库助手。请基于以下参考信息回答问题。如果参考信息不足以回答问题，请说明无法回答。
+                
+                参考信息：
+                {context}
+                
+                用户问题：{request.Message}
+                
+                请回答："
+                    : application
+                        .Prompt
+                        .Replace("{context}", context)
+                        .Replace("{question}", request.Message);
+
+                // 获取AI响应
+                var chatCompletion = kernel.GetRequiredService<IChatCompletionService>();
+                chatHistory.AddUserMessage(prompt);
+                var response = await chatCompletion.GetChatMessageContentAsync(chatHistory);
+
+                // 构建响应
+                var chatResponse = new ChatResponse
+                {
+                    Message = response.Content,
+                    ConversationId = conversationId,
+                    References = allSearchResults
+                        .SelectMany(
+                            r =>
+                                r.Partitions.Select(
+                                    p =>
+                                        new ChatReference
+                                        {
+                                            Content = p.Text,
+                                            Source = r.DocumentId
+                                        }
+                                )
+                        )
+                        .ToList()
+                };
+
+                return Ok(chatResponse);
             }
-
-            // 构建提示词
-            var context = string.Join(
-                "\n\n",
-                allSearchResults.SelectMany(r => r.Partitions.Select(p => p.Text))
-            );
-            var prompt = string.IsNullOrEmpty(application.Prompt)
-                ? $@"你是一个知识库助手。请基于以下参考信息回答问题。如果参考信息不足以回答问题，请说明无法回答。
-
-参考信息：
-{context}
-
-用户问题：{request.Message}
-
-请回答："
-                : application
-                    .Prompt
-                    .Replace("{context}", context)
-                    .Replace("{question}", request.Message);
-
-            // 获取AI响应
-            var chatCompletion = kernel.GetRequiredService<IChatCompletionService>();
-            chatHistory.AddUserMessage(prompt);
-            var response = await chatCompletion.GetChatMessageContentAsync(chatHistory);
-
-            // 构建响应
-            var chatResponse = new ChatResponse
+            else
             {
-                Message = response.Content,
-                ConversationId = conversationId,
-                References = allSearchResults
-                    .SelectMany(
-                        r =>
-                            r.Partitions.Select(
-                                p => new ChatReference { Content = p.Text, Source = r.DocumentId }
-                            )
-                    )
-                    .ToList()
-            };
-
-            return Ok(chatResponse);
+                // 一般聊天逻辑
+                var chatCompletion = kernel.GetRequiredService<IChatCompletionService>();
+                // 添加用户消息到对话历史
+                chatHistory.AddUserMessage(request.Message);
+                // 直接调用AI模型获取回复，不使用知识库参考
+                var response = await chatCompletion.GetChatMessageContentAsync(chatHistory);
+                // 添加AI回复到对话历史
+                chatHistory.AddAssistantMessage(response.Content);
+                // 构建普通聊天响应（不包含知识库引用）
+                var chatResponse = new ChatResponse
+                {
+                    Message = response.Content,
+                    ConversationId = conversationId,
+                    References = [] // 普通聊天没有知识库引用
+                };
+                return Ok(chatResponse);
+            }
         }
         catch (Exception ex)
         {
