@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System;
+using YMKB.UI.APIs.AIChat;
 using YMKB.UI.APIs.AIModels;
 using YMKB.UI.APIs.Auth;
 using YMKB.UI.APIs.FileManagement;
@@ -27,6 +28,11 @@ namespace YMKB.UI.APIs
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class ApiClient : BaseRequestBuilder
     {
+        /// <summary>The AIChat property</summary>
+        public global::YMKB.UI.APIs.AIChat.AIChatRequestBuilder AIChat
+        {
+            get => new global::YMKB.UI.APIs.AIChat.AIChatRequestBuilder(PathParameters, RequestAdapter);
+        }
         /// <summary>The AIModels property</summary>
         public global::YMKB.UI.APIs.AIModels.AIModelsRequestBuilder AIModels
         {

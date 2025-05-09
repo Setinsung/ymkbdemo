@@ -1,40 +1,33 @@
 ﻿@page "/chat"
-@inject ISnackbar Snackbar
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
-    <MudPaper Class="pa-4" Elevation="3">
-        <MudText Typo="Typo.h5" Class="mb-4">Chat</MudText>
-        
-        <MudPaper Class="pa-4" Style="height: 60vh; overflow-y: auto;" @ref="_chatContainer">
-            @foreach (var message in _messages)
-            {
-                <MudChat ChatPosition="@(message.IsUser ? ChatBubblePosition.End : ChatBubblePosition.Start)">
-                    <MudAvatar Color="@(message.IsUser ? Color.Primary : Color.Secondary)">
-                        @(message.IsUser ? "U" : "AI")
-                    </MudAvatar>
-                    <MudChatHeader Name="@(message.IsUser ? "用户" : "Assistant")" Time="@message.Time" />
-                    <MudChatBubble>
-                        @message.Text
-                    </MudChatBubble>
-                </MudChat>
-            }
-        </MudPaper>
 
-        <MudPaper Class="pa-4 mt-4">
-            <div class="d-flex align-center">
-                <MudTextField @bind-Value="_currentMessage" 
-                             Placeholder="输入消息..." 
-                             Class="flex-grow-1"
-                             Immediate="true" />
-                <MudIconButton Icon="@Icons.Material.Filled.Send" 
-                             Color="Color.Primary" 
-                             OnClick="SendMessage" 
-                             Disabled="@string.IsNullOrWhiteSpace(_currentMessage)"
-                             Class="ml-2" />
-            </div>
-        </MudPaper>
-    </MudPaper>
-</MudContainer>
+<MudText Typo="Typo.h5" Class="mb-4">问答</MudText>
+
+<MudPaper Class="pa-4" Style="height: 60vh; overflow-y: auto;" @ref="_chatContainer">
+    @foreach (var message in _messages)
+    {
+        <MudChat ChatPosition="@(message.IsUser ? ChatBubblePosition.End : ChatBubblePosition.Start)">
+            <MudAvatar Color="@(message.IsUser ? Color.Primary : Color.Secondary)">
+                @(message.IsUser ? "U" : "AI")
+            </MudAvatar>
+            <MudChatHeader Name="@(message.IsUser ? "用户" : "Assistant")" Time="@message.Time"/>
+            <MudChatBubble>
+                @message.Text
+            </MudChatBubble>
+        </MudChat>
+    }
+    <div class="d-flex align-center">
+        <MudTextField @bind-Value="_currentMessage"
+                      Placeholder="输入消息..."
+                      Class="flex-grow-1"
+                      Immediate="true"/>
+        <MudIconButton Icon="@Icons.Material.Filled.Send"
+                       Color="Color.Primary"
+                       OnClick="SendMessage"
+                       Disabled="@string.IsNullOrWhiteSpace(_currentMessage)"
+                       Class="ml-2"/>
+    </div>
+</MudPaper>
 
 @code {
     private List<ChatMessage> _messages = new();
@@ -58,9 +51,9 @@
             return;
 
         // 添加用户消息
-        _messages.Add(new ChatMessage 
-        { 
-            Text = _currentMessage, 
+        _messages.Add(new ChatMessage
+        {
+            Text = _currentMessage,
             IsUser = true,
             Time = DateTime.Now.AddHours(12).ToString("HH:mm")
         });
@@ -71,10 +64,10 @@
         // TODO: 这里添加与AI的交互逻辑
         // 模拟AI响应
         await Task.Delay(1000);
-        _messages.Add(new ChatMessage 
-        { 
+        _messages.Add(new ChatMessage
+        {
             // Text = $"我收到了你的消息：{userMessage}", 
-            Text = "你好！我是Assistant，有什么我可以帮你的吗？", 
+            Text = "你好！我是Assistant，有什么我可以帮你的吗？",
             IsUser = false,
             Time = DateTime.Now.AddHours(12).ToString("HH:mm")
         });
@@ -88,4 +81,5 @@
         public bool IsUser { get; set; }
         public string Time { get; set; }
     }
+
 }
