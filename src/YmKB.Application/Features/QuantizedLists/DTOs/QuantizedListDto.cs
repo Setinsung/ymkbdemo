@@ -15,4 +15,8 @@ public class QuantizedListDto
     public QuantizedListState Status { get; set; } = QuantizedListState.Pending;
 
     public string Remark { get; set; }
+    
+    public DateTime? Created { get; set; }
+    public DateTime? ProcessTime { get; set; }
+
 }

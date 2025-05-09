@@ -12,10 +12,15 @@
     private Dictionary<string, string> _fileNameWithContentTypes = [];
     private int _activeTab;
     private PaginatedResultOfKbDocFileDto _kbDocs = new();
+    private PaginatedResultOfQuantizedListDto _quantifyLists = new();
     private string _docSearchString = "";
-    private int pageIndex = 1;
-    private int pageSize = 12;
-    private int totalCount = 0;
+    private string _quantifyListSearchString = "";
+    private int _kbDoc_pageIndex = 1;
+    private int _kbDoc_pageSize = 12;
+    
+    private int _quantifyList_pageIndex = 1;
+    private int _quantifyList_pageSize = 12;
+    
     
     private string _vectorSearchString = "";
     private List<SearchResult> _searchResults = [];
@@ -23,6 +28,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadKbDocs();
+        await LoadQuantifyLists();
     }
 
     private async Task LoadKbDocs()
@@ -33,8 +39,8 @@
             {
                 KbId = Id,
                 Keywords = _docSearchString,
-                PageNumber = pageIndex - 1,
-                PageSize = pageSize,
+                PageNumber = _kbDoc_pageIndex - 1,
+                PageSize = _kbDoc_pageSize,
                 OrderBy = "Id"
             });
             _kbDocs = result;
@@ -47,11 +53,18 @@
         }
     }
 
-    private async Task PageChanged(int i)
+    private async Task KbDocPageChanged(int i)
     {
-        pageIndex = i;
+        _kbDoc_pageIndex = i;
         await LoadKbDocs();
     }
+    
+    private async Task QuantifyListPageChanged(int i)
+    {
+        _quantifyList_pageIndex = i;
+        await LoadQuantifyLists();
+    }
+    
 
     private string[] _mimeTypes =
     {
@@ -172,11 +185,41 @@
         await JS.InvokeVoidAsync("triggerFileDownload", file.FileName, CombinePathWithBaseUrl(appSettings.ServiceBaseUrl, file.Url!));
     }
     
-    private async Task SearchOnEnter(KeyboardEventArgs e)
+    private async Task KbDocsSearchOnEnter(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
             await LoadKbDocs();
+        }
+    }
+        
+    private async Task LoadQuantifyLists()
+    {
+        try
+        {
+            var result = await ApiClient.QuantizedLists.Pagination.PostAsync(new QuantizedListsWithPaginationQuery()
+            {
+                KbId = Id,
+                Keywords = _quantifyListSearchString,
+                PageNumber = _quantifyList_pageIndex - 1,
+                PageSize = _quantifyList_pageSize,
+                OrderBy = "Id"
+            });
+            _quantifyLists = result;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "查询失败");
+            Snackbar.Add("查询失败", Severity.Error);
+            _kbDocs = new();
+        }
+    }
+    
+    private async Task quantifyListSearchOnEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoadQuantifyLists();
         }
     }
     
@@ -213,6 +256,12 @@
         public string Snippet { get; set; }
     }
 
+    private async Task Refresh()
+    {
+        await LoadKbDocs();
+        await LoadQuantifyLists();
+    }
+
 }
 
 <MudTabs @bind-ActivePanelIndex="_activeTab" Rounded="true" Class="kbs-tabs">
@@ -220,7 +269,7 @@
         <MudToolBar Class="align-center">
             <MudStack Row Spacing="1">
                 <MudTextField T="string"
-                              @bind-Value="_docSearchString" Adornment="Adornment.End" @onkeypress="SearchOnEnter"
+                              @bind-Value="_docSearchString" Adornment="Adornment.End" @onkeypress="KbDocsSearchOnEnter"
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small">
                 </MudTextField>
             </MudStack>
@@ -255,17 +304,17 @@
                 <MudTd DataLabel="文件大小">@FormatFileSize(context.Size!.Value)</MudTd>
                 
                 <MudTd DataLabel="文件大小">
-                    @if (context.Status == NullableOfQuantizationState.Loading)
-                    {   
-                        <MudChip T="string" Size="Size.Small" Color="Color.Info">@context.Status</MudChip>
-                    }
-                    else if (context.Status == NullableOfQuantizationState.Accomplish)
+                    @switch (context.Status)
                     {
-                        <MudChip T="string" Size="Size.Small" Color="Color.Success">@context.Status</MudChip>
-                    }
-                    else
-                    {
-                        <MudChip T="string" Size="Size.Small" Color="Color.Error">@context.Status</MudChip>
+                        case NullableOfQuantizationState.Loading:
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info">@context.Status</MudChip>
+                            break;
+                        case NullableOfQuantizationState.Accomplish:
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">@context.Status</MudChip>
+                            break;
+                        default:
+                            <MudChip T="string" Size="Size.Small" Color="Color.Error">@context.Status</MudChip>
+                            break;
                     }
                 </MudTd>
                 <MudTd DataLabel="上传时间">@FormatDateTimeOst(context.Created!.Value)</MudTd>
@@ -282,30 +331,79 @@
         <div class="d-flex flex-column align-center mt-4">
             <MudPagination ShowFirstButton="true" ShowLastButton="true" Class="mt-4"
                            Count="@(_kbDocs.TotalPages ?? 0)"
-                           SelectedChanged="PageChanged"/>
+                           SelectedChanged="KbDocPageChanged"/>
         </div>
     </MudTabPanel>
     <MudTabPanel Icon="@Icons.Material.Filled.Build" Text="量化队列">
-        <MudText Typo="Typo.h6" Class="mb-2">量化任务队列</MudText>
-        <MudTable Items="@_quantTasks" Hover="true" Bordered="true" Striped="true">
+        <MudToolBar Class="align-center">
+            <MudStack Row Spacing="1">
+                <MudTextField T="string"
+                              @bind-Value="_quantifyListSearchString" Adornment="Adornment.End" @onkeypress="quantifyListSearchOnEnter"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small">
+                </MudTextField>
+            </MudStack>
+            <MudSpacer/>
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh"
+                    OnClick="Refresh">刷新
+            </MudButton>
+        </MudToolBar>
+        <MudTable Items="@_quantifyLists.Items" Hover="true">
             <HeaderContent>
-                <MudTh>任务ID</MudTh>
                 <MudTh>文件名</MudTh>
+                <MudTh>任务Id</MudTh>
                 <MudTh>进度</MudTh>
                 <MudTh>状态</MudTh>
+                <MudTh>备注</MudTh>
+                <MudTh>创建时间</MudTh>
+                <MudTh>完成时间</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="任务ID">@context.Id</MudTd>
                 <MudTd DataLabel="文件名">@context.FileName</MudTd>
+                <MudTd DataLabel="任务Id">@context.Id</MudTd>
                 <MudTd DataLabel="进度">
-                    <MudProgressLinear Value="@context.Progress" Color="Color.Info" Style="min-width:100px;"/>
+                    @switch (context.Status)
+                    {
+                        case QuantizedListState.Pending:
+                            <MudProgressLinear Value="100" Indeterminate="true" Color="Color.Info" Style="min-width:100px;"/>
+                            break;
+                        case QuantizedListState.Success:
+                            <MudProgressLinear Value="100" Indeterminate="false" Color="Color.Success" Style="min-width:100px;"/>
+                            break;
+                        default:
+                            <MudProgressLinear Value="100" Indeterminate="false" Color="Color.Error" Style="min-width:100px;"/>
+                            break;
+                    }
                 </MudTd>
                 <MudTd DataLabel="状态">
-                    <MudChip T="string"
-                             Color="@(context.Status == "完成" ? Color.Success : Color.Warning)">@context.Status</MudChip>
+                    @switch (context.Status)
+                    {
+                        case QuantizedListState.Pending:
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info">@context.Status</MudChip>
+                            break;
+                        case QuantizedListState.Success:
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">@context.Status</MudChip>
+                            break;
+                        default:
+                            <MudChip T="string" Size="Size.Small" Color="Color.Error">@context.Status</MudChip>
+                            break;
+                    }
                 </MudTd>
+                <MudTd DataLabel="备注">
+                    <MudTooltip Text="@context.Remark">
+                        <ChildContent>
+                            @TruncateText(context.Remark, 40)
+                        </ChildContent>
+                    </MudTooltip>
+                </MudTd>
+                <MudTd DataLabel="上传时间">@(context.Created != null ? FormatDateTimeOst(context.Created.Value) : "")</MudTd>
+                <MudTd DataLabel="完成时间">@(context.ProcessTime != null ? FormatDateTimeOst(context.ProcessTime.Value) : "")</MudTd>
             </RowTemplate>
         </MudTable>
+        <div class="d-flex flex-column align-center mt-4">
+            <MudPagination ShowFirstButton="true" ShowLastButton="true" Class="mt-4"
+                           Count="@(_quantifyLists.TotalPages ?? 0)"
+                           SelectedChanged="QuantifyListPageChanged"/>
+        </div>
     </MudTabPanel>
     <MudTabPanel Icon="@Icons.Material.Filled.ContentPasteSearch" Text="搜索测试">
         <MudGrid>

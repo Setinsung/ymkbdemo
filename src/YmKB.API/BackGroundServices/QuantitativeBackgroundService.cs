@@ -259,7 +259,7 @@ public class QuantitativeBackgroundService : BackgroundService
         return dbContext.QuantizedLists.Where(e => e.Id == id).ExecuteUpdateAsync(e => e
            .SetProperty(x => x.Status, status)
            .SetProperty(x => x.Remark, remark)
-           .SetProperty(x => x.ProcessTime, DateTime.Now)
+           .SetProperty(x => x.ProcessTime, DateTime.UtcNow)
         );  
     }
 

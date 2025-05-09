@@ -14,6 +14,8 @@ namespace YMKB.UI.APIs.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
+        /// <summary>The created property</summary>
+        public DateTimeOffset? Created { get; set; }
         /// <summary>The fileName property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -46,6 +48,8 @@ namespace YMKB.UI.APIs.Models
 #else
         public string KbId { get; set; }
 #endif
+        /// <summary>The processTime property</summary>
+        public DateTimeOffset? ProcessTime { get; set; }
         /// <summary>The remark property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -81,10 +85,12 @@ namespace YMKB.UI.APIs.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
+                { "created", n => { Created = n.GetDateTimeOffsetValue(); } },
                 { "fileName", n => { FileName = n.GetStringValue(); } },
                 { "id", n => { Id = n.GetStringValue(); } },
                 { "kbDocFileId", n => { KbDocFileId = n.GetStringValue(); } },
                 { "kbId", n => { KbId = n.GetStringValue(); } },
+                { "processTime", n => { ProcessTime = n.GetDateTimeOffsetValue(); } },
                 { "remark", n => { Remark = n.GetStringValue(); } },
                 { "status", n => { Status = n.GetEnumValue<global::YMKB.UI.APIs.Models.QuantizedListState>(); } },
             };
@@ -96,10 +102,12 @@ namespace YMKB.UI.APIs.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
+            writer.WriteDateTimeOffsetValue("created", Created);
             writer.WriteStringValue("fileName", FileName);
             writer.WriteStringValue("id", Id);
             writer.WriteStringValue("kbDocFileId", KbDocFileId);
             writer.WriteStringValue("kbId", KbId);
+            writer.WriteDateTimeOffsetValue("processTime", ProcessTime);
             writer.WriteStringValue("remark", Remark);
             writer.WriteEnumValue<global::YMKB.UI.APIs.Models.QuantizedListState>("status", Status);
             writer.WriteAdditionalData(AdditionalData);

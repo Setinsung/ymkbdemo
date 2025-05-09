@@ -40,7 +40,9 @@ public class QuantizedListsWithPaginationQueryHandler(IApplicationDbContext cont
                 FileName = context.KbDocFiles.FirstOrDefault(y => y.Id == x.KbDocFileId).FileName?? "",
                 KbDocFileId = x.KbDocFileId,
                 Status = x.Status,
-                Remark = x.Remark
+                Remark = x.Remark,
+                Created = x.Created,
+                ProcessTime = x.ProcessTime
             })
             .OrderBy(request.OrderBy, request.SortDirection)
             .ProjectToPaginatedDataAsync(
