@@ -1,85 +1,214 @@
 ﻿@page "/chat"
-
-
-<MudText Typo="Typo.h5" Class="mb-4">问答</MudText>
-
-<MudPaper Class="pa-4" Style="height: 60vh; overflow-y: auto;" @ref="_chatContainer">
-    @foreach (var message in _messages)
-    {
-        <MudChat ChatPosition="@(message.IsUser ? ChatBubblePosition.End : ChatBubblePosition.Start)">
-            <MudAvatar Color="@(message.IsUser ? Color.Primary : Color.Secondary)">
-                @(message.IsUser ? "U" : "AI")
-            </MudAvatar>
-            <MudChatHeader Name="@(message.IsUser ? "用户" : "Assistant")" Time="@message.Time"/>
-            <MudChatBubble>
-                @message.Text
-            </MudChatBubble>
-        </MudChat>
-    }
-    <div class="d-flex align-center">
-        <MudTextField @bind-Value="_currentMessage"
-                      Placeholder="输入消息..."
-                      Class="flex-grow-1"
-                      Immediate="true"/>
-        <MudIconButton Icon="@Icons.Material.Filled.Send"
-                       Color="Color.Primary"
-                       OnClick="SendMessage"
-                       Disabled="@string.IsNullOrWhiteSpace(_currentMessage)"
-                       Class="ml-2"/>
-    </div>
-</MudPaper>
+@page "/chat/{AppId}"
 
 @code {
-    private List<ChatMessage> _messages = new();
-    private string _currentMessage = "";
-    private MudPaper _chatContainer;
+    [Parameter] public string? AppId { get; set; }
 
-    protected override void OnInitialized()
+    private string _searchString = "";
+    private List<KbAppDto> _apps = new();
+    private KbAppDto? _selectedApp;
+    private string _messageInput = "";
+    private bool _isLoading;
+    private string? _conversationId;
+    private List<ChatMessage> _messages = new();
+    private List<ChatReference>? _currentReferences;
+
+    private List<KbAppDto> _filteredApps => _apps
+        .Where(x => string.IsNullOrWhiteSpace(_searchString) ||
+                    x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    protected override async Task OnInitializedAsync()
     {
-        // 添加欢迎消息
-        // _messages.Add(new ChatMessage 
-        // { 
-        //     Text = "你好！我是Assistant，有什么我可以帮你的吗？", 
-        //     IsUser = false,
-        //     Time = DateTime.Now.AddHours(12).ToString("HH:mm")
-        // });
+        await LoadApps();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(AppId) && _apps.Any())
+        {
+            var app = _apps.FirstOrDefault(a => a.Id == AppId);
+            if (app != null)
+            {
+                SelectApp(app);
+            }
+        }
+    }
+
+    private async Task LoadApps()
+    {
+        try
+        {
+            _apps = await ApiClient.KbApps.GetAsync();
+
+            // 如果URL中有AppId参数，加载完应用列表后自动选择对应应用
+            if (!string.IsNullOrEmpty(AppId))
+            {
+                var app = _apps.FirstOrDefault(a => a.Id == AppId);
+                if (app != null)
+                {
+                    SelectApp(app);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "加载应用列表失败");
+            Snackbar.Add("加载应用列表失败", Severity.Error);
+        }
+    }
+
+    private void SelectApp(KbAppDto app)
+    {
+        _selectedApp = app;
+        _messages.Clear();
+        _conversationId = null;
+        _currentReferences = null;
+
+        // 更新URL，但不触发页面重新加载
+        var uri = Navigation.GetUriWithQueryParameter("appId", app.Id);
+        Navigation.NavigateTo(uri, false);
     }
 
     private async Task SendMessage()
     {
-        if (string.IsNullOrWhiteSpace(_currentMessage))
+        if (string.IsNullOrWhiteSpace(_messageInput) || _selectedApp == null || _isLoading)
             return;
 
-        // 添加用户消息
-        _messages.Add(new ChatMessage
+        var userMessage = _messageInput;
+        _messageInput = "";
+        _messages.Add(new ChatMessage { Content = userMessage, IsUser = true });
+        _isLoading = true;
+
+        try
         {
-            Text = _currentMessage,
-            IsUser = true,
-            Time = DateTime.Now.AddHours(12).ToString("HH:mm")
-        });
+            var response = await ApiClient.AIChat.Chat.PostAsync(new ChatRequest
+            {
+                ApplicationId = _selectedApp.Id,
+                Message = userMessage,
+                ConversationId = _conversationId
+            });
 
-        var userMessage = _currentMessage;
-        _currentMessage = "";
-
-        // TODO: 这里添加与AI的交互逻辑
-        // 模拟AI响应
-        await Task.Delay(1000);
-        _messages.Add(new ChatMessage
+            if (response != null)
+            {
+                _conversationId = response.ConversationId;
+                _messages.Add(new ChatMessage { Content = response.Message, IsUser = false });
+                _currentReferences = response.References;
+            }
+        }
+        catch (Exception ex)
         {
-            // Text = $"我收到了你的消息：{userMessage}", 
-            Text = "你好！我是Assistant，有什么我可以帮你的吗？",
-            IsUser = false,
-            Time = DateTime.Now.AddHours(12).ToString("HH:mm")
-        });
+            Logger.LogError(ex, "发送消息失败");
+            Snackbar.Add("发送消息失败", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
 
-        StateHasChanged();
+    private async Task SearchOnEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SendMessage();
+        }
     }
 
     private class ChatMessage
     {
-        public string Text { get; set; }
+        public string Content { get; set; } = "";
         public bool IsUser { get; set; }
-        public string Time { get; set; }
     }
 
 }
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
+    <MudGrid>
+        <!-- 左侧应用列表 -->
+        <MudItem xs="12" sm="2">
+            <MudTextField @bind-Value="_searchString" Placeholder="搜索应用" Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-4"/>
+
+            <MudList T="string">
+                @foreach (var app in _filteredApps)
+                {
+                    <MudListItem Text="@app.Name"
+                                 Icon="@Icons.Material.Filled.Chat"
+                                 OnClick="@(() => SelectApp(app))"
+                                 Class="@(_selectedApp?.Id == app.Id ? "mud-selected-item" : "")"/>
+                }
+            </MudList>
+        </MudItem>
+
+        <!-- 中间聊天区域 -->
+        <MudItem xs="12" sm="7">
+            <MudPaper Class="pa-4" Style="height: calc(100vh - 100px); display: flex; flex-direction: column;">
+                @if (_selectedApp == null)
+                {
+                    <MudText Typo="Typo.h6" Class="mud-text-secondary" Style="text-align: center; margin-top: 40vh;">
+                        请从左侧选择一个应用开始对话
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h6" Class="mb-4">@_selectedApp.Name</MudText>
+
+                    <!-- 聊天消息列表 -->
+                    <MudPaper Class="flex-grow-1 pa-4 mb-4" Style="overflow-y: auto;">
+                        @foreach (var message in _messages)
+                        {
+                            <MudChat
+                                ChatPosition="@(message.IsUser ? ChatBubblePosition.End : ChatBubblePosition.Start)">
+                                <MudChatBubble>
+                                    @message.Content
+                                </MudChatBubble>
+                            </MudChat>
+                        }
+                        @if (_isLoading)
+                        {
+                            <MudChat ChatPosition="@ChatBubblePosition.Start">
+                                <MudChatBubble>
+                                    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+                                </MudChatBubble>
+                            </MudChat>
+                        }
+                    </MudPaper>
+
+                    <!-- 输入区域 -->
+                    <MudPaper Class="pa-4">
+                        <MudTextField @bind-Value="_messageInput"
+                                      Placeholder="输入消息..."
+                                      Variant="Variant.Outlined"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@Icons.Material.Filled.Send"
+                                      OnKeyDown="@SearchOnEnter"
+                                      Disabled="@_isLoading"/>
+                    </MudPaper>
+                }
+            </MudPaper>
+        </MudItem>
+
+        <!-- 右侧检索信息 -->
+        <MudItem xs="12" sm="3">
+            <MudText Typo="Typo.h6" Class="mb-4">检索信息</MudText>
+            @if (_currentReferences?.Any() == true)
+            {
+                @foreach (var reference in _currentReferences)
+                {
+                    <MudExpansionPanels>
+                        <MudExpansionPanel Text="@reference.Source">
+                            <MudText>@reference.Content</MudText>
+                        </MudExpansionPanel>
+                    </MudExpansionPanels>
+                }
+            }
+            else
+            {
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    暂无检索信息
+                </MudText>
+            }
+        </MudItem>
+    </MudGrid>
+</MudContainer>
