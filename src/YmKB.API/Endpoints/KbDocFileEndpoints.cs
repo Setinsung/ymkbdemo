@@ -43,6 +43,24 @@ public class KbDocFileEndpoins(ILogger<KbDocFileEndpoins> logger) : IEndpointReg
             .WithDescription("Returns the details of a specific KbDocFile by its unique ID.");
 
         group
+            .MapGet(
+                "/KbDocFileVectors",
+                (
+                    [FromServices] IMediator mediator,
+                    string kbDocFileId,
+                    int pageNumber,
+                    int pageSize
+                ) => mediator.Send(new KbDocFileVectorsQuery(kbDocFileId, pageNumber, pageSize)))
+            .Produces<KbDocFileVectorDto>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+           .WithSummary("Get KbDocFileVectors by KbDocFileId")
+           .WithDescription("Returns the details of a specific KbDocFileVectors by its unique ID.");
+
+        
+        
+        group
             .MapPost(
                 "/", async ([FromServices] IMediator mediator, [FromBody] CreateKbDocFileCommand command) =>
                 {

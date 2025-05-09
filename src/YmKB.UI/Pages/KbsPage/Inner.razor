@@ -22,7 +22,7 @@
     private int _quantifyList_pageSize = 12;
     
     
-    private string _vectorSearchString = "";
+    private string _vectorSearchString;
     private List<SearchResult> _searchResults = [];
 
     protected override async Task OnInitializedAsync()
@@ -407,13 +407,15 @@
     </MudTabPanel>
     <MudTabPanel Icon="@Icons.Material.Filled.ContentPasteSearch" Text="搜索测试">
         <MudGrid>
-            <MudItem xs="12" sm="4">
-                <MudTextField @bind-Value="_vectorSearchString" Placeholder="请输入搜索内容..."
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_vectorSearchString"
+                              Label="请输入搜索内容..." Variant="Variant.Outlined"
+                              Lines="5"
                               Adornment="Adornment.End"
                               AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true" Class="w-100 mb-2"/>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnSearch">搜索</MudButton>
             </MudItem>
-            <MudItem xs="12" sm="8">
+            <MudItem xs="12" sm="6">
                 <MudText Typo="Typo.h6" Class="mb-2">搜索结果</MudText>
                 <MudTable Items="@_searchResults" Hover="true" Bordered="true" Striped="true">
                     <HeaderContent>
