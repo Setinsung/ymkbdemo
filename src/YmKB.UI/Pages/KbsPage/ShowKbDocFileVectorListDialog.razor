@@ -1,0 +1,128 @@
+﻿@using MudBlazor.Extensions.Options
+@inject IDialogService DialogService
+<MudDialog Class="mud-ex-dialog-initial">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.ContentCut" Class="mr-3"/> @_title
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Class="mt-4">
+            @if (_isLoading)
+            {
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+            }
+            @if (_paginatedResultOfKbDocFileVectorDto?.Items is not null)
+            {
+                @foreach (var result in _paginatedResultOfKbDocFileVectorDto.Items)
+                {
+                    <MudItem xs="12" sm="6">
+                        <MudCard Class="card-hover-effect mb-3">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.subtitle2">@result.Index</MudText>
+                                </CardHeaderContent>
+                                <CardHeaderActions>
+                                    <MudIconButton OnClick="@(()=>DeleteFileVector(result.KbDocFileId))" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" />
+                                </CardHeaderActions>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudText>
+                                    @(TruncateText(result.Content, 100))
+                                </MudText>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Color="Color.Primary" Size="Size.Small" OnClick="@(() => ShowContentDialog(result.Content))">查看详情</MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+                }
+                <MudItem xs="12" sm="6">
+                    <MudCard Class="card-hover-effect mb-3">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.subtitle2">1</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Default" />
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudText>
+                                @(TruncateText("1111111111111111111111111111111", 100))
+                            </MudText>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Color="Color.Primary" Size="Size.Small"
+                                       OnClick="@(() => ShowContentDialog("result.Content"))">查看详情
+                            </MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public string KbDocFileId { get; set; }
+    private bool _isLoading = false;
+    private string _title = "文档切片向量列表";
+    private PaginatedResultOfKbDocFileVectorDto? _paginatedResultOfKbDocFileVectorDto = new();
+    void Submit() => MudDialog.CloseAnimatedIf(DialogResult.Ok(true));
+    void Cancel() => MudDialog.CancelAnimatedIf();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFileVectors();
+    }
+
+    private async Task LoadFileVectors()
+    {
+        _isLoading = true;
+        _paginatedResultOfKbDocFileVectorDto = await ApiClient.KbDocFiles.Vectors.GetAsync(
+            q =>
+            {
+                q.QueryParameters.KbDocFileId = KbDocFileId;
+                q.QueryParameters.PageSize = 100;
+                q.QueryParameters.PageNumber = 1;
+            });
+        _isLoading = false;
+    }
+
+    private async Task ShowContentDialog(string? content = "")
+    {
+        var options = new DialogOptionsEx()
+        {
+            MaximizeButton = true,
+            CloseButton = true,
+            FullHeight = true,
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Medium,
+            MaxHeight = MaxHeight.False,
+            FullWidth = true,
+            DragMode = MudDialogDragMode.Simple,
+            Animations = [AnimationType.SlideIn],
+            Position = DialogPosition.CenterRight,
+            DisableSizeMarginY = true,
+            DisablePositionMargin = true
+        };
+        await DialogService.ShowExAsync<ShowContentDialog>("", dialog => { dialog.ContentMessage = content; }, options);
+    }
+
+    private async Task DeleteFileVector(string? id)
+    {
+        await CommonDialogService.ShowConfirmationDialog("确认删除", "您确定要删除所选项目吗？", async () =>
+        {
+            await ApiClient.KbDocFiles.Vectors.DeleteAsync(new DeleteKbDocFileVectorCommand { DocumentId = id });
+            await LoadFileVectors();
+            Snackbar.Add("删除成功", Severity.Success);
+        });
+    }
+
+}

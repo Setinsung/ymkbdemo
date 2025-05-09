@@ -9,10 +9,9 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 using YMKB.UI.APIs.KbDocFiles.Item;
-using YMKB.UI.APIs.KbDocFiles.KbDocFileVectors;
 using YMKB.UI.APIs.KbDocFiles.Pagination;
 using YMKB.UI.APIs.KbDocFiles.RetryQuantization;
-using YMKB.UI.APIs.KbDocFiles.Vector;
+using YMKB.UI.APIs.KbDocFiles.Vectors;
 using YMKB.UI.APIs.Models;
 namespace YMKB.UI.APIs.KbDocFiles
 {
@@ -22,11 +21,6 @@ namespace YMKB.UI.APIs.KbDocFiles
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class KbDocFilesRequestBuilder : BaseRequestBuilder
     {
-        /// <summary>The KbDocFileVectors property</summary>
-        public global::YMKB.UI.APIs.KbDocFiles.KbDocFileVectors.KbDocFileVectorsRequestBuilder KbDocFileVectors
-        {
-            get => new global::YMKB.UI.APIs.KbDocFiles.KbDocFileVectors.KbDocFileVectorsRequestBuilder(PathParameters, RequestAdapter);
-        }
         /// <summary>The pagination property</summary>
         public global::YMKB.UI.APIs.KbDocFiles.Pagination.PaginationRequestBuilder Pagination
         {
@@ -37,10 +31,10 @@ namespace YMKB.UI.APIs.KbDocFiles
         {
             get => new global::YMKB.UI.APIs.KbDocFiles.RetryQuantization.RetryQuantizationRequestBuilder(PathParameters, RequestAdapter);
         }
-        /// <summary>The vector property</summary>
-        public global::YMKB.UI.APIs.KbDocFiles.Vector.VectorRequestBuilder Vector
+        /// <summary>The vectors property</summary>
+        public global::YMKB.UI.APIs.KbDocFiles.Vectors.VectorsRequestBuilder Vectors
         {
-            get => new global::YMKB.UI.APIs.KbDocFiles.Vector.VectorRequestBuilder(PathParameters, RequestAdapter);
+            get => new global::YMKB.UI.APIs.KbDocFiles.Vectors.VectorsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>Gets an item from the YMKB.UI.APIs.KbDocFiles.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>

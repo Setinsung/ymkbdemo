@@ -314,7 +314,27 @@
             DisablePositionMargin = true
         };
         await DialogService.ShowExAsync<ShowContentDialog>("", dialog => { dialog.ContentMessage = content; }, options);
-        
+    }
+
+    private async Task GetKbDocFileVectors(string? id)
+    {
+        if(id is null) return;
+        var options = new DialogOptionsEx()
+        {
+            MaximizeButton = true,
+            CloseButton = true,
+            FullHeight = true,
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Medium,
+            MaxHeight = MaxHeight.False,
+            FullWidth = true,
+            DragMode = MudDialogDragMode.Simple,
+            Animations = [AnimationType.SlideIn],
+            Position = DialogPosition.CenterRight,
+            DisableSizeMarginY = true,
+            DisablePositionMargin = true
+        };
+        await DialogService.ShowExAsync<ShowKbDocFileVectorListDialog>("", dialog => { dialog.KbDocFileId = id; }, options);
     }
 
 }
@@ -374,6 +394,8 @@
                 </MudTd>
                 <MudTd DataLabel="上传时间">@FormatDateTimeOst(context.Created!.Value)</MudTd>
                 <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.RemoveRedEye" Size="Size.Small"
+                                   OnClick="@(() => GetKbDocFileVectors(context.Id))"/>
                     <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small"
                                    OnClick="@(() => CopyDocumentUrl(context.Url))"/>
                     <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small"

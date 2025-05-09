@@ -45,7 +45,7 @@ public class KbDocFileEndpoins(ILogger<KbDocFileEndpoins> logger) : IEndpointReg
 
         group
             .MapGet(
-                "/KbDocFileVectors",
+                "/vectors",
                 (
                     [FromServices] IMediator mediator,
                     string kbDocFileId,
@@ -53,7 +53,7 @@ public class KbDocFileEndpoins(ILogger<KbDocFileEndpoins> logger) : IEndpointReg
                     int pageSize
                 ) => mediator.Send(new KbDocFileVectorsQuery(kbDocFileId, pageNumber, pageSize))
             )
-            .Produces<KbDocFileVectorDto>()
+            .Produces<PaginatedResult<KbDocFileVectorDto>>()
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
@@ -132,7 +132,7 @@ public class KbDocFileEndpoins(ILogger<KbDocFileEndpoins> logger) : IEndpointReg
 
         group
             .MapDelete(
-                "/vector",
+                "/vectors",
                 (
                     [FromServices] IMediator mediator,
                     [FromBody] DeleteKbDocFileVectorCommand command
