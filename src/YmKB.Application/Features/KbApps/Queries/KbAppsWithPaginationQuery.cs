@@ -1,5 +1,6 @@
 using AutoMapper;
 using Mediator;
+using Microsoft.EntityFrameworkCore;
 using YmKB.Application.Contracts.Cache;
 using YmKB.Application.Contracts.Persistence;
 using YmKB.Application.Extensions;
@@ -31,6 +32,35 @@ public class KbAppsWithPaginationQueryHandler(IApplicationDbContext context, IMa
     {
         var data = await context
             .KbApps
+            .Select(e => new KbAppDto()
+            {
+                Id = e.Id,
+                Name = e.Name,
+                Description = e.Description,
+                Icon = e.Icon,
+                KbAppType = e.KbAppType,
+                ChatModelId = e.ChatModelId,
+                ChatModelName = context.AIModels
+                    .Where(r => r.Id == e.ChatModelId)
+                    .Select(r => r.ModelDescription)
+                    .FirstOrDefault(),
+                EmbeddingModelId = e.EmbeddingModelId,
+                EmbeddingModelName = context.AIModels
+                    .Where(r => r.Id == e.EmbeddingModelId)
+                    .Select(r => r.ModelDescription)
+                    .FirstOrDefault(),
+                Temperature = e.Temperature,
+                Prompt = e.Prompt,
+                ApiFunctionList = e.ApiFunctionList,
+                NativeFunctionList = e.NativeFunctionList,
+                KbIdList = e.KbIdList,
+                Relevance = e.Relevance,
+                MaxAskPromptSize = e.MaxAskPromptSize,
+                MaxMatchesCount = e.MaxMatchesCount,
+                AnswerTokens = e.AnswerTokens,
+                PromptTemplate = e.PromptTemplate,
+                NoReplyFoundTemplate = e.NoReplyFoundTemplate
+            })
             .OrderBy(request.OrderBy, request.SortDirection) // Dynamic ordering
             .ProjectToPaginatedDataAsync(
                 condition: x =>
@@ -39,7 +69,7 @@ public class KbAppsWithPaginationQueryHandler(IApplicationDbContext context, IMa
                     || x.Description.Contains(request.Keywords),
                 pageNumber: request.PageNumber,
                 pageSize: request.PageSize,
-                mapperFunc: mapper.Map<KbAppDto>,
+                mapperFunc: e => e,
                 cancellationToken: cancellationToken
             );
         return data;

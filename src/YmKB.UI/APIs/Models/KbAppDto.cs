@@ -40,6 +40,14 @@ namespace YMKB.UI.APIs.Models
 #else
         public string ChatModelId { get; set; }
 #endif
+        /// <summary>The chatModelName property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? ChatModelName { get; set; }
+#nullable restore
+#else
+        public string ChatModelName { get; set; }
+#endif
         /// <summary>The description property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -63,6 +71,14 @@ namespace YMKB.UI.APIs.Models
 #nullable restore
 #else
         public string EmbeddingModelId { get; set; }
+#endif
+        /// <summary>The embeddingModelName property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? EmbeddingModelName { get; set; }
+#nullable restore
+#else
+        public string EmbeddingModelName { get; set; }
 #endif
         /// <summary>The icon property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -167,9 +183,11 @@ namespace YMKB.UI.APIs.Models
                 { "apiFunctionList", n => { ApiFunctionList = n.GetStringValue(); } },
                 { "chatModel", n => { ChatModel = n.GetObjectValue<global::YMKB.UI.APIs.Models.AIModelDto2>(global::YMKB.UI.APIs.Models.AIModelDto2.CreateFromDiscriminatorValue); } },
                 { "chatModelId", n => { ChatModelId = n.GetStringValue(); } },
+                { "chatModelName", n => { ChatModelName = n.GetStringValue(); } },
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "embeddingModel", n => { EmbeddingModel = n.GetObjectValue<global::YMKB.UI.APIs.Models.AIModelDto2>(global::YMKB.UI.APIs.Models.AIModelDto2.CreateFromDiscriminatorValue); } },
                 { "embeddingModelId", n => { EmbeddingModelId = n.GetStringValue(); } },
+                { "embeddingModelName", n => { EmbeddingModelName = n.GetStringValue(); } },
                 { "icon", n => { Icon = n.GetStringValue(); } },
                 { "id", n => { Id = n.GetStringValue(); } },
                 { "kbAppType", n => { KbAppType = n.GetEnumValue<global::YMKB.UI.APIs.Models.KbAppType>(); } },
@@ -196,9 +214,11 @@ namespace YMKB.UI.APIs.Models
             writer.WriteStringValue("apiFunctionList", ApiFunctionList);
             writer.WriteObjectValue<global::YMKB.UI.APIs.Models.AIModelDto2>("chatModel", ChatModel);
             writer.WriteStringValue("chatModelId", ChatModelId);
+            writer.WriteStringValue("chatModelName", ChatModelName);
             writer.WriteStringValue("description", Description);
             writer.WriteObjectValue<global::YMKB.UI.APIs.Models.AIModelDto2>("embeddingModel", EmbeddingModel);
             writer.WriteStringValue("embeddingModelId", EmbeddingModelId);
+            writer.WriteStringValue("embeddingModelName", EmbeddingModelName);
             writer.WriteStringValue("icon", Icon);
             writer.WriteStringValue("id", Id);
             writer.WriteEnumValue<global::YMKB.UI.APIs.Models.KbAppType>("kbAppType", KbAppType);

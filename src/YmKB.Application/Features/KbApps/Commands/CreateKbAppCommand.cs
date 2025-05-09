@@ -21,10 +21,10 @@ public record CreateKbAppCommand(
     string? KbIdList,
     string PromptTemplate,
     string? NoReplyFoundTemplate,
-    double Temperature = 70f,
-    double Relevance = 60f,
+    double Temperature = 0.5,
+    double Relevance = 0.4,
     int MaxAskPromptSize = 2048,
-    int MaxMatchesCount = 3,
+    int MaxMatchesCount = 10,
     int AnswerTokens = 2048
 ) : IFusionCacheRefreshRequest<string>, IRequiresValidation
 {

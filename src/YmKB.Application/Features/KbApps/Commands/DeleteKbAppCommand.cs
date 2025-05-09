@@ -37,13 +37,6 @@ public class DeleteKbAppCommandHandler(
             dbContext.KbApps.Remove(item); // todo: executedelete
         }
         await dbContext.SaveChangesAsync(cancellationToken);
-
-        // 知识库删除后，其下所有知识文档、向量全部删除
-        var kbDocFileIds = await dbContext.KbDocFiles
-            .Where(p => request.Ids.Contains(p.KbId))
-            .Select(p => p.Id)
-            .ToListAsync(cancellationToken);
-        await mediator.Send(new DeleteKbDocFileCommand(kbDocFileIds));
         return Unit.Value;
     }
 }

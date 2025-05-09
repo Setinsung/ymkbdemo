@@ -1,0 +1,181 @@
+@page "/applications/create"
+@page "/applications/{Id}/edit"
+@using YMKB.UI.APIs.AIModels.Search
+@code {
+    [Parameter] public string? Id { get; set; }
+
+    private KbAppDto model = new();
+    private List<AIModelDto> _conversationModels = [];
+    private List<AIModelDto> _embeddingModels = [];
+    private List<KnowledgeDbDto> _knowledgeDbDtos = [];
+    private bool _isValid;
+    private MudForm form;
+    private bool _isUpdate;
+
+    // out form
+    private double _relevance = 0.4;
+    private double _temperature = 0.5;
+    private int _answerTokens = 3000;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(Id))
+        {
+            model = await ApiClient.KbApps[Id].GetAsync() ?? new();
+            _relevance = model.Relevance ?? _relevance;
+            _temperature = model.Temperature ?? _temperature;
+            _answerTokens = model.AnswerTokens ?? _answerTokens;
+            _isUpdate = true;
+        }
+
+        await LoadSelectDataList();
+    }
+
+    private async Task LoadSelectDataList()
+    {
+        _conversationModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsGetAiModelTypeQueryParameterType = GetAiModelTypeQueryParameterType.Chat) ?? [];
+        _embeddingModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsGetAiModelTypeQueryParameterType = GetAiModelTypeQueryParameterType.Embedding) ?? [];
+        _knowledgeDbDtos = await ApiClient.KnowledgeDbs.GetAsync() ?? [];
+    }
+
+    private async Task Submit()
+    {
+        await form.Validate();
+        if (_isUpdate)
+        {
+            await ApiClient.KbApps.PutAsync(new UpdateKbAppCommand()
+            {
+                Id = model.Id,
+                Name = model.Name,
+                Description = model.Description,
+                KbAppType = model.KbAppType,
+                ChatModelId = model.ChatModelId,
+                EmbeddingModelId = model.EmbeddingModelId,
+                Temperature = _temperature,
+                Prompt = model.Prompt,
+                KbIdList = model.KbIdList,
+                Relevance = _relevance,
+                AnswerTokens = model.AnswerTokens,
+                NoReplyFoundTemplate = model.NoReplyFoundTemplate,
+                PromptTemplate = model.PromptTemplate ?? ""
+            });
+            Snackbar.Add("知识库修改成功", Severity.Success);
+        }
+        else
+        {
+            await ApiClient.KbApps.PostAsync(new CreateKbAppCommand()
+            {
+                Name = model.Name,
+                Description = model.Description,
+                KbAppType = model.KbAppType,
+                ChatModelId = model.ChatModelId,
+                EmbeddingModelId = model.EmbeddingModelId,
+                Temperature = _temperature,
+                Prompt = model.Prompt,
+                KbIdList = model.KbIdList,
+                Relevance = _relevance,
+                AnswerTokens = model.AnswerTokens,
+                NoReplyFoundTemplate = model.NoReplyFoundTemplate,
+                PromptTemplate = model.PromptTemplate ?? ""
+            });
+            Snackbar.Add("知识库创建成功", Severity.Success);
+        }
+
+        GoBack();
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/applications");
+    }
+
+}
+
+<MudText Typo="Typo.h5" Class="mb-4">@(Id == null ? "新增应用" : "编辑应用")</MudText>
+
+<MudContainer Class="mt-4">
+    <MudForm @ref="form" @bind-IsValid="@_isValid">
+        <MudGrid>
+            <MudItem xs="12" md="12">
+                <MudTextField @bind-Value="model.Name" Label="名称" Required="true" 
+                              Margin="Margin.Dense"
+                              RequiredError="名称是必填项" Variant="Variant.Outlined"/>
+            </MudItem>
+            <MudItem xs="12" md="12">
+                <MudTextField @bind-Value="model.Description" Label="描述" Class="mt-3" Variant="Variant.Outlined" Lines="3"/>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudRadioGroup T="KbAppType?" @bind-Value="model.KbAppType" Required="true">
+                    <MudRadio T="KbAppType?" Value="@KbAppType.Chat" Color="Color.Primary">对话应用</MudRadio>
+                    <MudRadio T="KbAppType?" Value="@KbAppType.KbChat" Color="Color.Secondary">知识库应用</MudRadio>
+                </MudRadioGroup>
+            </MudItem>
+            <MudItem xs="12" md="8">
+                @if (model.KbAppType == KbAppType.KbChat)
+                {
+                    <MudSelect T="string" MultiSelection="true" Label="绑定知识库" @bind-Value="model.KbIdList"
+                               RequiredError="请选择知识库" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense">
+                        @foreach (var item in _knowledgeDbDtos)
+                        {
+                            <MudSelectItem Value="item.Id">
+                                @(item.Name) — @(item.Description)
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                }
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudSelect T="string" Label="会话模型" @bind-Value="model.ChatModelId" Required="true"
+                           RequiredError="请选择会话模型" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var item in _conversationModels)
+                    {
+                        <MudSelectItem Value="item.Id">
+                            【@(item.ModelDescription)】— @(item.ModelName)
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudSelect T="string" Label="向量模型" @bind-Value="model.EmbeddingModelId" Required="true"
+                           RequiredError="请选择向量模型" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var item in _embeddingModels)
+                    {
+                        <MudSelectItem Value="item.Id">
+                            【@(item.ModelDescription)】— @(item.ModelName)
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="12">
+                <MudTextField @bind-Value="model.Prompt" Label="提示词" Class="mt-3" Variant="Variant.Outlined" Lines="3"/>
+            </MudItem>
+            <MudItem xs="12" md="12">
+                <MudTextField @bind-Value="model.NoReplyFoundTemplate" Label="0答案回复模板" Class="mt-3" Variant="Variant.Outlined" Lines="3"/>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudSlider T="double" ValueLabel="true" @bind-Value="_relevance" Min="0" Max="1" Step="0.01" Color="Color.Info">最小相似度: @_relevance</MudSlider>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudSlider T="double" ValueLabel="true" @bind-Value="_temperature" Min="0" Max="1" Step="0.01" Color="Color.Secondary">温度系数: @_temperature</MudSlider>
+            </MudItem>
+            @* <MudItem xs="12" md="4"> *@
+            @*     <MudSlider T="int" ValueLabel="true" @bind-Value="_maxMatchesCount" Min="1" Max="10" Step="1" Color="Color.Secondary">向量匹配数 @_maxMatchesCount</MudSlider> *@
+            @* </MudItem> *@
+            <MudItem xs="12" md="4">
+                <MudNumericField @bind-Value="_answerTokens" Label="回答最大token数" Required="true"
+                                 RequiredError="请输入回答最大token数" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense"/>
+            </MudItem>
+        </MudGrid>
+        <MudStack Row="true" Class="mt-6 d-flex justify-end">
+            <MudButton Variant="Variant.Outlined" OnClick="GoBack">返回</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">保存
+            </MudButton>
+        </MudStack>
+    </MudForm>
+</MudContainer>
+<style>
+    .aimodel-select-item .mud-list-item-text .mud-typography {
+        display: flex;
+        justify-content: space-between;
+    }
+</style>

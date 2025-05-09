@@ -15,10 +15,12 @@ public class KbAppDto
 
     public KbAppType KbAppType { get; set; }
 
+    public string? ChatModelName { get; set; }
     public AIModelDto? ChatModel { get; set; }
     
     public string? ChatModelId { get; set; }
     
+    public string? EmbeddingModelName { get; set; }
     public AIModelDto? EmbeddingModel { get; set; }
 
     public string? EmbeddingModelId { get; set; }

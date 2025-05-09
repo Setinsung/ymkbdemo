@@ -2,52 +2,66 @@
 @inject IApplicationService ApplicationService
 
 @code {
-    private List<Application> applications = new();
-    private bool loading = false;
-    private int totalItems;
-    private int currentPage = 1;
-    private int pageSize = 10;
+    private PaginatedResultOfKbAppDto _kbApps = new();
     private string _searchString = "";
-
-    private IEnumerable<Application> filteredApplications => applications;
+    private bool _loading;
+    private int pageIndex = 1;
+    private int pageSize = 12;
+    private int totalCount = 0;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadApplications();
     }
-
+    
     private async Task LoadApplications()
     {
-        loading = true;
+        _loading = true;
         try
         {
-            var result = await ApplicationService.GetApplicationsAsync(_searchString, currentPage, pageSize);
-            applications = result.Items;
-            totalItems = result.TotalCount;
+            PaginatedResultOfKbAppDto? result = await ApiClient.KbApps.Pagination.PostAsync(new KbAppsWithPaginationQuery()
+            {
+                Keywords = _searchString,
+                PageNumber = pageIndex - 1,
+                PageSize = pageSize,
+                OrderBy = "Id"
+            });
+            _kbApps = result;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "查询应用列表失败");
+            Snackbar.Add("查询应用配置列表失败", Severity.Error);
+            _kbApps = new();
         }
         finally
         {
-            loading = false;
+            _loading = false;
+
         }
+    }
+    
+    private async Task PageChanged(int i)
+    {
+        pageIndex = i;
+        await LoadApplications();
     }
 
     private async Task SearchOnEnter(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
-            currentPage = 1;
             await LoadApplications();
         }
     }
-
     private void CreateApplication()
     {
-        // NavigationManager.NavigateTo("/applications/create");
+        Navigation.NavigateTo("/applications/create");
     }
 
     private void EditApplication(string id)
     {
-        // NavigationManager.NavigateTo($"/applications/{id}/edit");
+        Navigation.NavigateTo($"/applications/{id}/edit");
     }
 
     private void UseApplication(string id)
@@ -60,80 +74,83 @@
         // 外部使用功能待实现
     }
 
-    private async Task DeleteApplication(Application app)
+    private async Task DeleteApplication(string id)
     {
-        var result = await ApplicationService.DeleteApplicationAsync(app.Id);
-        if (result)
+        await CommonDialogService.ShowConfirmationDialog("确认删除", "您确定要删除所选项目吗？", async () =>
         {
+            await ApiClient.KbApps.DeleteAsync(new DeleteKbAppCommand { Ids = [id] });
             await LoadApplications();
-        }
+            Snackbar.Add("删除成功", Severity.Success);
+        });
     }
 
 }
 
-<MudText Typo="Typo.h5" Class="mb-4">知识库管理</MudText>
+<MudText Typo="Typo.h5" Class="mb-4">应用管理</MudText>
 <MudToolBar>
     <MudStack Row Spacing="1">
         <MudTextField T="string"
-                      @bind-Value="_searchString" Adornment="Adornment.End"
+                      @bind-Value="_searchString" Adornment="Adornment.End" OnKeyDown="@SearchOnEnter"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small">
         </MudTextField>
     </MudStack>
     <MudSpacer/>
-    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="CreateApplication">新增知识库
+    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="CreateApplication">新增应用
     </MudFab>
 </MudToolBar>
-
-<MudStack Row="true" Justify="Justify.SpaceBetween" Class="mb-4">
-    <MudText Typo="Typo.h5">应用列表</MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateApplication">创建应用
-    </MudButton>
-</MudStack>
-
-@* <MudTextField @bind-Value="searchText" Placeholder="输入回车" Immediate="true" *@
-@*               AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start" *@
-@*               OnKeyDown="@SearchOnEnter" Class="mb-4"/> *@
-
+@if (_loading)
+{
+    <div class="d-flex flex-column align-center mt-4">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+    </div>
+}
 <MudGrid>
-    @foreach (var app in filteredApplications)
+    @foreach (var app in _kbApps.Items ?? [])
     {
         <MudItem xs="12" sm="6" md="4" lg="3">
-            <MudCard>
+            <MudCard Class="card-hover-effect overflow-hidden">
                 <MudCardHeader>
                     <CardHeaderAvatar>
-                        <MudAvatar Color="Color.Primary">
-                            <MudIcon Icon="@Icons.Material.Filled.SmartToy"/>
-                        </MudAvatar>
+                            @if (app.KbAppType == KbAppType.Chat)
+                            {
+                                <MudExIcon Color="Color.Info" Icon="@Icons.Material.Filled.Chat"/>
+                            }
+                            else
+                            {
+                                <MudExIcon Color="Color.Secondary" Icon="@Icons.Material.Filled.SmartToy"/>
+                            }                        
                     </CardHeaderAvatar>
                     <CardHeaderContent>
                         <MudText Typo="Typo.h6">@app.Name</MudText>
                         <MudText Typo="Typo.body2">@app.Description</MudText>
                     </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default"/>
+                    </CardHeaderActions>
                 </MudCardHeader>
                 <MudCardContent>
-                    <MudText>
-                        <MudChip T="string" Size="Size.Small" Color="Color.Primary">@app.Type</MudChip>
-                    </MudText>
-                    <MudText Class="mt-2">
-                        <MudChip T="string" Size="Size.Small"
-                                 Color="Color.Secondary">@app.ConversationModel</MudChip>
-                    </MudText>
-                    <MudText Class="mt-2">
-                        <MudChip T="string" Size="Size.Small"
-                                 Color="Color.Info">@app.EmbeddingModel</MudChip>
-                    </MudText>
+                        <MudText Class="mt-2">
+                            <MudChip Variant="Variant.Text" T="string" Size="Size.Small"
+                                     Color="Color.Secondary">@app.ChatModelName</MudChip>
+                        </MudText>
+
+                        <MudText Class="mt-2">
+                            <MudChip Variant="Variant.Text" T="string" Size="Size.Small"
+                                     Color="Color.Info">@app.EmbeddingModelName</MudChip>
+                        </MudText>
                 </MudCardContent>
-                <MudCardActions>
+                <MudCardActions Class="d-flex justify-end">
+                    <MudButton OnClick="@(() => UseApplication(app.Id))">进入</MudButton>
                     <MudButton OnClick="@(() => EditApplication(app.Id))">修改</MudButton>
-                    <MudButton OnClick="@(() => UseApplication(app.Id))">使用</MudButton>
-                    <MudButton Color="Color.Error" OnClick="@(() => DeleteApplication(app))">删除
+                    <MudButton Color="Color.Error" OnClick="@(() => DeleteApplication(app.Id))">删除
                     </MudButton>
                 </MudCardActions>
             </MudCard>
         </MudItem>
     }
 </MudGrid>
-
-<MudPagination Count="@((int)Math.Ceiling(totalItems / (double)pageSize))"
-               @bind-Selected="currentPage"
-               Class="mt-4 d-flex justify-center"/>
+<div class="d-flex flex-column align-center mt-4">
+    <MudPagination ShowFirstButton="true" ShowLastButton="true" Class="mt-4"
+                   Count="@(_kbApps.TotalPages ?? 0)"
+                   SelectedChanged="PageChanged"/>
+</div>

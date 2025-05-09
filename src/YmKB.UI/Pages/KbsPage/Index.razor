@@ -1,4 +1,5 @@
 ﻿@page "/knowledgebases"
+
 @code {
     private PaginatedResultOfKnowledgeDbDto _kbs = new();
     private string _searchString = "";
@@ -29,8 +30,8 @@
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "查询模型配置列表失败");
-            Snackbar.Add("查询模型配置列表失败", Severity.Error);
+            Logger.LogError(ex, "查询知识库列表列表失败");
+            Snackbar.Add("查询知识库列表失败", Severity.Error);
             _loading = false;
             _kbs = new();
         }
@@ -106,7 +107,8 @@
                 <MudCardHeader>
                     <CardHeaderContent>
                         <div class="d-flex align-start">
-                            <MudIcon Class="mt-2" Icon="@Icons.Material.Outlined.Info" Size="Size.Large" Color="Color.Primary"/>
+                            <MudIcon Class="mt-2" Icon="@Icons.Material.Outlined.Info" Size="Size.Large"
+                                     Color="Color.Primary"/>
                             <div class="ml-4">
                                 <MudText Typo="Typo.h6">@kb.Name</MudText>
                                 <MudTooltip Text="@kb.Description">
@@ -122,7 +124,8 @@
                 <MudCardContent>
                     <MudText>
                         <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Secondary">
-                            文档数量: 0</MudChip>
+                            文档数量: 0
+                        </MudChip>
                     </MudText>
                 </MudCardContent>
                 <MudCardActions Class="d-flex justify-end">
