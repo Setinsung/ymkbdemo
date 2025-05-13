@@ -186,6 +186,28 @@
         }
     }
 
+    private async Task ShowWebSiteUploadDialog()
+    {
+        string webPageUrl = "";
+        await CommonDialogService.ShowDialogAsync(
+            "网页上传",
+            new DialogParameters<ShowWebSiteUploadDialog> { { x => x.Url, webPageUrl } },
+            onConfirm: async _ =>
+            {
+                await ApiClient.KbDocFiles.PostAsync(new CreateKbDocFileCommand()
+                {
+                    KbId = Id,
+                    FileName = webPageUrl,
+                    Type = "web",
+                    Size = 0,
+                    Url = webPageUrl
+                });
+                Snackbar.Add("网页上传成功", Severity.Success);
+                await Activate(1);
+            }
+        );
+    }
+
     private async Task CreateKbDocFileAssociation(List<FileUploadResponse> fileuploaded)
     {
         // 文件上传创建kbdocfile关联知识库
@@ -348,7 +370,6 @@
         };
         await DialogService.ShowExAsync<ShowKbDocFileVectorListDialog>("", dialog => { dialog.KbDocFileId = id; }, options);
     }
-
 }
 
 <MudTabs @bind-ActivePanelIndex="_activeTab" @ref="tabs" Rounded="true" Class="kbs-tabs">
@@ -361,6 +382,8 @@
                 </MudTextField>
             </MudStack>
             <MudSpacer/>
+            <MudFab Class="mr-4" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Web" OnClick="ShowWebSiteUploadDialog">网页上传
+            </MudFab>
             <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Upload"
                     OnClick="ShowUploadDialog">文档上传
             </MudFab>
@@ -410,8 +433,16 @@
                                    OnClick="@(() => GetKbDocFileVectors(context.Id))"/>
                     <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small"
                                    OnClick="@(() => CopyDocumentUrl(context.Url))"/>
-                    <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small"
-                                   OnClick="@(() => DownloadDocument(context))"/>
+                    @if (context.Type == "web")
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.NearMe" Size="Size.Small"
+                                       Href="@(context.Url)" Target="_blank"/>
+                    }
+                    else
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small"
+                                       OnClick="@(() => DownloadDocument(context))"/>
+                    }
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
                                    OnClick="@(() => DeleteDocument(context.Id))"/>
                 </MudTd>

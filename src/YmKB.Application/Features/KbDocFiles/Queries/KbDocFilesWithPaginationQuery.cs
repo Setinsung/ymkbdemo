@@ -33,6 +33,7 @@ public class KbDocFilesWithPaginationQueryHandler(IApplicationDbContext context,
         var data = await context
             .KbDocFiles
             .Where(e => request.KbId == null || e.KbId == request.KbId)
+            .Where(e => e.Type != "web")
             .OrderBy(request.OrderBy, request.SortDirection) // Dynamic ordering
             .ProjectToPaginatedDataAsync(
                 condition: x =>

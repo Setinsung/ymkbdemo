@@ -3,7 +3,7 @@
         <MudForm @ref="_form" @bind-IsValid="@_isValid">
             <MudGrid>
                 <MudItem xs="12" md="6">
-                    <MudTextField @bind-Value="Model.ModelName" Label="模型Id" Required="true" Class="mt-3"/>
+                    <MudTextField @bind-Value="Model.ModelName" Label="模型Id名" Required="true" Class="mt-3"/>
                 </MudItem>
                 <MudItem xs="12" md="6">
                     <MudSelect @bind-Value="Model.AiModelType" Label="模型类型" Required="true" Class="mt-3">
@@ -18,7 +18,7 @@
                     <PasswordInput @bind-Value="Model.ModelKey" Label="模型密钥" Required="true" Class="mt-3"/>
                 </MudItem>
                 <MudItem xs="12" md="12">
-                    <MudTextField @bind-Value="Model.ModelDescription" Label="模型名"/>
+                    <MudTextField @bind-Value="Model.ModelDescription" Label="模型描述名"/>
                 </MudItem>
             </MudGrid>
 

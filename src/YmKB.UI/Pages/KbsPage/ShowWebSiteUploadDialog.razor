@@ -1,0 +1,29 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form" @bind-IsValid="@_isValid">
+            <MudGrid>
+                <MudItem xs="12" md="12">
+                    <MudTextField @bind-Value="Url" Label="网页URL"/>
+                </MudItem>
+            </MudGrid>
+
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">取消</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Disabled="!_isValid">确定</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public string Url { get; set; }
+
+    private MudForm _form;
+    private bool _isValid;
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+
+    private void Cancel() => MudDialog.Cancel();
+}
