@@ -10,6 +10,7 @@
     private string _messageInput = "";
     private bool _isLoading;
     private string? _conversationId;
+    private bool _isOnlineSearch;
     private List<ChatMessage> _messages = new();
     private List<ChatReference>? _currentReferences;
 
@@ -86,7 +87,8 @@
             {
                 ApplicationId = _selectedApp.Id,
                 Message = userMessage,
-                ConversationId = _conversationId
+                ConversationId = _conversationId,
+                IsWebTextSearch = _isOnlineSearch
             });
 
             if (response != null)
@@ -122,8 +124,15 @@
     }
 
 }
-
-<MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
+<MudToolBar>
+    <MudSpacer/>
+    <MudToggleIconButton @bind-Toggled="_isOnlineSearch"
+                         Icon="@Icons.Material.Filled.CloudOff"
+                         Color="@Color.Error"
+                         ToggledIcon="@Icons.Material.Filled.CloudQueue"
+                         ToggledColor="@Color.Success"
+                         title="@(_isOnlineSearch ? "On" : "Off")" />
+</MudToolBar>
     <MudGrid>
         <!-- 左侧应用列表 -->
         <MudItem xs="12" sm="2">
@@ -211,4 +220,3 @@
             }
         </MudItem>
     </MudGrid>
-</MudContainer>
