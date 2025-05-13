@@ -17,7 +17,7 @@ public class ShaBingTextSearch : ITextSearch
     /// <param name="options">创建此 <see cref="ShaBingTextSearch"/> 实例时使用的选项。</param>
     public ShaBingTextSearch(ShaBingTextSearchOptions? options = null)
     {
-        this._logger =
+        this._logger = options?.Logger??
             options?.LoggerFactory?.CreateLogger(typeof(ShaBingTextSearch)) ?? NullLogger.Instance;
         this._shaBingSearchCore = new ShaBingSearchCore(
             options?.Host?.ToString(),

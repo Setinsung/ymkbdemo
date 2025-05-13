@@ -27,6 +27,11 @@ public sealed class ShaBingTextSearchOptions
     /// 用于日志记录的 <see cref="ILoggerFactory"/>。如果为 null，则不进行日志记录。
     /// </summary>
     public ILoggerFactory? LoggerFactory { get; init; } = null;
+    
+    /// <summary>
+    /// 或者直接指定 <see cref="ILogger"/>
+    /// </summary>
+    public ILogger? Logger { get; init; } = null;
 
     /// <summary>
     /// 将搜索结果映射为 <see cref="string"/> 的 <see cref="ITextSearchStringMapper" /> 实例

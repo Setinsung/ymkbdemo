@@ -77,7 +77,7 @@ public class AIChatController : ControllerBase
             if (request.IsWebTextSearch)
             {
                 aiPromptExecutionSettings.FunctionChoiceBehavior = FunctionChoiceBehavior.Auto();
-                var textSearch = new ShaBingTextSearch();
+                var textSearch = new ShaBingTextSearch(new ShaBingTextSearchOptions {Logger = _logger});
                 var searchPlugin = textSearch.CreateWithSearch("SearchPlugin");
                 kernel.Plugins.Add(searchPlugin);
             }
