@@ -13,13 +13,13 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadAllAIModels();
         if (!string.IsNullOrEmpty(Id))
         {
             model = await ApiClient.KnowledgeDbs[Id].GetAsync() ?? new();
             _isUpdate = true;
         }
-
-        await LoadAllAIModels();
+        StateHasChanged();
     }
 
     private async Task LoadAllAIModels()
@@ -107,15 +107,11 @@
                     }
                 </MudSelect>
             </MudItem>
-            <MudItem xs="12" md="4">
+            <MudItem xs="12" md="6">
                 <MudNumericField @bind-Value="model.MaxTokensPerParagraph" Label="段落切片数" Required="true"
                                  RequiredError="请输入段落切片数" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense"/>
             </MudItem>
-            <MudItem xs="12" md="4">
-                <MudNumericField @bind-Value="model.MaxTokensPerLine" Label="行切片数" Required="true"
-                                 RequiredError="请输入行切片数" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense"/>
-            </MudItem>
-            <MudItem xs="12" md="4">
+            <MudItem xs="12" md="6">
                 <MudNumericField @bind-Value="model.OverlappingTokens" Label="重叠部分" Required="true"
                                  RequiredError="请输入重叠部分" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense"/>
             </MudItem>

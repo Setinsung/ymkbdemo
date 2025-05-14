@@ -21,4 +21,6 @@ public class KnowledgeDbDto
     public int OverlappingTokens { get; set; } = 49;
 
     public int? DocCount { get; set; }
+    
+    public int? WebDocCount { get; set; }
 }

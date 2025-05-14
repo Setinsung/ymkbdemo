@@ -3,7 +3,7 @@
         <MudForm @ref="_form" @bind-IsValid="@_isValid">
             <MudGrid>
                 <MudItem xs="12" md="12">
-                    <MudTextField @bind-Value="Url" Label="网页URL"/>
+                    <MudTextField T="string" @bind-Value="_returnValue" Label="网页URL"/>
                 </MudItem>
             </MudGrid>
 
@@ -17,12 +17,12 @@
 
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
-    [Parameter] public string Url { get; set; }
+    private string _returnValue;
 
     private MudForm _form;
     private bool _isValid;
 
-    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    private void Submit() => MudDialog.Close(DialogResult.Ok(_returnValue));
 
 
     private void Cancel() => MudDialog.Cancel();

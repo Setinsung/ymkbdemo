@@ -107,8 +107,16 @@
     <MudSpacer/>
     @if (_fileListSelected != null)
     {
-        <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Success"
-                       OnClick="@(() => DownloadDocument(_fileListSelected))"/>
+        @if (_fileListSelected.Type == "web")
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.NearMe" Href="@(_fileListSelected.Url)" 
+                           Target="_blank"/>
+        }
+        else
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Success"
+                           OnClick="@(() => DownloadDocument(_fileListSelected))"/>
+        }
         <MudIconButton Icon="@Icons.Material.Filled.FileCopy" Color="Color.Info"
                        OnClick="@(() => CopyDocumentUrl(_fileListSelected.Url))"/>
         <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
@@ -123,10 +131,16 @@
                 {
                     <MudListItem Value="item">
                         <div class="file-item">
-                            <MudExIcon
-                                Icon="@BrowserFileExt.IconForFile(item.Type)"
-                                Color="@BrowserFileExt.GetPreferredColor(item.Type)"
-                            />
+                            @if (item.Type == "web")
+                            {
+                                <MudExIcon Icon="@Icons.Material.Filled.Web" Color="Color.Info"/>
+                            }
+                            else
+                            {
+                                <MudExIcon
+                                    Icon="@BrowserFileExt.IconForFile(item.Type)"
+                                    Color="@BrowserFileExt.GetPreferredColor(item.Type)"/>
+                            }
                             <MudTooltip Text="@item.FileName">
                                 <ChildContent>
                                     <MudText Typo="Typo.subtitle2">@TruncateText(item.FileName, 35)</MudText>
@@ -164,7 +178,7 @@
     <MudItem xs="12" sm="12">
         <MudPaper>
 
-            @if (_fileListSelected?.Url != null)
+            @if (_fileListSelected?.Url != null && _fileListSelected.Type != "web")
             {
                 <div style="width: 100%; height: 800px; margin-top: 20px">
                     <MudExFileDisplay HandleContentErrorFunc="@HandleContentError"

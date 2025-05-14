@@ -16,11 +16,12 @@
     private bool _isLoading;
     private PaginatedResultOfKbDocFileDto _kbDocs = new();
     private PaginatedResultOfQuantizedListDto _quantifyLists = new();
+    
     private string _docSearchString = "";
-    private string _quantifyListSearchString = "";
     private int _kbDoc_pageIndex = 1;
     private int _kbDoc_pageSize = 12;
 
+    private string _quantifyListSearchString = "";
     private int _quantifyList_pageIndex = 1;
     private int _quantifyList_pageSize = 12;
 
@@ -107,24 +108,6 @@
         await LoadQuantifyLists();
     }
 
-
-    private string[] _mimeTypes =
-    {
-        "application/zip*",
-        "application/x-zip*",
-        "application/x-compressed",
-        "application/x-rar-compressed",
-        "audio/*",
-        "application/pdf",
-        "application/xml",
-        "text/markdown",
-        "application/msword",
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.*",
-        "image/*",
-        "text/*"
-    };
-
     private async Task ShowUploadDialog()
     {
         var parameters = new DialogParameters
@@ -132,26 +115,12 @@
             { nameof(MudExMessageDialog.Buttons), MudExDialogResultAction.OkCancel("Upload") },
             { nameof(MudExMessageDialog.Icon), Icons.Material.Filled.FileUpload }
         };
-        var res = await DialogService.ShowComponentInDialogAsync<MudExUploadEdit<UploadableFile>>("上传内容", "拖放文件或点击上传",
-            uploadEdit =>
-            {
-                uploadEdit.AllowAudioRecording = true;
-                uploadEdit.MinHeight = 250;
-                uploadEdit.AutoExtractArchive = true;
-                uploadEdit.DropZoneClickAction = DropZoneClickAction.UploadFile;
-                uploadEdit.MimeTypes = _mimeTypes;
-            }, parameters, options =>
-            {
-                options.Resizeable = true;
-                options.FullWidth = true;
-                options.MaxWidth = MaxWidth.Medium;
-                options.DialogAppearance = MudExAppearance.FromStyle(new
-                {
-                    Border = "2px solid",
-                    BorderColor = Color.Primary,
-                    BorderRadius = 8
-                });
-            });
+        var res = await DialogService.ShowComponentInDialogAsync<UploadDocFileDialog>( "上传文档", "", e => { }, parameters, options =>
+        {
+            options.Resizeable = true;
+            options.FullWidth = true;
+            options.MaxWidth = MaxWidth.Medium;
+        });
         // 上传文件接口
         if (!res.DialogResult.Canceled && res.Component.UploadRequests.Any())
         {
@@ -182,28 +151,28 @@
                 Console.WriteLine(JsonSerializer.Serialize(response));
                 await CreateKbDocFileAssociation(response);
             }
-            await Activate(1);
         }
     }
-
+    
     private async Task ShowWebSiteUploadDialog()
     {
-        string webPageUrl = "";
         await CommonDialogService.ShowDialogAsync(
             "网页上传",
-            new DialogParameters<ShowWebSiteUploadDialog> { { x => x.Url, webPageUrl } },
-            onConfirm: async _ =>
+            new DialogParameters<ShowWebSiteUploadDialog>(),
+            onConfirm: async res =>
             {
+                var url = (string)res.Data;
                 await ApiClient.KbDocFiles.PostAsync(new CreateKbDocFileCommand()
                 {
                     KbId = Id,
-                    FileName = webPageUrl,
+                    FileName = url,
                     Type = "web",
                     Size = 0,
-                    Url = webPageUrl
+                    Url = url
                 });
                 Snackbar.Add("网页上传成功", Severity.Success);
                 await Activate(1);
+                Snackbar.Add("量化队列创建完成", Severity.Success);
             }
         );
     }
@@ -222,8 +191,8 @@
                 Url = file.Path
             });
         }
-
-        await LoadKbDocs();
+        await Activate(1);
+        Snackbar.Add("量化队列创建完成", Severity.Success);
     }
 
     private async Task CopyDocumentUrl(string? url)

@@ -31,6 +31,22 @@ public class KnowledgeDbsWithPaginationQueryHandler(IApplicationDbContext contex
     {
         var data = await context
             .KnowledgeDbs
+            .Select(e => new KnowledgeDbDto()
+            {
+                Id = e.Id,
+                Icon = e.Icon,
+                Name = e.Name,
+                Description = e.Description,
+                ChatModelID = e.ChatModelID,
+                EmbeddingModelID = e.EmbeddingModelID,
+                MaxTokensPerParagraph = e.MaxTokensPerParagraph,
+                MaxTokensPerLine = e.MaxTokensPerLine,
+                OverlappingTokens = e.OverlappingTokens,
+                DocCount = context.KbDocFiles
+                    .Count(r => r.KbId == e.Id && r.Type != "web"),
+                WebDocCount = context.KbDocFiles
+                    .Count(r => r.KbId == e.Id && r.Type== "web")
+            })
             .OrderBy(request.OrderBy, request.SortDirection) // Dynamic ordering
             .ProjectToPaginatedDataAsync(
                 condition: x =>
@@ -39,7 +55,7 @@ public class KnowledgeDbsWithPaginationQueryHandler(IApplicationDbContext contex
                     || x.Description.Contains(request.Keywords),
                 pageNumber: request.PageNumber,
                 pageSize: request.PageSize,
-                mapperFunc: mapper.Map<KnowledgeDbDto>,
+                mapperFunc: e => e,
                 cancellationToken: cancellationToken
             );
         return data;
