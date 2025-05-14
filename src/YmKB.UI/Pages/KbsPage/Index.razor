@@ -124,7 +124,10 @@
                 <MudCardContent>
                     <MudText>
                         <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Secondary">
-                            文档数量: 0
+                            文档数量: @kb.DocCount
+                        </MudChip>
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Info">
+                            网页数量: @kb.WebDocCount
                         </MudChip>
                     </MudText>
                 </MudCardContent>
