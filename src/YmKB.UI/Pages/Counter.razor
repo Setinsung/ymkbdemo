@@ -1,82 +1,43 @@
-﻿@page "/dynamic-form"
-@using MudBlazor
+﻿@page "/testt"
+<MudSelect T="string" Label="US States" MultiSelection="true" @bind-Value="_value" @bind-SelectedValues="_options">
+    @foreach (var state in _states)
+    {
+        <MudSelectItem T="string" Value="@state">@state</MudSelectItem>
+    }
+</MudSelect>
 
-<h3>动态参数表单</h3>
-
-<MudForm Model="@formModel" Validation="@Validation">
-    <MudTextField Label="名称" @bind-Value="formModel.Name" Required />
-    <MudTextField Label="描述" @bind-Value="formModel.Description" Required />
-    
-    <MudDivider Class="my-4" />
-    
-    <MudText Typo="Typo.h6">参数列表</MudText>
-    
-        @foreach (var parameter in Parameters)
-        {
-            <MudPaper Class="d-flex">
-                <MudTextField @bind-Value="parameter.Name" Label="参数名" Variant="Variant.Outlined" 
-                              Class="mr-2 flex-grow" Required />
-                <MudTextField @bind-Value="parameter.Description" Label="参数描述" Variant="Variant.Outlined" 
-                              Class="mr-2 flex-grow" Required />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" 
-                              OnClick="@(() => RemoveParameter(parameter))" />
-            </MudPaper>
-        }
-    
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" 
-              OnClick="AddParameter" Class="mt-4">
-        <MudIcon Icon="@Icons.Material.Filled.Add" /> 添加参数
-    </MudButton>
-    
-    <MudDivider Class="my-4" />
-    
-    <MudButton Variant="Variant.Filled" Color="Color.Success" 
-              OnClick="SubmitForm" Class="mt-4">
-        提交
-    </MudButton>
-</MudForm>
-
+<MudGrid Class="mt-6 px-4">
+    <MudItem xs="6">
+        <MudText Typo="Typo.subtitle2">Value:</MudText>
+        <MudText Typo="Typo.subtitle2">"</MudText>
+        <MudText Typo="Typo.body2" Class="pl-4">@_value</MudText>
+        <MudText Typo="Typo.subtitle2">"</MudText>
+    </MudItem>
+    <MudItem xs="6">
+        <MudText Typo="Typo.subtitle2">SelectedValues: HashSet&lt;string&gt;</MudText>
+        <MudText Typo="Typo.subtitle2">{</MudText>
+        <MudText Typo="Typo.body2" Class="pl-4">@(string.Join(", ", _options.Select(x=>$"\"{x}\"")))</MudText>
+        <MudText Typo="Typo.subtitle2">}</MudText>
+    </MudItem>
+</MudGrid>
 @code {
-    private FormModel formModel = new FormModel();
-    private List<ParameterModel> Parameters = new List<ParameterModel>();
-    private MudForm? Validation;
-
-    private void AddParameter()
-    {
-        Parameters.Add(new ParameterModel());
-    }
-
-    private void RemoveParameter(ParameterModel parameter)
-    {
-        Parameters.Remove(parameter);
-    }
-
-    private void SubmitForm()
-    {
-        // 执行表单验证
-        Validation?.Validate();
-        
-        // 处理表单提交逻辑
-        Console.WriteLine("表单提交:");
-        Console.WriteLine($"名称: {formModel.Name}");
-        Console.WriteLine($"描述: {formModel.Description}");
-        Console.WriteLine("参数列表:");
-        
-        foreach (var param in Parameters)
-        {
-            Console.WriteLine($"  - {param.Name}: {param.Description}");
-        }
-    }
-
-    public class FormModel
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-    }
-
-    public class ParameterModel
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-    }
+    private string _value = "Nothing selected";
+    private IEnumerable<string> _options = new HashSet<string> { "Alaska" };
+    private readonly string[] _states =
+    [
+        "Alabama", "Alaska", "American Samoa", "Arizona",
+        "Arkansas", "California", "Colorado", "Connecticut",
+        "Delaware", "District of Columbia", "Federated States of Micronesia",
+        "Florida", "Georgia", "Guam", "Hawaii", "Idaho",
+        "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
+        "Louisiana", "Maine", "Marshall Islands", "Maryland",
+        "Massachusetts", "Michigan", "Minnesota", "Mississippi",
+        "Missouri", "Montana", "Nebraska", "Nevada",
+        "New Hampshire", "New Jersey", "New Mexico", "New York",
+        "North Carolina", "North Dakota", "Northern Mariana Islands", "Ohio",
+        "Oklahoma", "Oregon", "Palau", "Pennsylvania", "Puerto Rico",
+        "Rhode Island", "South Carolina", "South Dakota", "Tennessee",
+        "Texas", "Utah", "Vermont", "Virgin Island", "Virginia",
+        "Washington", "West Virginia", "Wisconsin", "Wyoming"
+    ];
 }

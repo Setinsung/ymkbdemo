@@ -1,19 +1,29 @@
 @page "/applications/create"
 @page "/applications/{Id}/edit"
+@using System.Text.Json
+@using MudBlazor.Extensions.Options
 @using YMKB.UI.APIs.AIModels.Search
 @code {
     [Parameter] public string? Id { get; set; }
 
-    private KbAppDto model = new();
+    private KbAppDto model = new(){ KbAppType = KbAppType.Chat };
     private List<AIModelDto> _conversationModels = [];
     private List<AIModelDto> _embeddingModels = [];
     private List<KnowledgeDbDto> _knowledgeDbDtos = [];
+    private List<JsFunctionCallDto> _plugins = [];
     private bool _isValid;
     private MudForm form;
     private bool _isUpdate;
 
-    private string _kblist = "";
+    // _options才是实际用于选择的列表，_kblistSelectValue是用于显示的字符串
+    private string _kblistSelectValue = "";
+    private IEnumerable<string> _kblistSelectOptions = new HashSet<string>();
 
+    private string _pluginsSelectValue = "";
+    private IEnumerable<string> _pluginsOptions = new HashSet<string>();
+    
+    private IEnumerable<JsFunctionCallDto> _pluginsOptions2 = new HashSet<JsFunctionCallDto>();
+    
     // out form
     private double _relevance = 0.4;
     private double _temperature = 0.5;
@@ -24,14 +34,17 @@
         if (!string.IsNullOrEmpty(Id))
         {
             model = await ApiClient.KbApps[Id].GetAsync() ?? new();
-            _kblist = model.KbIdList ?? _kblist;
+            _kblistSelectValue = model.KbIdList ?? _kblistSelectValue;
+            _kblistSelectOptions = (model.KbIdList ?? "").Split(", ").Where(s => !string.IsNullOrEmpty(s)).ToHashSet();
+            _pluginsSelectValue = model.ApiFunctionList ?? _pluginsSelectValue;
+            _pluginsOptions = (model.ApiFunctionList ?? "").Split(", ").Where(s =>!string.IsNullOrEmpty(s)).ToHashSet();
             _relevance = model.Relevance ?? _relevance;
             _temperature = model.Temperature ?? _temperature;
             _answerTokens = model.AnswerTokens ?? _answerTokens;
             _isUpdate = true;
         }
-
         await LoadSelectDataList();
+        StateHasChanged();
     }
 
     private async Task LoadSelectDataList()
@@ -42,6 +55,11 @@
         _embeddingModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsAIModelType2 = AIModelType2.Embedding) ?? [];
         
         _knowledgeDbDtos = await ApiClient.KnowledgeDbs.GetAsync() ?? [];
+        _plugins = await ApiClient.JsFunctionCalls.GetAsync()?? [];
+    }
+    private string GetMultiSelectionText(List<string> selectedValues)
+    {
+        return $"关联 {selectedValues.Count} 项";
     }
 
     private async Task Submit()
@@ -59,7 +77,8 @@
                 EmbeddingModelId = model.EmbeddingModelId,
                 Temperature = _temperature,
                 Prompt = model.Prompt,
-                KbIdList = _kblist,
+                KbIdList = string.Join(", ", _kblistSelectOptions),
+                ApiFunctionList = string.Join(", ", _pluginsOptions),
                 Relevance = _relevance,
                 AnswerTokens = model.AnswerTokens,
                 NoReplyFoundTemplate = model.NoReplyFoundTemplate,
@@ -78,7 +97,8 @@
                 EmbeddingModelId = model.EmbeddingModelId,
                 Temperature = _temperature,
                 Prompt = model.Prompt,
-                KbIdList = model.KbIdList,
+                KbIdList = string.Join(", ", _kblistSelectOptions),
+                ApiFunctionList = string.Join(", ", _pluginsOptions),
                 Relevance = _relevance,
                 AnswerTokens = model.AnswerTokens,
                 NoReplyFoundTemplate = model.NoReplyFoundTemplate,
@@ -117,16 +137,21 @@
                 </MudRadioGroup>
             </MudItem>
             <MudItem xs="12" md="8">
-                    <MudText>@_kblist</MudText>
-                    <MudSelect T="string" MultiSelection="true" Label="绑定知识库" @bind-Value="_kblist"
-                               RequiredError="请选择知识库" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense">
+                @if (model.KbAppType == KbAppType.KbChat)
+                {
+                    <MudSelect T="string" MultiSelection="true" SelectAll="true" SelectAllText="全选"
+                               Label="绑定知识库" @bind-Value="_kblistSelectValue" @bind-SelectedValues="_kblistSelectOptions"
+                               RequiredError="请选择知识库" Class="mt-3"
+                               Variant="Variant.Outlined" Margin="Margin.Dense"
+                               MultiSelectionTextFunc="@(new Func<List<string>, string>(GetMultiSelectionText))">
                         @foreach (var item in _knowledgeDbDtos)
                         {
-                            <MudSelectItem Value="item.Id">
+                            <MudSelectItem T="string" Value="item.Id">
                                 @(item.Name) — @(item.Description)
                             </MudSelectItem>
                         }
                     </MudSelect>
+                }
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudSelect T="string" Label="会话模型" @bind-Value="model.ChatModelId" Required="true"
@@ -168,6 +193,20 @@
             <MudItem xs="12" md="4">
                 <MudNumericField @bind-Value="_answerTokens" Label="回答最大token数" Required="true"
                                  RequiredError="请输入回答最大token数" Class="mt-3" Variant="Variant.Outlined" Margin="Margin.Dense"/>
+            </MudItem>
+            <MudItem xs="12" md="12">
+                <MudSelect T="string" MultiSelection="true" SelectAll="true" SelectAllText="全选"
+                           Label="插件导入" @bind-Value="_pluginsSelectValue" @bind-SelectedValues="_pluginsOptions"
+                           RequiredError="请选择插件" Class="mt-3"
+                           Variant="Variant.Outlined" Margin="Margin.Dense"
+                           MultiSelectionTextFunc="@(new Func<List<string>, string>(GetMultiSelectionText))">
+                    @foreach (var item in _plugins)
+                    {
+                        <MudSelectItem T="string" Value="item.Id">
+                            @(item.MainFuncName) — @(item.Name)
+                        </MudSelectItem>
+                    }
+                </MudSelect>
             </MudItem>
         </MudGrid>
         <MudStack Row="true" Class="mt-6 d-flex justify-end">
