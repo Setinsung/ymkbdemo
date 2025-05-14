@@ -70,6 +70,8 @@ namespace YMKB.UI.APIs.Models
 #endif
         /// <summary>The overlappingTokens property</summary>
         public int? OverlappingTokens { get; set; }
+        /// <summary>The webDocCount property</summary>
+        public int? WebDocCount { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::YMKB.UI.APIs.Models.KnowledgeDbDto"/> and sets the default values.
         /// </summary>
@@ -105,6 +107,7 @@ namespace YMKB.UI.APIs.Models
                 { "maxTokensPerParagraph", n => { MaxTokensPerParagraph = n.GetIntValue(); } },
                 { "name", n => { Name = n.GetStringValue(); } },
                 { "overlappingTokens", n => { OverlappingTokens = n.GetIntValue(); } },
+                { "webDocCount", n => { WebDocCount = n.GetIntValue(); } },
             };
         }
         /// <summary>
@@ -124,6 +127,7 @@ namespace YMKB.UI.APIs.Models
             writer.WriteIntValue("maxTokensPerParagraph", MaxTokensPerParagraph);
             writer.WriteStringValue("name", Name);
             writer.WriteIntValue("overlappingTokens", OverlappingTokens);
+            writer.WriteIntValue("webDocCount", WebDocCount);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

@@ -24,10 +24,10 @@
 
     private async Task LoadAllAIModels()
     {
-        // _conversationModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsAIModelType2 = AIModelType2.Chat) ?? [];
-        // _embeddingModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsAIModelType2 = AIModelType2.Embedding) ?? [];
-        _conversationModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsGetAiModelTypeQueryParameterType = GetAiModelTypeQueryParameterType.Chat) ?? [];
-        _embeddingModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsGetAiModelTypeQueryParameterType = GetAiModelTypeQueryParameterType.Embedding) ?? [];
+        _conversationModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsAIModelType2 = AIModelType2.Chat) ?? [];
+        _embeddingModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsAIModelType2 = AIModelType2.Embedding) ?? [];
+        // _conversationModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsGetAiModelTypeQueryParameterType = GetAiModelTypeQueryParameterType.Chat) ?? [];
+        // _embeddingModels = await ApiClient.AIModels.Search.GetAsync(q => q.QueryParameters.AiModelTypeAsGetAiModelTypeQueryParameterType = GetAiModelTypeQueryParameterType.Embedding) ?? [];
     }
 
     private async Task Submit()

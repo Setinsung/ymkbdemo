@@ -14,6 +14,7 @@ using YMKB.UI.APIs.AIChat;
 using YMKB.UI.APIs.AIModels;
 using YMKB.UI.APIs.Auth;
 using YMKB.UI.APIs.FileManagement;
+using YMKB.UI.APIs.JsFunctionCalls;
 using YMKB.UI.APIs.KbApps;
 using YMKB.UI.APIs.KbDocFiles;
 using YMKB.UI.APIs.KnowledgeDbs;
@@ -48,6 +49,11 @@ namespace YMKB.UI.APIs
         public global::YMKB.UI.APIs.FileManagement.FileManagementRequestBuilder FileManagement
         {
             get => new global::YMKB.UI.APIs.FileManagement.FileManagementRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The JsFunctionCalls property</summary>
+        public global::YMKB.UI.APIs.JsFunctionCalls.JsFunctionCallsRequestBuilder JsFunctionCalls
+        {
+            get => new global::YMKB.UI.APIs.JsFunctionCalls.JsFunctionCallsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The KbApps property</summary>
         public global::YMKB.UI.APIs.KbApps.KbAppsRequestBuilder KbApps
