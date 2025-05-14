@@ -1,0 +1,143 @@
+﻿@page "/plugins"
+
+@code {
+    private PaginatedResultOfJsFunctionCallDto _jsPlugins = new();
+    private string _searchString = "";
+    private bool _loading;
+    private int pageIndex = 1;
+    private int pageSize = 12;
+    private int totalCount = 0;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAllJsPlugins();
+    }
+
+    private async Task LoadAllJsPlugins()
+    {
+        _loading = true;
+        try
+        {
+            var result = await ApiClient.JsFunctionCalls.Pagination.PostAsync(new JsFunctionCallsWithPaginationQuery()
+            {
+                Keywords = _searchString,
+                PageNumber = pageIndex - 1,
+                PageSize = pageSize,
+                OrderBy = "Id"
+            });
+            _jsPlugins = result;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "查询Js函数插件列表失败");
+            Snackbar.Add("查询Js函数插件列表失败", Severity.Error);
+            _jsPlugins = new();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task SearchOnEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoadAllJsPlugins();
+        }
+    }
+
+    private async Task PageChanged(int i)
+    {
+        pageIndex = i;
+        await LoadAllJsPlugins();
+    }
+
+    private async Task DeletePlugin(string id)
+    {
+        await CommonDialogService.ShowConfirmationDialog("确认删除", "您确定要删除所选项目吗？", async () =>
+        {
+            await ApiClient.JsFunctionCalls.DeleteAsync(new DeleteJsFunctionCallCommand() { Ids = [id] });
+            await LoadAllJsPlugins();
+            Snackbar.Add("删除成功", Severity.Success);
+        });
+    }
+
+    private void CreatePlugin()
+    {
+        Navigation.NavigateTo("/plugins/create");
+    }
+
+    private void EditPlugin(string id)
+    {
+        Navigation.NavigateTo($"/plugins/{id}/edit");
+    }
+
+}
+
+<MudText Typo="Typo.h5" Class="mb-4">插件管理</MudText>
+<MudToolBar>
+    <MudStack Row Spacing="1">
+        <MudTextField T="string"
+                      @bind-Value="_searchString" Adornment="Adornment.End" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small"
+                      OnKeyDown="@SearchOnEnter"></MudTextField>
+    </MudStack>
+    <MudSpacer/>
+    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Code" OnClick="CreatePlugin">新增函数
+    </MudFab>
+</MudToolBar>
+<MudDataGrid Items="@_jsPlugins.Items" Loading="@_loading" Dense="true" Hover="true">
+    <Columns>
+        <TemplateColumn Title="#">
+            <CellTemplate>
+                @(_jsPlugins.Items!.IndexOf(context.Item) + 1)
+            </CellTemplate>
+        </TemplateColumn>
+        <PropertyColumn Property="e => e.Name" Title="插件名称"/>
+        <PropertyColumn Property="e => e.Description" Title="插件描述"/>
+        <PropertyColumn Property="e => e.MainFuncName" Title="主函数名">
+            <CellTemplate>
+                <MudText Style="color: #7cbbbb">@context.Item.MainFuncName</MudText>
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.Parameters" Title="函数参数">
+            <CellTemplate>
+                <MudMenu Label="@(string.Join(", ", context.Item.Parameters.Select(p => p.ParamName)))">
+                    @foreach (var p in context.Item.Parameters ?? [])
+                    {
+                        <MudMenuItem>
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Text">
+                                @p.ParamName
+                            </MudChip>
+                            : @p.ParamDescription
+                        </MudMenuItem>
+                    }
+                </MudMenu>
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.ScriptContent" Title="函数内容">
+            <CellTemplate>
+                <MudButton>查看源码</MudButton>
+            </CellTemplate>
+        </PropertyColumn>
+        <TemplateColumn CellClass="d-flex justify-end">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning"
+                                   OnClick="() => EditPlugin(context.Item.Id!)"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                                   OnClick="() => DeletePlugin(context.Item.Id!)"/>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
+<div class="d-flex flex-column align-center mt-4">
+    <MudPagination ShowFirstButton="true" ShowLastButton="true" Class="mt-4"
+                   Count="@(_jsPlugins.TotalPages ?? 0)"
+                   SelectedChanged="PageChanged"/>
+</div>
+
+

@@ -1,0 +1,290 @@
+@page "/plugins/create"
+@page "/plugins/{Id}/edit"
+@using BlazorMonaco
+@using BlazorMonaco.Editor
+@using BlazorMonaco.Languages
+@inject IJSRuntime JSRuntime
+
+@code {
+    [Parameter] public string? Id { get; set; }
+    private StandaloneCodeEditor _editor;
+    private JsFunctionCallDto _model = new();
+    private List<JsFunctionParameter> _functionParameters = [new()];
+    private bool _isValid;
+    private MudForm form;
+    private bool _isUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(Id))
+        {
+            _model = await ApiClient.JsFunctionCalls[Id].GetAsync() ?? new();
+            _functionParameters = _model.Parameters ?? [new()];
+            if (_model.ScriptContent is not null)
+                await SetScriptContent(_model.ScriptContent);
+            _isUpdate = true;
+        }
+
+        await RegisterHttpClientHelperCompletionProvider();
+        StateHasChanged();
+    }
+
+
+    private static StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions
+        {
+            Language = "javascript",
+            GlyphMargin = true,
+            AutomaticLayout = true,
+            Value = "\"use strict\";\n" +
+                    "function GetMySecret() {\n" +
+                    "	if (true) {\n" +
+                    "		return '1q2w3e4r'\n" +
+                    "	}\n" +
+                    "}\n"
+        };
+    }
+
+    private async Task EditorOnDidInit()
+    {
+        await _editor.AddCommand((int)KeyMod.CtrlCmd | (int)KeyCode.KeyH, (args) => { Console.WriteLine("Ctrl+H : 触发初始编辑器命令。"); });
+
+        var newDecorations = new ModelDeltaDecoration[]
+        {
+            new()
+            {
+                Range = new BlazorMonaco.Range(3, 1, 3, 1),
+                Options = new ModelDecorationOptions
+                {
+                    IsWholeLine = true,
+                    ClassName = "decorationContentClass",
+                    GlyphMarginClassName = "decorationGlyphMarginClass"
+                }
+            }
+        };
+        var decorationIds = await _editor.DeltaDecorations(null, newDecorations);
+        // 您现在可以使用 '_decorationIds' 来更改或删除装饰
+    }
+
+    // HttpClientHelper相关的补全项注册
+    private async Task RegisterHttpClientHelperCompletionProvider()
+    {
+        // 创建HttpClientHelper相关的补全项
+        var httpClientHelperCompletions = new CompletionList
+        {
+            Suggestions =
+            [
+                new CompletionItem
+                {
+                    LabelAsString = "HttpClientHelper",
+                    Kind = CompletionItemKind.Class,
+                    Detail = "HTTP客户端助手，提供GET、POST、PUT、DELETE等方法",
+                    InsertText = "HttpClientHelper",
+                    RangeAsObject = new BlazorMonaco.Range
+                    {
+                        StartLineNumber = 1,
+                        StartColumn = 1,
+                        EndLineNumber = 999,
+                        EndColumn = 999
+                    },
+                    Command = new Command
+                    {
+                        Id = "editor.action.triggerSuggest",
+                        Title = "Re-trigger completions"
+                    }
+                },
+
+                // GetAsync方法补全
+                new CompletionItem
+                {
+                    LabelAsString = "GetAsync",
+                    Kind = CompletionItemKind.Method,
+                    Detail = "HttpClientHelper.GetAsync(url: string): Promise<any>",
+                    InsertText = "GetAsync('${1:url}')",
+                    InsertTextRules = CompletionItemInsertTextRule.InsertAsSnippet
+                },
+
+                // PostAsync方法补全
+                new CompletionItem
+                {
+                    LabelAsString = "PostAsync",
+                    Kind = CompletionItemKind.Method,
+                    Detail = "HttpClientHelper.PostAsync(url: string, data: any): Promise<any>",
+                    InsertText = "PostAsync('${1:url}', ${2:data})",
+                    InsertTextRules = CompletionItemInsertTextRule.InsertAsSnippet
+                },
+
+                // PutAsync方法补全
+                new CompletionItem
+                {
+                    LabelAsString = "PutAsync",
+                    Kind = CompletionItemKind.Method,
+                    Detail = "HttpClientHelper.PutAsync(url: string, data: any): Promise<any>",
+                    InsertText = "PutAsync('${1:url}', ${2:data})",
+                    InsertTextRules = CompletionItemInsertTextRule.InsertAsSnippet
+                },
+
+                // DeleteAsync方法补全
+                new CompletionItem
+                {
+                    LabelAsString = "DeleteAsync",
+                    Kind = CompletionItemKind.Method,
+                    Detail = "HttpClientHelper.DeleteAsync(url: string): Promise<any>",
+                    InsertText = "DeleteAsync('${1:url}')",
+                    InsertTextRules = CompletionItemInsertTextRule.InsertAsSnippet
+                }
+            ]
+        };
+        await BlazorMonaco.Languages.Global.RegisterCompletionItemProvider(JSRuntime, "javascript", async (modelUri, position, context) =>
+        {
+            return httpClientHelperCompletions;
+            // var model = await BlazorMonaco.Editor.Global.GetModel(JSRuntime, modelUri);
+            // // 获取当前行文本
+            // var lineContent = await model.GetLineContent(position.LineNumber);
+            // var textUntilPosition = lineContent.Substring(0, position.Column - 1);
+            // // 检查是否正在输入HttpClientHelper
+            // if (textUntilPosition.EndsWith("HttpClientHelper") || textUntilPosition.EndsWith("HttpClientHelper."))
+            // {
+            //     // 如果是输入点后面的补全，过滤出方法
+            //     if (textUntilPosition.EndsWith("HttpClientHelper."))
+            //     {
+            //         httpClientHelperCompletions.Suggestions = httpClientHelperCompletions.Suggestions
+            //             .Where(item => item.LabelAsString != "HttpClientHelper")
+            //             .ToList();
+            //     }
+            //     return httpClientHelperCompletions;
+            // }
+            // // 检查是否是在await后面
+            // var precedingText = textUntilPosition.TrimEnd();
+            // if (precedingText.EndsWith("await") || precedingText.EndsWith("await "))
+            // {
+            //     return httpClientHelperCompletions;
+            // }
+            // return new CompletionList { Suggestions = [] };
+        });
+    }
+
+    private async Task SetScriptContent(string content)
+    {
+        await _editor.SetValue(content);
+    }
+
+    private void RemoveParameter(JsFunctionParameter parameter)
+    {
+        _functionParameters.Remove(parameter);
+    }
+
+    private void AddParameter()
+    {
+        _functionParameters.Add(new JsFunctionParameter());
+    }
+
+    private async Task Submit()
+    {
+        var scriptContent = await _editor.GetValue();
+        // 参数列表剃除空的
+        _functionParameters = _functionParameters.Where(p => !string.IsNullOrWhiteSpace(p.ParamName) || !string.IsNullOrWhiteSpace(p.ParamDescription)).ToList();
+        if (_isUpdate)
+        {
+            await ApiClient.JsFunctionCalls.PutAsync(new UpdateJsFunctionCallCommand()
+            {
+                Id = _model.Id,
+                Name = _model.Name,
+                Description = _model.Description,
+                ScriptContent = scriptContent ?? "",
+                MainFuncName = _model.MainFuncName,
+                Parameters = _functionParameters
+            });
+            Snackbar.Add("函数插件修改成功", Severity.Success);
+            GoBack();
+        }
+        else
+        {
+            await ApiClient.JsFunctionCalls.PostAsync(new CreateJsFunctionCallCommand()
+            {
+                Name = _model.Name,
+                Description = _model.Description,
+                ScriptContent = scriptContent ?? "",
+                MainFuncName = _model.MainFuncName,
+                Parameters = _functionParameters
+            });
+            Snackbar.Add("函数插件创建成功", Severity.Success);
+            GoBack();
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/plugins");
+    }
+
+}
+
+<MudText Typo="Typo.h5" Class="mb-4">@(Id == null ? "新增函数插件" : "编辑函数插件")</MudText>
+
+<MudContainer Class="mt-4">
+    <MudForm @ref="form" @bind-IsValid="@_isValid">
+        <MudGrid>
+            <MudItem xs="12" md="12">
+                <MudText Class="mb-2"><b>Script Content:</b></MudText>
+                <StandaloneCodeEditor CssClass="js-code-editor" @ref="_editor" Id="sample-code-editor"
+                                      ConstructionOptions="EditorConstructionOptions"
+                                      OnDidInit="EditorOnDidInit"/>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudText Class="mb-2"><b>基本信息:</b></MudText>
+                <MudTextField @bind-Value="_model.Name" Label="函数名称" Required="true"
+                              Margin="Margin.Dense"
+                              RequiredError="函数名称是必填项" Variant="Variant.Outlined"
+                              Placeholder="描述此函数插件的名称"/>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudText Class="mb-2">&nbsp;</MudText>
+                <MudTextField @bind-Value="_model.MainFuncName" Label="主函数名" Required="true"
+                              Margin="Margin.Dense"
+                              RequiredError="函数名称是必填项" Placeholder="写出脚本内容中的主函数名称"
+                              Variant="Variant.Outlined"/>
+            </MudItem>
+            <MudItem xs="12" md="12">
+                <MudTextField @bind-Value="_model.Description" Label="函数描述"
+                              Placeholder="清晰地描述这个函数插件的作用" Class="mt-3" Variant="Variant.Outlined"
+                              Lines="2"/>
+            </MudItem>
+            <MudItem xs="12" md="12">
+                <MudStack Row Spacing="1">
+                    <MudText Class="mb-2"><b>参数信息:</b></MudText>
+                    <MudSpacer/>
+                    <MudButton
+                        OnClick="AddParameter" Class="mt-4">
+                        <MudIcon Icon="@Icons.Material.Filled.Add"/>
+                        添加参数
+                    </MudButton>
+                </MudStack>
+            </MudItem>
+            @foreach (var parameter in _functionParameters)
+            {
+                <MudItem xs="12" md="6" Class="d-flex">
+                    <MudTextField @bind-Value="parameter.ParamName" Label="参数名" Variant="Variant.Outlined"
+                                  Class="mr-2 flex-grow" Margin="Margin.Dense" Required/>
+                    <MudTextField @bind-Value="parameter.ParamDescription" Label="参数描述" Variant="Variant.Outlined"
+                                  Class="mr-2 flex-grow" Margin="Margin.Dense" Required/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                                   OnClick="@(() => RemoveParameter(parameter))"/>
+                </MudItem>
+            }
+
+        </MudGrid>
+        <MudStack Row="true" Class="mt-6 d-flex justify-end">
+            <MudButton Variant="Variant.Outlined" OnClick="GoBack">返回</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit" Disabled="@(!_isValid)">保存
+            </MudButton>
+        </MudStack>
+    </MudForm>
+</MudContainer>
+<style>
+    .js-code-editor {
+        height: 250px;
+        width: 100%;
+    }
+</style>
