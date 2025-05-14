@@ -1,0 +1,89 @@
+﻿@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public DocFileUpload DocFileUploadModel { get; set; } = new();
+
+    private readonly string[] _mimeTypes =
+    {
+        "application/zip*",
+        "application/x-zip*",
+        "application/x-compressed",
+        "application/x-rar-compressed",
+        "audio/*",
+        "application/pdf",
+        "application/xml",
+        "text/markdown",
+        "application/msword",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.*",
+        "image/*",
+        "text/*"
+    };
+
+    private bool _isValid;
+    private int _activeTab;
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    private void Cancel()
+    {
+        DocFileUploadModel = new();
+        MudDialog.Cancel();
+    }
+
+}
+
+<MudDialog>
+    <DialogContent>
+
+        <MudTabs @bind-ActivePanelIndex="_activeTab" Rounded="true" Class="kbs-tabs">
+            @*<MudSelect @bind-Value="DocFileUploadModel.SegmentPattern" Dense="true" Label="分段模式" Required="true" Class="mt-4 mb-4">
+        <MudSelectItem T="NullableOfSegmentPattern" Value="@NullableOfSegmentPattern.Subsection">一般分段</MudSelectItem>
+        <MudSelectItem T="NullableOfSegmentPattern" Value="@NullableOfSegmentPattern.QA">问答分段</MudSelectItem>
+    </MudSelect>*@
+            <MudTabPanel Icon="@Icons.Material.Filled.UploadFile" Text="文档上传">
+                <MudExUploadEdit
+                    AllowAudioRecording="true"
+                    AllowVideoCapture="true"
+                    AllowExternalUrl="false"
+                    AutoExtractArchive="true"
+                    MinHeight="250"
+                    UploadRequestsChanged="@(e => DocFileUploadModel.UploadRequests = e)"
+                    DropZoneClickAction="DropZoneClickAction.UploadFile"
+                    MimeTypes="@_mimeTypes" bind-UploadRequests="DocFileUploadModel.UploadRequests" T="UploadableFile"
+                    Style="max-height: 600px; width: 100%">
+                </MudExUploadEdit>
+            </MudTabPanel>
+            <MudTabPanel Icon="@Icons.Material.Filled.Web" Text="网页上传">
+                <MudForm @bind-IsValid="@_isValid">
+                    <MudGrid>
+                        <MudItem xs="12" md="4">
+                            <MudTextField T="string" @bind-Value="DocFileUploadModel.WebPageName" Label="网页名称"
+                                          Class="mt-6"/>
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                        </MudItem>
+                        <MudItem xs="12" md="8">
+                            <MudTextField T="string" @bind-Value="DocFileUploadModel.WebPageUrl" Label="网页URL"
+                                          Class="mt-6"/>
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                        </MudItem>
+                    </MudGrid>
+                </MudForm>
+            </MudTabPanel>
+            <MudToggleGroup T="NullableOfSegmentPattern" Size="Size.Small"
+                            SelectionMode="SelectionMode.SingleSelection"
+                            @bind-Value="DocFileUploadModel.SegmentPattern" CheckMark FixedContent
+                            Class="mt-4" Style="max-width: 300px">
+                <MudToggleItem Value="NullableOfSegmentPattern.Subsection" Text="一般分段"/>
+                <MudToggleItem Value="NullableOfSegmentPattern.QA" Text="问答分段"/>
+            </MudToggleGroup>
+        </MudTabs>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">取消</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Disabled="@(_activeTab != 0 && !_isValid)">确定</MudButton>
+    </DialogActions>
+</MudDialog>
