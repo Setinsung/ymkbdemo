@@ -6,10 +6,11 @@
                     <MudTextField @bind-Value="Model.ModelName" Label="模型Id名" Required="true" Class="mt-3"/>
                 </MudItem>
                 <MudItem xs="12" md="6">
-                    <MudSelect @bind-Value="Model.AiModelType" Label="模型类型" Required="true" Class="mt-3">
+                    @*mudselect in muddialog z-index or overflow error*@
+                    <MudSelect @bind-Value="Model.AiModelType" Dense="true" Label="模型类型" Required="true" Class="mt-3">
                         <MudSelectItem T="AIModelType?" Value="@AIModelType.Chat">会话模型</MudSelectItem>
                         <MudSelectItem T="AIModelType?" Value="@AIModelType.Embedding">向量模型</MudSelectItem>
-                    </MudSelect>                
+                    </MudSelect>
                 </MudItem>
                 <MudItem xs="12" md="6">
                     <MudTextField @bind-Value="Model.Endpoint" Label="模型端点" Required="true" Class="mt-3"/>
@@ -19,6 +20,14 @@
                 </MudItem>
                 <MudItem xs="12" md="12">
                     <MudTextField @bind-Value="Model.ModelDescription" Label="模型描述名"/>
+                </MudItem>
+                <MudItem xs="12" md="12">
+                </MudItem>
+                <MudItem xs="12" md="12">
+                </MudItem>
+                <MudItem xs="12" md="12">
+                </MudItem>
+                <MudItem xs="12" md="12">
                 </MudItem>
             </MudGrid>
 
