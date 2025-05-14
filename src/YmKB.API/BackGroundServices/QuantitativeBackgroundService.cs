@@ -151,10 +151,11 @@ public class QuantitativeBackgroundService : BackgroundService
         var existQuantizedItem = await dbContext.QuantizedLists.FirstOrDefaultAsync(x => x.KbId == kb.Id && x.KbDocFileId == kbDocFile.Id);
         if (existQuantizedItem is not null)
         {
-            existQuantizedItem.Status = QuantizedListState.Pending;
-            existQuantizedItem.Remark = remark;
-            existQuantizedItem.ProcessTime = null;
-            await dbContext.SaveChangesAsync();
+            await mediator.Send(new UpdateQuantizedListCommand(existQuantizedItem.Id, kb.Id, kbDocFile.Id, remark));
+            // existQuantizedItem.Status = QuantizedListState.Pending;
+            // existQuantizedItem.Remark = remark;
+            // existQuantizedItem.ProcessTime = null;
+            // await dbContext.SaveChangesAsync();
             qlId = existQuantizedItem.Id;
         }
         else

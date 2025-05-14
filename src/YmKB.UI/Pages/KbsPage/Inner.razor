@@ -220,6 +220,18 @@
         await JS.InvokeVoidAsync("triggerFileDownload", file.FileName, CombinePathWithBaseUrl(appSettings.ServiceBaseUrl, file.Url!));
     }
 
+    private async Task ReTryDocument(string? id)
+    {
+        await CommonDialogService.ShowConfirmationDialog("确认重试", "您确定要使此文档重试量化吗？", async () =>
+        {
+            await ApiClient.KbDocFiles.RetryQuantization[id].PostAsync();
+            await LoadKbDocs();
+            await Activate(1);
+            Snackbar.Add("重入量化队列完成", Severity.Success);
+        });
+    }
+
+    
     private async Task KbDocsSearchOnEnter(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
@@ -493,6 +505,11 @@
                     }
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
                                    OnClick="@(() => DeleteDocument(context.Id))"/>
+                    @if (context.Status == NullableOfQuantizationState.Fail)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Refresh" Size="Size.Small" 
+                                       Color="Color.Success" OnClick="@(() => ReTryDocument(context.Id))"/>
+                    }
                 </MudTd>
             </RowTemplate>
         </MudTable>
