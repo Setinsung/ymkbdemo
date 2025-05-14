@@ -1,11 +1,10 @@
 ﻿@page "/knowledgebases/{Id}"
 @using System.Text.Json
 @using Microsoft.Kiota.Abstractions
-@using MudBlazor.Extensions.Core
 @using MudBlazor.Extensions.Options
-@using YmKB.UI.Services.JsInterops
 @inject IJSRuntime JS
 @inject IDialogService DialogService
+@implements IDisposable
 
 @code {
     [Parameter] public string? Id { get; set; }
@@ -13,10 +12,11 @@
     private Dictionary<string, string> _fileNameWithContentTypes = [];
     private int _activeTab;
     MudTabs tabs;
+    private System.Timers.Timer? _pollingTimer;
     private bool _isLoading;
     private PaginatedResultOfKbDocFileDto _kbDocs = new();
     private PaginatedResultOfQuantizedListDto _quantifyLists = new();
-    
+
     private string _docSearchString = "";
     private int _kbDoc_pageIndex = 1;
     private int _kbDoc_pageSize = 12;
@@ -73,7 +73,7 @@
         await Refresh();
     }
 
-    
+
     private async Task LoadKbDocs()
     {
         try
@@ -115,7 +115,7 @@
             { nameof(MudExMessageDialog.Buttons), MudExDialogResultAction.OkCancel("Upload") },
             { nameof(MudExMessageDialog.Icon), Icons.Material.Filled.FileUpload }
         };
-        var res = await DialogService.ShowComponentInDialogAsync<UploadDocFileDialog>( "上传文档", "", e => { }, parameters, options =>
+        var res = await DialogService.ShowComponentInDialogAsync<UploadDocFileDialog>("上传文档", "", e => { }, parameters, options =>
         {
             options.Resizeable = true;
             options.FullWidth = true;
@@ -153,7 +153,7 @@
             }
         }
     }
-    
+
     private async Task ShowWebSiteUploadDialog()
     {
         await CommonDialogService.ShowDialogAsync(
@@ -191,6 +191,7 @@
                 Url = file.Path
             });
         }
+
         await Activate(1);
         Snackbar.Add("量化队列创建完成", Severity.Success);
     }
@@ -259,9 +260,74 @@
 
     private async Task Refresh()
     {
-        await LoadKbDocs();
-        await LoadQuantifyLists();
+        if (_activeTab == 0)
+        {
+            await LoadKbDocs();
+        }
+
+        if (_activeTab == 1)
+        {
+            await LoadQuantifyLists();
+            // 检查是否有loading状态的任务
+            var hasLoading = _quantifyLists.Items.Any(t => t.Status is QuantizedListState.Pending);
+            if (hasLoading)
+            {
+                StartPolling();
+            }
+        }
+
+        // 当tab页不处于量化列表时，清理timer
+        if (_activeTab != 1 && _pollingTimer is not null)
+        {
+            _pollingTimer?.Stop();
+            _pollingTimer?.Dispose();
+            _pollingTimer = null;
+        }
+        StateHasChanged();
     }
+
+    private void StartPolling()
+    {
+        _pollingTimer?.Dispose();
+        _pollingTimer = new System.Timers.Timer(5000);
+        _pollingTimer.Elapsed += async (sender, e) =>
+        {
+            try
+            {
+                var result = await ApiClient.QuantizedLists.Pagination.PostAsync(new QuantizedListsWithPaginationQuery()
+                {
+                    KbId = Id,
+                    Keywords = _quantifyListSearchString,
+                    PageNumber = _quantifyList_pageIndex - 1,
+                    PageSize = _quantifyList_pageSize,
+                    OrderBy = "Id"
+                });
+                if (result.Items.Any(t => t.Status is QuantizedListState.Pending))
+                {
+                    Logger.LogInformation("量化队列进行中...");
+                }
+                else
+                {
+                    Logger.LogInformation("全部停止");
+                    await Refresh();
+                    _pollingTimer.Stop();
+                    _pollingTimer?.Dispose();
+                    _pollingTimer = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "轮询时出错");
+                _pollingTimer.Stop();
+                _pollingTimer?.Dispose();
+                _pollingTimer = null;
+            }
+        };
+        _pollingTimer.AutoReset = true;
+        _pollingTimer.Enabled = true;
+        _pollingTimer.Start();
+    }
+
 
     private async Task DeleteQuantizedList(string? id)
     {
@@ -298,7 +364,7 @@
             _isLoading = false;
         }
     }
-    
+
     private async Task ShowContentDialog(string? content = "")
     {
         var options = new DialogOptionsEx()
@@ -321,7 +387,7 @@
 
     private async Task GetKbDocFileVectors(string? id)
     {
-        if(id is null) return;
+        if (id is null) return;
         var options = new DialogOptionsEx()
         {
             MaximizeButton = true,
@@ -339,6 +405,18 @@
         };
         await DialogService.ShowExAsync<ShowKbDocFileVectorListDialog>("", dialog => { dialog.KbDocFileId = id; }, options);
     }
+
+
+    public void Dispose()
+    {
+        if (_pollingTimer != null)
+        {
+            _pollingTimer.Stop();
+            _pollingTimer?.Dispose();
+            _pollingTimer = null;
+        }
+    }
+
 }
 
 <MudTabs @bind-ActivePanelIndex="_activeTab" @ref="tabs" Rounded="true" Class="kbs-tabs">
@@ -351,7 +429,8 @@
                 </MudTextField>
             </MudStack>
             <MudSpacer/>
-            <MudFab Class="mr-4" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Web" OnClick="ShowWebSiteUploadDialog">网页上传
+            <MudFab Class="mr-4" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Web"
+                    OnClick="ShowWebSiteUploadDialog">网页上传
             </MudFab>
             <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Upload"
                     OnClick="ShowUploadDialog">文档上传
@@ -511,13 +590,16 @@
     <MudTabPanel Icon="@Icons.Material.Filled.ContentPasteSearch" Text="搜索测试">
         <MudGrid Class="mt-4">
             <MudItem xs="12" sm="6">
-                <MudSlider @bind-Value="_minRelevance" Min="0" Max="1" Step="0.01" Color="Color.Info">最小相似度: @_minRelevance</MudSlider>
+                <MudSlider @bind-Value="_minRelevance" Min="0" Max="1" Step="0.01" Color="Color.Info">
+                    最小相似度: @_minRelevance</MudSlider>
                 <MudTextField @bind-Value="_vectorSearchString"
                               Label="请输入搜索内容..." Variant="Variant.Outlined"
                               Lines="5"
                               Adornment="Adornment.End"
                               AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true" Class="w-100 mb-2"/>
-                <MudButton Disabled="_isLoading" Variant="Variant.Filled" Color="Color.Primary" OnClick="OnVectorSearchTest">搜索</MudButton>
+                <MudButton Disabled="_isLoading" Variant="Variant.Filled" Color="Color.Primary"
+                           OnClick="OnVectorSearchTest">搜索
+                </MudButton>
             </MudItem>
             <MudItem xs="12" sm="6">
                 @if (_isLoading)
@@ -535,7 +617,11 @@
                                         <CardHeaderContent>
                                             <div class="d-flex align-center justify-space-between">
                                                 <MudText Typo="Typo.subtitle2">@result.FileName</MudText>
-                                                <MudText Typo="Typo.subtitle2"><MudChip Size="Size.Small" T="double" Color="Color.Success" Variant="Variant.Outlined">相似度: @result.Relevance</MudChip></MudText>
+                                                <MudText Typo="Typo.subtitle2">
+                                                    <MudChip Size="Size.Small" T="double" Color="Color.Success"
+                                                             Variant="Variant.Outlined">
+                                                        相似度: @result.Relevance</MudChip>
+                                                </MudText>
                                             </div>
                                         </CardHeaderContent>
                                     </MudCardHeader>
@@ -545,7 +631,9 @@
                                         </MudText>
                                     </MudCardContent>
                                     <MudCardActions>
-                                        <MudButton Color="Color.Primary" Size="Size.Small" OnClick="@(() => ShowContentDialog(result.Content))">查看详情</MudButton>
+                                        <MudButton Color="Color.Primary" Size="Size.Small"
+                                                   OnClick="@(() => ShowContentDialog(result.Content))">查看详情
+                                        </MudButton>
                                     </MudCardActions>
                                 </MudCard>
                             </MudItem>
