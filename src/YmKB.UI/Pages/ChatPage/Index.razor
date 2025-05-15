@@ -145,7 +145,7 @@
                 @foreach (var app in _filteredApps)
                 {
                     <MudListItem Text="@app.Name"
-                                 Icon="@Icons.Material.Filled.Chat"
+                                 Icon="@(app.KbAppType == KbAppType.Chat? Icons.Material.Filled.Chat : Icons.Material.Filled.SmartToy)"
                                  OnClick="@(() => SelectApp(app))"
                                  Class="@(_selectedApp?.Id == app.Id ? "mud-selected-item" : "")"/>
                 }

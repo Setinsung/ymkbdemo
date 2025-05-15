@@ -125,7 +125,7 @@
         // });
 
         await CommonDialogService.ShowDialogAsync(
-            "新增模型",
+            "内容上传",
             new DialogParameters<DocFileUploadDialog> { { x => x.DocFileUploadModel, _docFileUploadModel } },
             onConfirm: async _ =>
             {
