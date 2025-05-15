@@ -1,5 +1,6 @@
 ﻿@page "/chat"
 @page "/chat/{AppId}"
+@using Markdig
 
 @code {
     [Parameter] public string? AppId { get; set; }
@@ -126,6 +127,7 @@
 }
 <MudToolBar>
     <MudSpacer/>
+    <MudText>联网搜索: &nbsp;</MudText>
     <MudToggleIconButton @bind-Toggled="_isOnlineSearch"
                          Icon="@Icons.Material.Filled.CloudOff"
                          Color="@Color.Error"
@@ -170,7 +172,7 @@
                             <MudChat
                                 ChatPosition="@(message.IsUser ? ChatBubblePosition.End : ChatBubblePosition.Start)">
                                 <MudChatBubble>
-                                    @message.Content
+                                    @((MarkupString)Markdown.ToHtml(message.Content))
                                 </MudChatBubble>
                             </MudChat>
                         }

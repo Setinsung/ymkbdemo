@@ -13,6 +13,7 @@ using YmKB.API.Models;
 using YmKB.Application.Contracts;
 using YmKB.Application.Contracts.Persistence;
 using YmKB.Domain.Entities;
+using YmKB.JSFunctionCall;
 
 namespace YmKB.API.Controllers;
 
@@ -25,6 +26,7 @@ public class AIChatController : ControllerBase
     private readonly IApplicationDbContext _dbContext;
     private readonly IMediator _mediator;
     private static readonly Dictionary<string, ChatHistory> _chatHistories = new();
+    private static readonly JsFunctionCallContext _jsFunctionCallContext = new();
 
     public AIChatController(
         ILogger<AIChatController> logger,
@@ -74,12 +76,42 @@ public class AIChatController : ControllerBase
                     Temperature = application.Temperature,
                     MaxTokens = application.AnswerTokens
                 };
+            aiPromptExecutionSettings.FunctionChoiceBehavior = FunctionChoiceBehavior.Auto();
+
             if (request.IsWebTextSearch)
             {
-                aiPromptExecutionSettings.FunctionChoiceBehavior = FunctionChoiceBehavior.Auto();
                 var textSearch = new ShaBingTextSearch(new ShaBingTextSearchOptions {Logger = _logger});
                 var searchPlugin = textSearch.CreateWithSearch("SearchPlugin");
                 kernel.Plugins.Add(searchPlugin);
+            }
+
+            // 导入kernel插件
+            if (!string.IsNullOrWhiteSpace(application.ApiFunctionList))
+            {
+                var pluginIds = application.ApiFunctionList.Split(", ").Where(s => !string.IsNullOrEmpty(s)).ToHashSet();
+                var plugins = await _dbContext
+                   .JsFunctionCalls
+                   .Where(p => pluginIds.Contains(p.Id))
+                   .ToListAsync();
+                foreach (var plugin in plugins)
+                {
+                    var function = kernel.CreateFunctionFromMethod(async (params object[] args) =>
+                    {
+                        var result = await _jsFunctionCallContext.FunctionCallAsync(plugin.ScriptContent,
+                            plugin.MainFuncName,
+                            args);
+                        return result;
+                    },
+                    plugin.MainFuncName,
+                    plugin.Description,
+                    plugin.Parameters.Select(e => new KernelParameterMetadata(e.ParamName)
+                    {
+                        Name = e.ParamName,
+                        Description = e.ParamDescription
+                    }));
+                    kernel.Plugins.AddFromFunctions(plugin.MainFuncName, plugin.Description,
+                        [function]);
+                }
             }
 
             // 获取或创建聊天历史
@@ -100,7 +132,7 @@ public class AIChatController : ControllerBase
                 );
 
                 // 解析知识库ID列表
-                var kbIds = application.KbIdList.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                var kbIds = application.KbIdList.Split(", ").Where(s => !string.IsNullOrEmpty(s)).ToHashSet();
                 var allSearchResults = new List<Citation>();
 
                 // 对每个知识库进行搜索
