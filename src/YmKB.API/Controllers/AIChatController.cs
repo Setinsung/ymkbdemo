@@ -93,6 +93,8 @@ public class AIChatController : ControllerBase
                    .JsFunctionCalls
                    .Where(p => pluginIds.Contains(p.Id))
                    .ToListAsync();
+                
+                // 这样是无法成功调用的！因为args传的是jsonemelent的列表，不知道咋办转换。现在计划是让Parameter携带类型信息。然后在这里使用Deserialize转换。
                 foreach (var plugin in plugins)
                 {
                     var function = kernel.CreateFunctionFromMethod(async (params object[] args) =>

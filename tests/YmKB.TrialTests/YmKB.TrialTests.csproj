@@ -27,6 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\YmKB.Infrastructure\YmKB.Infrastructure.csproj" />
       <ProjectReference Include="..\..\src\YmKB.JSFunctionCall\YmKB.JSFunctionCall.csproj" />
     </ItemGroup>
 
