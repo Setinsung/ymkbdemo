@@ -43,6 +43,9 @@ Generated\ Files/
 
 /src/YmKB.API/files/*
 /src/YmKB.API/tmp-memory-files/*
+/src/YmKB.API/YmKB.db
+/src/YmKB.API/YmKB.db-shm
+/src/YmKB.API/YmKB.db-wal
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -403,6 +406,3 @@ FodyWeavers.xsd
 
 
 
-*.db
-*.db-shm
-*.db-wal
