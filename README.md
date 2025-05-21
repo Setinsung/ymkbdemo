@@ -3,6 +3,8 @@
 
 ## 一、环境配置说明
 
+- 首先确保环境安装了`.NET9 SDK`。
+
 ### （一）数据库配置（默认使用SQLite）
 - **配置文件路径**  
    - `.\YmKB\src\YmKB.API\appsettings.json`

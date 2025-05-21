@@ -400,3 +400,9 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+
+
+*.db
+*.db-shm
+*.db-wal
